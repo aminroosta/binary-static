@@ -960,15 +960,16 @@ CookieStorage.prototype = {
         }
         this.initialized = true;
     },
-    write: function write(val, expireDate, isSecure) {
+    write: function write(val, expireDate) {
+        // write: function(val, expireDate, isSecure) {
         if (!this.initialized) this.read();
         this.value = val;
         if (expireDate) this.expires = expireDate;
         Cookies.set(this.cookie_name, this.value, {
             expires: this.expires,
             path: this.path,
-            domain: this.domain,
-            secure: !!isSecure
+            domain: this.domain
+            // secure : !!isSecure,
         });
     },
     get: function get(key) {
