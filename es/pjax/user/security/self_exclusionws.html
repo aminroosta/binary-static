@@ -1,161 +1,195 @@
 <div id="content" class="self_exclusionws-content">
-        <!-- Google Tag Manager -->
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-MZWFF7"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<script data-cfasync="false">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MZWFF7');</script>
-<!-- End Google Tag Manager -->
-        <div id="page_info" style="display:none;">
-            <title>Detalles de la cuenta | Binary.com</title>
-            <div id="content_class">self_exclusionws-content</div>
-        </div>
-        
-        <div class="container">
+            <div id="page_info" style="display:none;">
+                <title>Auto-exclusión | Binary.com</title>
+                <div id="content_class">self_exclusionws-content</div>
+            </div>
+            <div class="container">
 
 
-  <div>
-	<h1>Características de auto-exclusión</h1>
 
-	<p id="selfExclusionDesc">Comercializar mercados financieros puede volverse adictivo. Complete el formulario a continuación para limitar su participación en el sitio web o enviar una carta firmada o fax a nuestro equipo de atención al cliente. Una vez establecidos, los límites sólo pueden ser ajustados. Los límites se eliminarán o alterarán sólo a partir de un período de 7 días después de establecer los límites con la excepción de la fecha de autoexclusión, que no puede ser suprimida o alterada una vez que se haya confirmado. Para eliminar o aumentar sus límites, por favor póngase en contacto con el servicio de <a href="/es/contact.html">atención al cliente</a>.</p>
-
-	<p id="errorMsg" class="notice-msg center-text hidden"></p>
-
-	<div id="loading"></div>
-
-	<form id="frmSelfExclusion" class="form rbox hidden">
-		<fieldset>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_balance">Saldo de caja máximo en la cuenta</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_balance" id="max_balance" type="text" maxlength="20" />
-					<div class="hint">Una vez que se alcance este límite ya no podrá depositar.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_turnover">Límite diario de volumen de transacciones</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_turnover" id="max_turnover" type="text" maxlength="20" />
-					<div class="hint">Máximo de adquisiciones de contratos agregados por día.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_losses">Límite diario de pérdidas</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_losses" id="max_losses" type="text" maxlength="20" />
-					<div class="hint">Máximo de pérdidas por día.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_7day_turnover">El límite de volumen de transacciones de 7 días</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_7day_turnover" id="max_7day_turnover" type="text" maxlength="20" />
-					<div class="hint">Máximo de adquisiciones de contratos por un período de 7 días.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_7day_losses">El límite de pérdidas de 7 días </label>
-				</div>
-				<div class="gr-8">
-					<input name="max_7day_losses" id="max_7day_losses" type="text" maxlength="20" />
-					<div class="hint">Máximo de pérdidas por un período de 7 días.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_30day_turnover">El límite de volumen de transacciones de 30 días </label>
-				</div>
-				<div class="gr-8">
-					<input name="max_30day_turnover" id="max_30day_turnover" type="text" maxlength="20" />
-					<div class="hint">Máximo de adquisiciones de contratos por un período de 30 días.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_30day_losses">El límite de pérdidas de 30 días</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_30day_losses" id="max_30day_losses" type="text" maxlength="20" />
-					<div class="hint">Máximo de pérdidas por un período de 30 días.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="max_open_bets">Número máximo de posiciones abiertas</label>
-				</div>
-				<div class="gr-8">
-					<input name="max_open_bets" id="max_open_bets" type="text" maxlength="4" />
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="session_duration_limit">Límite de la duración de la sesión, en minutos</label>
-				</div>
-				<div class="gr-8">
-					<input name="session_duration_limit" id="session_duration_limit" type="text" maxlength="5" />
-					<div class="hint">Usted será automáticamente desconectado después de ese tiempo.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear ja-hide">
-				<div class="gr-4 form_label">
-					<label for="timeout_until">Pausa hasta</label>
-				</div>
-                <div class="gr-3">
-					<input name="timeout_until_duration" id="timeout_until_duration" type="text" maxlength="10" />
-					<div class="hint nowrap">Ingrese una fecha en el formato AAAA-MM-DD HH:mm (hora local).</div>
-				</div>
-				<div class="gr-5">
-                    <input name="timeout_until" id="timeout_until" type="text" maxlength="8" />
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4 form_label">
-					<label for="exclude_until">Excluirme del sitio web hasta</label>
-				</div>
-				<div class="gr-8">
-					<input name="exclude_until" id="exclude_until" type="text" maxlength="10" />
-					<div class="hint">Ingrese una fecha en el formato AAAA-MM-DD.</div>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4"></div>
-				<div class="gr-8">
-					<span class="button">
-						<button class="button">Actualizar configuración</button>
-					</span>
-				</div>
-			</div>
-
-			<div class="gr-row gr-padding-10 row clear">
-				<div class="gr-4"></div>
-				<div class="gr-8">
-					<div id="formMessage"></div>
-				</div>
-			</div>
-
-		</fieldset>
-	</form>
+  <div class="invisible" id="description">
+    <h1>Características de auto-exclusión</h1>
+    <p>Comercializar mercados financieros puede volverse adictivo. Complete el formulario a continuación para limitar su participación en el sitio web o enviar una carta firmada o fax a nuestro equipo de atención al cliente. Una vez establecidos, los límites sólo pueden ser ajustados. Los límites se eliminarán o alterarán sólo a partir de un período de 7 días después de establecer los límites con la excepción de la fecha de autoexclusión, que no puede ser suprimida o alterada una vez que se haya confirmado. Para eliminar o aumentar sus límites, por favor póngase en contacto con el servicio de <a href="/binary-static/es/contact.html">atención al cliente</a>.</p>
 </div>
+<div class="invisible" id="description_max_30day_turnover">
+    <h1>Turnover Limit</h1>
+    <p>In order to access the cashier, we kindly request that you set a 30-day turnover limit for your account. Turnover is the total aggregate amount that is used to open trades. Therefore, this limit should be set to the total volume that you wish to trade with over 30 days.</p>
+</div>
+
+<p id="msg_error" class="center-text notice-msg invisible"></p>
+
+<div id="loading"><div class="barspinner dark">
+    
+    <div class="rect1"></div>
+    
+    <div class="rect2"></div>
+    
+    <div class="rect3"></div>
+    
+    <div class="rect4"></div>
+    
+    <div class="rect5"></div>
+    
+</div></div>
+
+<form id="frm_self_exclusion" class="invisible">
+    <fieldset>
+        
+        
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_balance">
+                Saldo de caja máximo en la cuenta
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_balance" maxlength="20" />
+            <div class="hint">Una vez que se alcance este límite ya no podrá depositar.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_turnover">
+                Límite diario de volumen de transacciones
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_turnover" maxlength="20" />
+            <div class="hint">Máximo de adquisiciones de contratos agregados por día.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_losses">
+                Límite diario de pérdidas
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_losses" maxlength="20" />
+            <div class="hint">Máximo de pérdidas por día.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_7day_turnover">
+                El límite de volumen de transacciones de 7 días
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_7day_turnover" maxlength="20" />
+            <div class="hint">Máximo de adquisiciones de contratos por un período de 7 días.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_7day_losses">
+                El límite de pérdidas de 7 días
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_7day_losses" maxlength="20" />
+            <div class="hint">Máximo de pérdidas por un período de 7 días.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m max_30day_turnover">
+        <div class="gr-4 gr-12-m">
+            <label for="max_30day_turnover">
+                El límite de volumen de transacciones de 30 días
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_30day_turnover" maxlength="20" />
+            <div class="hint">Máximo de adquisiciones de contratos por un período de 30 días.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_30day_losses">
+                El límite de pérdidas de 30 días
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_30day_losses" maxlength="20" />
+            <div class="hint">Máximo de pérdidas por un período de 30 días.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="max_open_bets">
+                Número máximo de posiciones abiertas
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="max_open_bets" maxlength="4" />
+            <div class="hint">Maximum number of contracts that can be open at the same time.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="session_duration_limit">
+                Límite de la duración de la sesión, en minutos
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="session_duration_limit" maxlength="5" />
+            <div class="hint">Usted será automáticamente desconectado después de ese tiempo.</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ja-hide">
+        <div class="gr-4 gr-12-m">
+            <label for="timeout_until_date">
+                Pausa hasta
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                
+            <div class="gr-row">
+                <div class="gr-5 gr-6-t gr-12-p gr-12-m">
+                    <input type="text" class="clearable" id="timeout_until_date" maxlength="15" autocomplete="off" readonly />
+                </div>
+                <div class="gr-4 gr-6-t gr-12-p gr-12-m">
+                    <input type="text" class="clearable" id="timeout_until_time" maxlength="8" autocomplete="off"  />
+                </div>
+            </div>
+        
+            <div class="hint">Please enter date in the format DD MMM, YYYY HH:mm (local time).</div>
+        </div>
+    </div>
+
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="exclude_until">
+                Excluirme del sitio web hasta
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <input type="text" id="exclude_until" maxlength="15" autocomplete="off" readonly class="clearable" />
+            <div class="hint">Please enter date in the format DD MMM, YYYY.</div>
+        </div>
+    </div>
+
+        <div class="gr-row ">
+                <div class="gr-8 gr-push-4 gr-12-m gr-push-0-m center-text-m">
+            
+        
+        <div id="msg_form" class="error-msg invisible"></div>
+        
+        <div class="gr-padding-10">
+        
+            <button id="btn_submit" type="submit">Actualizar configuración</button>
+        </div>
+    
+                </div>
+            </div>
+    
+    </fieldset>
+</form>

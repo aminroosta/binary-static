@@ -1,160 +1,137 @@
 <div id="content" class="cashier-content">
-        <!-- Google Tag Manager -->
-<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-MZWFF7"
-height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-<script data-cfasync="false">(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-MZWFF7');</script>
-<!-- End Google Tag Manager -->
-        <div id="page_info" style="display:none;">
-            <title>Kasse | Binary.com</title>
-            <div id="content_class">cashier-content</div>
+            <div id="page_info" style="display:none;">
+                <title>Kasse | Binary.com</title>
+                <div id="content_class">cashier-content</div>
+            </div>
+            <div class="container">
+
+
+
+  <h1>Kasse</h1>
+
+<div class="gr-padding-10 table-body client_virtual invisible gr-parent">
+    <h3 class="gr-padding-10">Holen Sie sich mehr virtuelles Geld</h3>
+    <div class="gr-row">
+        <div class="gr-2 gr-4-m">
+            <img class="responsive" id="virtual_money_icon" src="/binary-static/images/pages/cashier/virtual_topup.svg" />
+        </div>
+        <div class="gr-5 gr-12-m">
+            <span class="ja-hide">Sie können mehr virtuelles Geld beantragen, wenn Ihr virtuelles Guthaben unter 1.000 USD fällt.</span>
+            <span class="invisible ja-show">Sie können mehr virtuelles Geld beantragen, wenn Ihre virtuelle Bilanz unter 100.000 JPY fällt.</span>
+        </div>
+        <div class="gr-5 gr-12-m invisible">
+            <a class="toggle button" id="VRT_topup_link">
+                <span class="ja-hide">Sie erhalten 10.000,00 USD</span>
+                <span class="invisible ja-show">Erhalten Sie 1.000.000 JPY</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="gr-padding-10 client_virtual invisible"></div>
+
+<div class="gr-padding-10 table-body">
+    <h3 class="gr-padding-10">
+        <span class="invisible normal_currency client_logged_out">Banküberweisung, Kreditkarte, e-Cash Wallet</span>
+        <span class="invisible crypto_currency">Kryptowährung</span>
+    </h3>
+    <div class="gr-row">
+        <div class="gr-2 gr-4-m">
+            <a class="ja-hide" href="/binary-static/de/cashier/forwardws.html#deposit" id="payment_methods">
+                <img class="responsive" id="payment_methods_icon" src="/binary-static/images/pages/cashier/payment-methods.svg" />
+            </a>
+            <a class="invisible ja-show" href="/binary-static/de/cashier/deposit-jp.html" id="payment_methods">
+                <img class="responsive" id="payment_methods_icon" src="/binary-static/images/pages/cashier/japan_cashier.svg" />
+            </a>
+        </div>
+        <div class="gr-5 gr-12-m">
+            <span class="invisible normal_currency client_logged_out">Ein- oder Auszahlung von oder auf Ihr Konto über Banküberweisung, Kreditkarte oder e-Cash Wallet.</span>
+            <span class="invisible crypto_currency">Zahlen Sie auf Ihr Konto über Bitcoin ein, oder heben Sie davon über Bitcoin ab.</span>
+            <a class="ja-hide invisible normal_currency client_logged_out" href="/binary-static/de/cashier/payment_methods.html" id="view_payment_methods">
+                <p>Vorhandene Zahlungsmethoden anzeigen</p>
+            </a>
+        </div>
+        <div class="gr-5 gr-12-m ja-hide">
+        <div class="gr-padding-10 client_real invisible gr-parent">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/forwardws.html#deposit">
+                <span class="deposit">Einzahlung</span>
+            </a>
+        </div>
+        <div class="gr-padding-10 client_real invisible">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/forwardws.html#withdraw">
+                <span class="withdraw">Abheben</span>
+            </a>
         </div>
         
-        <div class="container">
-
-
-  <div class="gr-row">
-
-    <div class="gr-12">
-        <h1>Kasse</h1>
-    </div>
-
-    <div class="gr-12 gr-padding-10 table-body by_client_type client_virtual with_login_cookies invisible gr-parent">
-        <div class="gr-padding-10">
-            <h3>Holen Sie sich mehr virtuelles Geld</h3>
-        </div>
-        <div class="gr-row">
-            <div class="gr-12">
-                <div class="gr-row">
-                    <div class="gr-2 gr-4-m">
-                        <img class="responsive charting-page-icon" id="virtual_money_icon" src="/images/pages/cashier/virtual_topup.svg" />
-                    </div>
-                    <div class="gr-5 gr-12-m">
-                        <span class="ja-hide">Sie können mehr virtuelles Geld beantragen, wenn Ihr virtuelles Guthaben unter 1.000 USD fällt.</span>
-                        <p class="hidden ja-show">You can request more virtual money if your virtual balance falls below JPY 100,000.</span>
-                    </div>
-                    <div class="gr-5 gr-12-m">
-                        <div class="gr-padding-10 by_client_type client_virtual with_login_cookies invisible gr-parent">
-                            <a class="pjaxload button button_large by_client_type client_virtual with_login_cookies invisible" href="/de/cashier/top_up_virtualws.html" id="VRT_topup_link">
-                                <span class="ja-hide">Sie erhalten 10.000,00 USD</span>
-                                <span class="hidden ja-show">Erhalten Sie 1.000.000 JPY</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <div class="gr-padding-10 invisible upgrademessage">
+                <a class="button"></a>
             </div>
-        </div>
+        
     </div>
-
-    <div class="gr-12 gr-padding-10 by_client_type client_virtual with_login_cookies invisible">
-        <span></span>
-    </div>
-
-    <div class="gr-12 gr-padding-10 table-body">
-        <div class="gr-padding-10 invisible gr-parent">
-            <p class="notice-msg by_client_type client_real with_login_cookies">
-                Auszahlung ist gesperrt, bitte <a class="pjaxload" href="/de/contact.html">setzen Sie sich mit uns in Verbindung</a>, um mehr Informationen zu erhalten.
-            </p>
-        </div>
-        <p class="center-text invisible" id="authenticate_button">
-            <a class="button pjaxload" href="/de/user/authenticatews.html">
-                <span>Authentifizieren Sie Ihr Konto</span>
+        <div class="gr-5 gr-12-m invisible ja-show">
+        <div class="gr-padding-10 client_real invisible gr-parent">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/deposit-jp.html">
+                <span class="deposit">Einzahlung</span>
             </a>
-        </p>
-        <div class="gr-padding-10">
-            <h3>Banküberweisung, Kreditkarte, e-Cash Wallet</h3>
         </div>
-        <div class="gr-row">
-            <div class="gr-12">
-                <div class="gr-row">
-                    <div class="gr-2 gr-4-m">
-                        <a class="pjaxload" href="/de/cashier/forwardws.html#deposit" id="payment_methods">
-                            <img class="ja-hide responsive charting-page-icon" id="payment_methods_icon" src="/images/pages/cashier/payment-methods.svg" />
-                            <img class="hidden ja-show responsive charting-page-icon" id="payment_methods_icon" src="/images/pages/cashier/japan_cashier.svg" />
-                        </a>
-                    </div>
-                    <div class="gr-5 gr-12-m">
-                        <span>Ein- oder Auszahlung von oder auf Ihr Konto über Banküberweisung, Kreditkarte oder e-Cash Wallet.</span>
-                        <a class="pjaxload ja-hide" href="/de/cashier/payment_methods.html" id="view_payment_methods">
-                            <p>Vorhandene Zahlungsmethoden anzeigen</p>
-                        </a>
-                    </div>
-                    <div class="gr-5 gr-12-m">
-                        <div class="gr-padding-10 by_client_type client_real with_login_cookies invisible gr-parent">
-                            <a class="pjaxload button button_large by_client_type client_real with_login_cookies invisible" href="/de/cashier/forwardws.html#deposit">
-                                <span class="deposit">Einzahlung</span>
-                            </a>
-                        </div>
-                        <div class="gr-padding-10 by_client_type client_real with_login_cookies invisible">
-                            <a class="pjaxload button button_large by_client_type client_real with_login_cookies invisible" href="/de/cashier/forwardws.html#withdraw">
-                                <span class="withdraw">Abheben</span>
-                            </a>
-                        </div>
-                        <div class="gr-padding-10 invisible upgrademessage">
-                            <a class="pjaxload button button_large"></a>
-                        </div>
-                    </div>
-                </div>
+        <div class="gr-padding-10 client_real invisible">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/withdraw-jp.html">
+                <span class="withdraw">Abheben</span>
+            </a>
+        </div>
+        
+            <div class="gr-padding-10 invisible upgrademessage">
+                <a class="button"></a>
             </div>
+        
+    </div>
+    </div>
+</div>
+
+<div class="gr-padding-10"></div>
+
+<div class="gr-padding-10 table-body ja-hide payment-agent invisible" id="payment-agent-section">
+    <h3 class="gr-padding-10">Zahlungsagent</h3>
+    <div class="gr-row">
+        <div class="gr-2 gr-4-m">
+            <a href="/binary-static/de/cashier/payment_agent_listws.html" id="payment_agent">
+                <img class="responsive" id="payment_agent_icon" src="/binary-static/images/pages/cashier/payment-agents.svg" />
+            </a>
+        </div>
+        <div class="gr-5 gr-12-m">
+            <span>Bei e-Cash Methoden oder nationalen Währungen, die nicht von Binary.com unterstützt werden.</span>
+            <p class="faded">Bitte beachten: Die Abhebung über einen Zahlungsagenten ist nur möglich, wenn Sie auch über diesen Zahlungsagenten eingezahlt haben</p>
+        </div>
+        <div class="gr-5 gr-12-m">
+        <div class="gr-padding-10 client_real invisible gr-parent">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/payment_agent_listws.html">
+                <span class="deposit">Einzahlung</span>
+            </a>
+        </div>
+        <div class="gr-padding-10 client_real invisible">
+            <a class="toggle button client_real invisible" href="/binary-static/de/paymentagent/withdrawws.html">
+                <span class="withdraw">Abheben</span>
+            </a>
+        </div>
+        
+    </div>
+    </div>
+</div>
+
+<div class="gr-padding-10 table-body ja-hide invisible" id="account-transfer-section">
+    <div class="gr-row">
+        <div class="gr-2 gr-4-m">
+            <a href="/binary-static/de/cashier/account_transfer.html" id="account_transfer">
+                <img class="responsive" id="acc_transfer_icon" src="/binary-static/images/pages/cashier/account-transfer.svg" />
+            </a>
+        </div>
+        <div class="gr-5 gr-12-m">
+            <span>Überweisung zwischen Ihren Spielkonten und Finanzkonten.</span>
+        </div>
+        <div class="gr-5 gr-12-m gr-padding-10 gr-parent">
+            <a class="toggle button client_real invisible" href="/binary-static/de/cashier/account_transfer.html">
+                <span class="withdraw">Überweisung</span>
+            </a>
         </div>
     </div>
-
-    <div class="gr-12 gr-padding-10">
-        <span></span>
-    </div>
-
-    <div class="gr-12 gr-padding-10 table-body ja-hide payment-agent" id="payment-agent-section">
-        <div class="gr-padding-10">
-            <h3>Zahlungsagent</h3>
-        </div>
-        <div class="gr-row">
-            <div class="gr-2 gr-4-m">
-                <a class="pjaxload" href="/de/cashier/payment_agent_listws.html" id="payment_agent">
-                    <img class="responsive charting-page-icon" id="payment_agent_icon" src="/images/pages/cashier/payment-agents.svg" />
-                </a>
-            </div>
-            <div class="gr-5 gr-12-m">
-                <span>Bei e-Cash Methoden oder nationalen Währungen, die nicht von Binary.com unterstützt werden.</span>
-                <p class="faded">
-                    Bitte beachten: Die Abhebung über einen Zahlungsagenten ist nur möglich, wenn Sie auch über diesen Zahlungsagenten eingezahlt haben
-                </p>
-            </div>
-            <div class="gr-5 gr-12-m">
-                <div class="gr-padding-10 gr-parent">
-                    <a class="pjaxload button button_large by_client_type client_real with_login_cookies invisible" href="/de/cashier/payment_agent_listws.html">
-                        <span class="deposit">Einzahlung</span>
-                    </a>
-                </div>
-                <div class="gr-padding-10">
-                    <a class="pjaxload button button_large by_client_type client_real with_login_cookies invisible" href="/de/paymentagent/withdrawws.html">
-                        <span class="withdraw">Abheben</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="gr-12 gr-padding-10 table-body ja-hide invisible" id="account-transfer-section">
-        <div class="gr-row">
-            <div class="gr-2 gr-4-m">
-                <a class="pjaxload" href="/de/account/account_transferws.html" id="account_transfer">
-                    <img class="responsive charting-page-icon" id="acc_transfer_icon" src="/images/pages/cashier/account-transfer.svg" />
-                </a>
-            </div>
-            <div class="gr-5 gr-12-m">
-                <span>Überweisung zwischen Ihren Spielkonten und Finanzkonten.</span>
-            </div>
-            <div class="gr-5 gr-12-m">
-                <div class="gr-padding-10 gr-parent">
-                    <a class="button button_large by_client_type client_real with_login_cookies invisible" href="/de/account/account_transferws.html">
-                        <span class="withdraw">Überweisung</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
