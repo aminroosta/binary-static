@@ -20105,8 +20105,9 @@ var MBTradingEvents = function () {
         var validatePayout = function validatePayout(payout_amount) {
             var is_ok = true;
             var contract = MBContract.getCurrentContracts();
-            var max_amount = Array.isArray(contract) && contract[0].expiry_type !== 'intraday' ? 20000 : 5000;
-            if (!payout_amount || isNaN(payout_amount) || jpClient() && (payout_amount < 1 || payout_amount > 100) || payout_amount <= 0 || payout_amount > max_amount) {
+            var min_amount = 0;
+            var max_amount = jpClient() ? 100 : Array.isArray(contract) && contract.length && contract[0].expiry_type !== 'intraday' ? 20000 : 5000;
+            if (!payout_amount || isNaN(payout_amount) || payout_amount <= min_amount || payout_amount > max_amount) {
                 is_ok = false;
             }
 
@@ -20122,7 +20123,10 @@ var MBTradingEvents = function () {
             };
             var old_value = jp_client ? 1 : 10;
             if (!$payout.attr('value')) {
-                var payout_def = MBDefaults.get('payout') || old_value;
+                var payout_def = MBDefaults.get('payout');
+                if (!validatePayout(payout_def)) {
+                    payout_def = old_value;
+                }
                 $payout.value = payout_def;
                 MBDefaults.set('payout', payout_def);
                 $payout.attr('value', payout_def).find('.current').html(payout_def);
@@ -25414,6 +25418,7 @@ var Header = __webpack_require__(45);
 var localize = __webpack_require__(1).localize;
 var defaultRedirectUrl = __webpack_require__(8).defaultRedirectUrl;
 var dateValueChanged = __webpack_require__(4).dateValueChanged;
+var jpClient = __webpack_require__(9).jpClient;
 var FormManager = __webpack_require__(22);
 var scrollToHashSection = __webpack_require__(82).scrollToHashSection;
 var DatePicker = __webpack_require__(71);
@@ -25629,6 +25634,10 @@ var SelfExclusion = function () {
                 BinaryPjax.load(defaultRedirectUrl());
             } else {
                 getData();
+                if (jpClient()) {
+                    // need to update daily_loss_limit value inside jp_settings object
+                    BinarySocket.send({ get_settings: 1 }, { forced: true });
+                }
             }
         });
     };
