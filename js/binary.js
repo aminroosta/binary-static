@@ -852,11 +852,17 @@ var checkInput = function checkInput(type, wrong_val) {
  * if yes, update the data-value. if no, return false.
  */
 var dateValueChanged = function dateValueChanged(element, type) {
-    if (element.getAttribute('data-value') === element.value) {
+    var value = void 0;
+    if (element.selectedOptions) {
+        value = element.selectedOptions[0].getAttribute('data-value');
+    } else {
+        value = element.value;
+    }
+    if (element.getAttribute('data-value') === value) {
         return false;
     }
     if (element.getAttribute('type') === type) {
-        element.setAttribute('data-value', element.value);
+        element.setAttribute('data-value', value);
     }
     return true;
 };
@@ -955,10 +961,16 @@ Store.prototype = {
         }
     },
     getObject: function getObject(key) {
-        return this.storage.getObject(key);
+        return typeof this.storage.getObject === 'function' ? // Prevent runtime error in IE
+        this.storage.getObject(key) : JSON.parse(this.storage.getItem(key) || '{}');
     },
     setObject: function setObject(key, value) {
-        this.storage.setObject(key, value);
+        if (typeof this.storage.setObject === 'function') {
+            // Prevent runtime error in IE
+            this.storage.setObject(key, value);
+        } else {
+            this.storage.setItem(key, JSON.stringify(value));
+        }
     },
     remove: function remove(key) {
         this.storage.removeItem(key);
@@ -986,6 +998,12 @@ InScriptStore.prototype = {
         } else {
             obj[key[0]] = value;
         }
+    },
+    getObject: function getObject(key) {
+        return JSON.parse(this.get(key) || '{}');
+    },
+    setObject: function setObject(key, value) {
+        this.set(key, JSON.stringify(value));
     },
     remove: function remove() {
         var _this = this;
@@ -1116,7 +1134,7 @@ module.exports = {
 var urlLang = __webpack_require__(17).urlLang;
 var jpClient = __webpack_require__(9).jpClient;
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
-__webpack_require__(492);
+__webpack_require__(493);
 
 var Url = function () {
     'use strict';
@@ -1420,8 +1438,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 10 */,
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1431,37 +1448,28 @@ var jpClient = __webpack_require__(9).jpClient;
 var getLanguage = __webpack_require__(17).get;
 var getPropertyValue = __webpack_require__(8).getPropertyValue;
 
-var currencies_config = '';
+var currencies_config = {};
 
 var formatMoney = function formatMoney(currency_value, amount, exclude_currency) {
-    var is_crypto = isCryptocurrency(currency_value);
-    var is_jp = jpClient();
+    if (amount) amount = String(amount).replace(/,/g, '');
+    var sign = amount && Number(amount) < 0 ? '-' : '';
     var decimal_places = getDecimalPlaces(currency_value);
     var money = void 0;
-    if (amount) amount = String(amount).replace(/,/g, '');
-    if (typeof Intl !== 'undefined' && currency_value && !is_crypto && typeof amount !== 'undefined') {
-        var options = exclude_currency ? { minimumFractionDigits: decimal_places, maximumFractionDigits: decimal_places } : { style: 'currency', currency: currency_value };
-        var language = getLanguage().toLowerCase();
-        money = new Intl.NumberFormat(language.replace('_', '-'), options).format(amount);
+
+    amount = isNaN(amount) ? 0 : Math.abs(amount);
+    if (typeof Intl !== 'undefined') {
+        var options = { minimumFractionDigits: decimal_places, maximumFractionDigits: decimal_places };
+        money = new Intl.NumberFormat(getLanguage().toLowerCase().replace('_', '-'), options).format(amount);
     } else {
-        var updated_amount = amount,
-            sign = '';
-        if (is_jp) {
-            updated_amount = parseInt(amount);
-            if (Number(updated_amount) < 0) {
-                sign = '-';
-            }
-        }
-        updated_amount = addComma(updated_amount, decimal_places);
-        if (exclude_currency) {
-            money = updated_amount;
-        } else {
-            var symbol = map_currency[currency_value];
-            money = symbol ? sign + symbol + updated_amount : currency_value + ' ' + updated_amount;
-        }
+        money = addComma(amount, decimal_places);
     }
-    return money;
+
+    return sign + (exclude_currency ? '' : formatCurrency(currency_value)) + money;
 };
+
+var formatCurrency = function formatCurrency(currency) {
+    return '<span class="symbols ' + currency.toLowerCase() + '"></span>';
+}; // defined in binary-style
 
 var addComma = function addComma(num, decimal_points, is_crypto) {
     var number = String(num || 0).replace(/,/g, '');
@@ -1478,21 +1486,7 @@ var addComma = function addComma(num, decimal_points, is_crypto) {
 };
 
 var getDecimalPlaces = function getDecimalPlaces(currency) {
-    return getPropertyValue(currencies_config, [currency, 'fractional_digits']) || (isCryptocurrency(currency) ? 8 : jpClient() ? 0 : 2);
-};
-
-// Taken with modifications from:
-//    https://github.com/bengourley/currency-symbol-map/blob/master/map.js
-// When we need to handle more currencies please look there.
-var map_currency = {
-    USD: '$',
-    GBP: '£',
-    AUD: 'A$',
-    EUR: '€',
-    JPY: '¥',
-    BTC: '₿',
-    ETH: 'Ξ',
-    LTC: 'Ł'
+    return currencies_config[currency] ? getPropertyValue(currencies_config, [currency, 'fractional_digits']) : isCryptocurrency(currency) ? 8 : jpClient() ? 0 : 2;
 };
 
 var setCurrencies = function setCurrencies(website_status) {
@@ -1506,9 +1500,7 @@ var isCryptocurrency = function isCryptocurrency(currency) {
 
 module.exports = {
     formatMoney: formatMoney,
-    formatCurrency: function formatCurrency(currency) {
-        return map_currency[currency] || '';
-    },
+    formatCurrency: formatCurrency,
     isCryptocurrency: isCryptocurrency,
     addComma: addComma,
     getDecimalPlaces: getDecimalPlaces,
@@ -1519,6 +1511,7 @@ module.exports = {
 };
 
 /***/ }),
+/* 11 */,
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -1887,103 +1880,6 @@ module.exports = {
 "use strict";
 
 
-var Url = __webpack_require__(6);
-var isEmptyObject = __webpack_require__(8).isEmptyObject;
-var isVisible = __webpack_require__(4).isVisible;
-var State = __webpack_require__(5).State;
-
-/*
- * Handles trading page default values
- *
- * Priorities:
- * 1. Client's input: on each change to form, it will reflect to both query string & session storage
- * 2. Query string parameters: will change session storage values
- * 3. Session storage values: if none of the above, it will be the source
- *
- */
-
-var Defaults = function () {
-    'use strict';
-
-    var params = {};
-    var getDefault = function getDefault(key) {
-        var p_value = params[key] || Url.param(key);
-        var s_value = sessionStorage.getItem(key);
-        if (p_value && (!s_value || p_value !== s_value)) {
-            sessionStorage.setItem(key, p_value);
-        }
-        if (!p_value && s_value) {
-            setDefault(key, s_value);
-        }
-        return p_value || s_value;
-    };
-
-    var setDefault = function setDefault(key, value) {
-        if (!key) return;
-        value = value || '';
-        if (isEmptyObject(params)) params = Url.paramsHash();
-        if (params[key] !== value) {
-            params[key] = value;
-            // to increase speed, do not set values when form is still loading
-            if (!isVisible(document.getElementById('trading_init_progress'))) {
-                sessionStorage.setItem(key, value);
-                updateURL();
-            }
-        }
-    };
-
-    var removeDefault = function removeDefault() {
-        for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
-            keys[_key] = arguments[_key];
-        }
-
-        if (isEmptyObject(params)) params = Url.paramsHash();
-        var is_updated = false;
-        keys.forEach(function (key) {
-            if (key in params) {
-                sessionStorage.removeItem(key);
-                delete params[key];
-                is_updated = true;
-            }
-        });
-        if (is_updated) {
-            updateURL();
-        }
-    };
-
-    var updateAll = function updateAll() {
-        Object.keys(params).forEach(function (key) {
-            sessionStorage.setItem(key, params[key]);
-        });
-        updateURL();
-    };
-
-    var updateURL = function updateURL() {
-        if (!State.get('is_trading') && !State.get('is_beta_trading')) return;
-        var updated_url = '' + window.location.origin + window.location.pathname + '?' + Url.paramsHashToString(params);
-        window.history.replaceState({ url: updated_url }, null, updated_url);
-    };
-
-    return {
-        get: getDefault,
-        set: setDefault,
-        update: updateAll,
-        remove: removeDefault,
-        clear: function clear() {
-            params = {};
-        }
-    };
-}();
-
-module.exports = Defaults;
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
 var Validation = __webpack_require__(89);
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
 var showLoadingImage = __webpack_require__(8).showLoadingImage;
@@ -2126,6 +2022,103 @@ var FormManager = function () {
 module.exports = FormManager;
 
 /***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Url = __webpack_require__(6);
+var isEmptyObject = __webpack_require__(8).isEmptyObject;
+var isVisible = __webpack_require__(4).isVisible;
+var State = __webpack_require__(5).State;
+
+/*
+ * Handles trading page default values
+ *
+ * Priorities:
+ * 1. Client's input: on each change to form, it will reflect to both query string & session storage
+ * 2. Query string parameters: will change session storage values
+ * 3. Session storage values: if none of the above, it will be the source
+ *
+ */
+
+var Defaults = function () {
+    'use strict';
+
+    var params = {};
+    var getDefault = function getDefault(key) {
+        var p_value = params[key] || Url.param(key);
+        var s_value = sessionStorage.getItem(key);
+        if (p_value && (!s_value || p_value !== s_value)) {
+            sessionStorage.setItem(key, p_value);
+        }
+        if (!p_value && s_value) {
+            setDefault(key, s_value);
+        }
+        return p_value || s_value;
+    };
+
+    var setDefault = function setDefault(key, value) {
+        if (!key) return;
+        value = value || '';
+        if (isEmptyObject(params)) params = Url.paramsHash();
+        if (params[key] !== value) {
+            params[key] = value;
+            // to increase speed, do not set values when form is still loading
+            if (!isVisible(document.getElementById('trading_init_progress'))) {
+                sessionStorage.setItem(key, value);
+                updateURL();
+            }
+        }
+    };
+
+    var removeDefault = function removeDefault() {
+        for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
+            keys[_key] = arguments[_key];
+        }
+
+        if (isEmptyObject(params)) params = Url.paramsHash();
+        var is_updated = false;
+        keys.forEach(function (key) {
+            if (key in params) {
+                sessionStorage.removeItem(key);
+                delete params[key];
+                is_updated = true;
+            }
+        });
+        if (is_updated) {
+            updateURL();
+        }
+    };
+
+    var updateAll = function updateAll() {
+        Object.keys(params).forEach(function (key) {
+            sessionStorage.setItem(key, params[key]);
+        });
+        updateURL();
+    };
+
+    var updateURL = function updateURL() {
+        if (!State.get('is_trading') && !State.get('is_beta_trading')) return;
+        var updated_url = '' + window.location.origin + window.location.pathname + '?' + Url.paramsHashToString(params);
+        window.history.replaceState({ url: updated_url }, null, updated_url);
+    };
+
+    return {
+        get: getDefault,
+        set: setDefault,
+        update: updateAll,
+        remove: removeDefault,
+        clear: function clear() {
+            params = {};
+        }
+    };
+}();
+
+module.exports = Defaults;
+
+/***/ }),
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -2216,6 +2209,10 @@ var getMinMaxTime = function getMinMaxTime($setMinMaxSelector) {
     var minTime = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : window.time ? window.time : moment.utc();
 
     var $selected_option = $setMinMaxSelector.find('option:selected');
+    // if 'now' is selected, take first option's value
+    if (isNaN(+$setMinMaxSelector.val())) {
+        $selected_option = $($setMinMaxSelector.find('option')[1]);
+    }
     minTime = +$selected_option.val() > minTime.unix() ? moment.utc($selected_option.val() * 1000) : minTime;
     var maxTime = moment.utc($selected_option.attr('data-end') * 1000);
     return {
@@ -2246,15 +2243,15 @@ module.exports = {
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var Moment = __webpack_require__(7);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var Notifications = __webpack_require__(84);
 var Symbols = __webpack_require__(57);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var urlFor = __webpack_require__(6).urlFor;
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
 var elementTextContent = __webpack_require__(4).elementTextContent;
@@ -2610,7 +2607,7 @@ var commonTrading = function () {
                 node.hide();
             } else {
                 node.show();
-                elementTextContent(node, comment);
+                elementInnerHtml(node, comment);
             }
         }
     };
@@ -3084,6 +3081,81 @@ module.exports = Clock;
 "use strict";
 
 
+var isEmptyObject = __webpack_require__(8).isEmptyObject;
+
+/*
+ * Handles trading page default values
+ *
+ * Priorities:
+ * 1. Client's input: on each change to form, it will reflect to both query string & session storage
+ * 2. Local storage values: if none of the above, it will be the source
+ *
+ */
+
+var MBDefaults = function () {
+    'use strict';
+
+    var params = {};
+    var getDefault = function getDefault(key) {
+        loadParams();
+        return params[key];
+    };
+
+    var loadParams = function loadParams() {
+        if (isEmptyObject(params)) params = JSON.parse(localStorage.getItem('mb_trading')) || {};
+    };
+
+    var saveParams = function saveParams() {
+        localStorage.setItem('mb_trading', JSON.stringify(params));
+    };
+
+    var setDefault = function setDefault(key, value) {
+        if (!key) return;
+        value = value || '';
+        loadParams();
+        if (params[key] !== value) {
+            params[key] = value;
+            saveParams();
+        }
+    };
+
+    var removeDefault = function removeDefault() {
+        for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
+            keys[_key] = arguments[_key];
+        }
+
+        loadParams();
+        var is_updated = false;
+        keys.forEach(function (key) {
+            if (key in params) {
+                delete params[key];
+                is_updated = true;
+            }
+        });
+        if (is_updated) {
+            saveParams();
+        }
+    };
+
+    return {
+        get: getDefault,
+        set: setDefault,
+        remove: removeDefault,
+        clear: function clear() {
+            params = {};
+        }
+    };
+}();
+
+module.exports = MBDefaults;
+
+/***/ }),
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var moment = __webpack_require__(7);
 var countDecimalPlaces = __webpack_require__(23).countDecimalPlaces;
 var displayPriceMovement = __webpack_require__(23).displayPriceMovement;
@@ -3261,83 +3333,8 @@ var Tick = function () {
 module.exports = Tick;
 
 /***/ }),
-/* 35 */,
 /* 36 */,
-/* 37 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var isEmptyObject = __webpack_require__(8).isEmptyObject;
-
-/*
- * Handles trading page default values
- *
- * Priorities:
- * 1. Client's input: on each change to form, it will reflect to both query string & session storage
- * 2. Local storage values: if none of the above, it will be the source
- *
- */
-
-var MBDefaults = function () {
-    'use strict';
-
-    var params = {};
-    var getDefault = function getDefault(key) {
-        loadParams();
-        return params[key];
-    };
-
-    var loadParams = function loadParams() {
-        if (isEmptyObject(params)) params = JSON.parse(localStorage.getItem('mb_trading')) || {};
-    };
-
-    var saveParams = function saveParams() {
-        localStorage.setItem('mb_trading', JSON.stringify(params));
-    };
-
-    var setDefault = function setDefault(key, value) {
-        if (!key) return;
-        value = value || '';
-        loadParams();
-        if (params[key] !== value) {
-            params[key] = value;
-            saveParams();
-        }
-    };
-
-    var removeDefault = function removeDefault() {
-        for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
-            keys[_key] = arguments[_key];
-        }
-
-        loadParams();
-        var is_updated = false;
-        keys.forEach(function (key) {
-            if (key in params) {
-                delete params[key];
-                is_updated = true;
-            }
-        });
-        if (is_updated) {
-            saveParams();
-        }
-    };
-
-    return {
-        get: getDefault,
-        set: setDefault,
-        remove: removeDefault,
-        clear: function clear() {
-            params = {};
-        }
-    };
-}();
-
-module.exports = MBDefaults;
-
-/***/ }),
+/* 37 */,
 /* 38 */,
 /* 39 */,
 /* 40 */,
@@ -3543,20 +3540,10 @@ var Header = function () {
     var displayAccountStatus = function displayAccountStatus() {
         BinarySocket.wait('authorize').then(function () {
             var get_account_status = void 0,
-                status = void 0,
-                should_authenticate = false,
-                has_mt_account = false;
-
-            var costarica_landing_company = /costarica/.test(Client.get('landing_company_shortcode'));
-
-            var _authenticate = function _authenticate() {
-                // don't show age verification check for costarica clients
-                var should_age_verify = !/age_verification/.test(status) && !costarica_landing_company;
-                return (!/authenticated/.test(status) || should_age_verify) && !jpClient() && should_authenticate;
-            };
+                status = void 0;
 
             var riskAssessment = function riskAssessment() {
-                return (get_account_status.risk_classification === 'high' || Client.isAccountOfType('financial') || has_mt_account) && /financial_assessment_not_complete/.test(status) && !jpClient();
+                return (get_account_status.risk_classification === 'high' || Client.isAccountOfType('financial')) && /financial_assessment_not_complete/.test(status) && !jpClient();
             };
 
             var buildMessage = function buildMessage(string, path) {
@@ -3590,7 +3577,7 @@ var Header = function () {
 
             var validations = {
                 authenticate: function authenticate() {
-                    return _authenticate();
+                    return +get_account_status.prompt_client_to_authenticate;
                 },
                 financial_limit: function financial_limit() {
                     return (/ukrts_max_turnover_limit_not_set/.test(status)
@@ -3637,18 +3624,7 @@ var Header = function () {
                 BinarySocket.wait('website_status', 'get_account_status', 'get_settings', 'balance').then(function () {
                     get_account_status = State.getResponse('get_account_status') || {};
                     status = get_account_status.status;
-                    if (costarica_landing_company && +Client.get('balance') < 200) {
-                        BinarySocket.wait('mt5_login_list').then(function (response) {
-                            if (response.mt5_login_list.length) {
-                                should_authenticate = true;
-                                has_mt_account = true;
-                            }
-                            checkStatus(check_statuses_real);
-                        });
-                    } else {
-                        should_authenticate = true;
-                        checkStatus(check_statuses_real);
-                    }
+                    checkStatus(check_statuses_real);
                 });
             }
         });
@@ -3901,6 +3877,7 @@ module.exports = {
 "use strict";
 
 
+var MBDefaults = __webpack_require__(34);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
@@ -3935,7 +3912,7 @@ var WebtraderChart = function () {
     var setChart = function setChart() {
         var is_mb_trading = State.get('is_mb_trading');
         var new_underlying = is_mb_trading ? $('#underlying').attr('value') : document.getElementById('underlying').value;
-        if (($('#tab_graph').hasClass('active') || is_mb_trading) && (!chart || chart.data().instrumentCode !== new_underlying)) {
+        if (($('#tab_graph').hasClass('active') || is_mb_trading) && (!chart || chart.data().instrumentCode !== new_underlying || is_mb_trading && (getChartSettings().time_frame !== chart.data().timePeriod || getChartSettings().chart_type !== chart.data().type))) {
             cleanupChart();
             initChart();
         }
@@ -3948,7 +3925,7 @@ var WebtraderChart = function () {
         if (!is_initialized) {
             __webpack_require__.e/* require.ensure */(0).then((function () {
                 __webpack_require__.e/* require.ensure */(3).then((function (require) {
-                    WebtraderCharts = __webpack_require__(497);
+                    WebtraderCharts = __webpack_require__(498);
                     WebtraderCharts.init({
                         server: Config.getSocketURL(),
                         appId: Config.getAppId(),
@@ -3972,8 +3949,8 @@ var WebtraderChart = function () {
             instrumentCode: $underlying_code,
             instrumentName: $underlying_name,
             showInstrumentName: true,
-            timePeriod: '1t',
-            type: 'line',
+            timePeriod: getChartSettings().time_frame,
+            type: getChartSettings().chart_type,
             lang: getLanguage().toLowerCase(),
             timezoneOffset: (jpClient() ? -9 : 0) * 60,
             showShare: !is_mb_trading
@@ -3985,6 +3962,23 @@ var WebtraderChart = function () {
         if (typeof getPropertyValue(chart, ['actions', 'reflow']) === 'function') {
             chart.actions.reflow();
         }
+    };
+
+    var getChartSettings = function getChartSettings() {
+        var chart_settings = { time_frame: '1t', chart_type: 'line' };
+        if (State.get('is_mb_trading')) {
+            var period = MBDefaults.get('period').split('_')[2].substr(0, 2).toUpperCase();
+            var period_map = {
+                '5H': { time_frame: '1m', chart_type: 'line' },
+                '0D': { time_frame: '30m', chart_type: 'ohlc' },
+                '1W': { time_frame: '1d', chart_type: 'ohlc' },
+                '1M': { time_frame: '1d', chart_type: 'candlestick' },
+                '3M': { time_frame: '1d', chart_type: 'candlestick' },
+                '1Y': { time_frame: '1d', chart_type: 'candlestick' }
+            };
+            chart_settings = period_map[period] || chart_settings;
+        }
+        return chart_settings;
     };
 
     return {
@@ -4011,13 +4005,13 @@ var Purchase_Beta = __webpack_require__(159);
 var TickDisplay_Beta = __webpack_require__(160);
 var updateWarmChart = __webpack_require__(24).updateWarmChart;
 var DigitInfo = __webpack_require__(248);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var getActiveTab = __webpack_require__(93).getActiveTab;
 var getActiveTab_Beta = __webpack_require__(93).getActiveTab_Beta;
 var Purchase = __webpack_require__(163);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var TickDisplay = __webpack_require__(120);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBTick = __webpack_require__(112);
 var BinarySocket = __webpack_require__(2);
 var State = __webpack_require__(5).State;
@@ -4049,7 +4043,7 @@ var GetTicks = function () {
                         _callback(response);
                     }
                     if (State.get('is_mb_trading')) {
-                        MBTick.processTickHistory(response);
+                        MBTick.processTickStream(response);
                         return;
                     }
                     if (type === 'tick') {
@@ -4206,8 +4200,8 @@ var toJapanTimeIfNeeded = __webpack_require__(27).toJapanTimeIfNeeded;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
-var addComma = __webpack_require__(11).addComma;
-var formatMoney = __webpack_require__(11).formatMoney;
+var addComma = __webpack_require__(10).addComma;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var ViewPopup = function () {
     'use strict';
@@ -4334,7 +4328,7 @@ var ViewPopup = function () {
         if (final_price) {
             profit_loss = final_price - contract.buy_price;
             percentage = addComma(profit_loss * 100 / contract.buy_price, 2);
-            containerSetText('trade_details_profit_loss', formatMoney(contract.currency, profit_loss) + '<span>(' + (percentage > 0 ? '+' : '') + percentage + '%)</span>', { class: profit_loss >= 0 ? 'profit' : 'loss' });
+            containerSetText('trade_details_profit_loss', formatMoney(contract.currency, profit_loss) + '<span class="percent">(' + (percentage > 0 ? '+' : '') + percentage + '%)</span>', { class: profit_loss >= 0 ? 'profit' : 'loss' });
         } else {
             containerSetText('trade_details_profit_loss', '-', { class: 'loss' });
         }
@@ -5028,7 +5022,7 @@ module.exports = DatePicker;
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var moment = __webpack_require__(7);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var Client = __webpack_require__(3);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
@@ -5197,7 +5191,9 @@ var MBContract = function () {
             $count_down_timer = $duration.find('.remaining-time');
 
             var time_left = parseInt($duration.attr('value').split('_')[1]) - window.time.unix();
-            if (time_left < 120) {
+            if (time_left <= 0) {
+                location.reload();
+            } else if (time_left < 120) {
                 $count_down_timer.addClass('alert');
             }
             var remaining_month_day_string = [];
@@ -5222,9 +5218,7 @@ var MBContract = function () {
             $count_down_timer.text(remaining_month_day_string.join('') + ' ' + remaining_time_string.join(':'));
         });
         current_time_left = parseInt($period.attr('value').split('_')[1]) - window.time.unix();
-        if (current_time_left <= 0) {
-            location.reload();
-        } else if (current_time_left < 120) {
+        if (current_time_left < 120) {
             // make all price buttons inactive if less than 2 minutes remaining
             $('.price-button').addClass('inactive');
         }
@@ -5969,10 +5963,10 @@ module.exports = Scroll;
 
 
 var showChart = __webpack_require__(55).showChart;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var getActiveTab = __webpack_require__(93).getActiveTab;
 var GetTicks = __webpack_require__(56);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var getLanguage = __webpack_require__(17).get;
 var State = __webpack_require__(5).State;
 var Url = __webpack_require__(6);
@@ -6228,7 +6222,7 @@ var localize = __webpack_require__(1).localize;
 var urlParam = __webpack_require__(6).param;
 var showLoadingImage = __webpack_require__(8).showLoadingImage;
 var jpClient = __webpack_require__(9).jpClient;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var GetAppDetails = __webpack_require__(54);
 
 var PortfolioInit = function () {
@@ -6274,14 +6268,14 @@ var PortfolioInit = function () {
 
         var new_class = is_first ? '' : 'new';
         var $div = $('<div/>');
-        $div.append($('<tr/>', { class: 'tr-first ' + new_class + ' ' + data.contract_id, id: data.contract_id }).append($('<td/>', { class: 'ref' }).append($('<span ' + GetAppDetails.showTooltip(data.app_id, oauth_apps[data.app_id]) + ' data-balloon-position="right">' + data.transaction_id + '</span>'))).append($('<td/>', { class: 'payout' }).append($('<strong/>', { text: formatMoney(data.currency, data.payout) }))).append($('<td/>', { class: 'details', text: long_code })).append($('<td/>', { class: 'purchase' }).append($('<strong/>', { text: formatMoney(data.currency, data.buy_price) }))).append($('<td/>', { class: 'indicative' }).append($('<strong/>', { class: 'indicative_price', text: '--.--' }))).append($('<td/>', { class: 'button' }).append($('<button/>', { class: 'button open_contract_details nowrap', contract_id: data.contract_id, text: localize('View') })))).append($('<tr/>', { class: 'tr-desc ' + new_class + ' ' + data.contract_id }).append($('<td/>', { colspan: '6', text: long_code })));
+        $div.append($('<tr/>', { class: 'tr-first ' + new_class + ' ' + data.contract_id, id: data.contract_id }).append($('<td/>', { class: 'ref' }).append($('<span ' + GetAppDetails.showTooltip(data.app_id, oauth_apps[data.app_id]) + ' data-balloon-position="right">' + data.transaction_id + '</span>'))).append($('<td/>', { class: 'payout' }).append($('<strong/>', { html: formatMoney(data.currency, data.payout) }))).append($('<td/>', { class: 'details', text: long_code })).append($('<td/>', { class: 'purchase' }).append($('<strong/>', { html: formatMoney(data.currency, data.buy_price) }))).append($('<td/>', { class: 'indicative' }).append($('<strong/>', { class: 'indicative_price', text: '--.--' }))).append($('<td/>', { class: 'button' }).append($('<button/>', { class: 'button open_contract_details nowrap', contract_id: data.contract_id, text: localize('View') })))).append($('<tr/>', { class: 'tr-desc ' + new_class + ' ' + data.contract_id }).append($('<td/>', { colspan: '6', text: long_code })));
         $('#portfolio-body').prepend($div.html());
     };
 
     var updateBalance = function updateBalance() {
         var $portfolio_balance = $('#portfolio-balance');
         if ($portfolio_balance.length === 0) return;
-        $portfolio_balance.text(Portfolio.getBalance(Client.get('balance'), Client.get('currency')));
+        $portfolio_balance.html(Portfolio.getBalance(Client.get('balance'), Client.get('currency')));
         var $if_balance_zero = $('#if-balance-zero');
         if (Client.get('balance') > 0 || Client.get('is_virtual')) {
             $if_balance_zero.setVisibility(0);
@@ -6371,13 +6365,13 @@ var PortfolioInit = function () {
             removeContract(proposal.contract_id);
         } else {
             if (+proposal.is_valid_to_sell !== 1) {
-                no_resale_html = $('<span/>', { text: localize('Resale not offered') });
+                no_resale_html = $('<span/>', { class: 'message', text: localize('Resale not offered') });
                 $td.addClass('no_resale');
             } else {
                 status_class = values[proposal.contract_id].indicative < old_indicative ? ' price_moved_down' : values[proposal.contract_id].indicative > old_indicative ? ' price_moved_up' : '';
                 $td.removeClass('no_resale');
             }
-            $td.html($('<strong/>', { class: 'indicative_price ' + status_class, text: formatMoney(proposal.currency, values[proposal.contract_id].indicative) }).append(no_resale_html));
+            $td.html($('<strong/>', { class: 'indicative_price ' + status_class, html: formatMoney(proposal.currency, values[proposal.contract_id].indicative) }).append(no_resale_html));
         }
 
         updateFooter();
@@ -6402,8 +6396,8 @@ var PortfolioInit = function () {
     };
 
     var updateFooter = function updateFooter() {
-        $('#cost-of-open-positions').text(formatMoney(currency, Portfolio.getSumPurchase(values)));
-        $('#value-of-open-positions').text(formatMoney(currency, Portfolio.getIndicativeSum(values)));
+        $('#cost-of-open-positions').html(formatMoney(currency, Portfolio.getSumPurchase(values)));
+        $('#value-of-open-positions').html(formatMoney(currency, Portfolio.getIndicativeSum(values)));
     };
 
     var errorMessage = function errorMessage(msg) {
@@ -6816,7 +6810,7 @@ module.exports = MBNotifications;
 
 
 var MBContract = __webpack_require__(72);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(90);
 var BinarySocket = __webpack_require__(2);
 var TradingAnalysis = __webpack_require__(83);
@@ -6827,7 +6821,7 @@ var GTM = __webpack_require__(50);
 var localize = __webpack_require__(1).localize;
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
 var jpClient = __webpack_require__(9).jpClient;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 /*
  * Price object handles all the functions we need to display prices
@@ -7123,12 +7117,13 @@ var commonTrading = __webpack_require__(24);
 var displayPriceMovement = __webpack_require__(23).displayPriceMovement;
 var getStartDateNode = __webpack_require__(23).getStartDateNode;
 var getTradingTimes = __webpack_require__(23).getTradingTimes;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var elementTextContent = __webpack_require__(4).elementTextContent;
+var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
 var isVisible = __webpack_require__(4).isVisible;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 /*
  * Price object handles all the functions we need to display prices
@@ -7295,7 +7290,7 @@ var Price_Beta = function () {
             if (data.display_value) {
                 $('.stake:hidden').show();
                 elementTextContent(stake, localize('Stake') + ': ');
-                elementTextContent(amount, formatMoney(currency.value || currency.getAttribute('value'), data.display_value));
+                elementInnerHtml(amount, formatMoney(currency.value || currency.getAttribute('value'), data.display_value));
                 $('.stake_wrapper:hidden').show();
             } else {
                 $('.stake_wrapper:visible').hide();
@@ -7303,7 +7298,7 @@ var Price_Beta = function () {
 
             if (data.payout) {
                 elementTextContent(payout, localize('Payout') + ': ');
-                elementTextContent(payout_amount, formatMoney(currency.value || currency.getAttribute('value'), +data.payout));
+                elementInnerHtml(payout_amount, formatMoney(currency.value || currency.getAttribute('value'), +data.payout));
                 $('.payout_wrapper:hidden').show();
             } else {
                 $('.payout_wrapper:visible').hide();
@@ -7485,12 +7480,13 @@ var commonTrading = __webpack_require__(24);
 var displayPriceMovement = __webpack_require__(23).displayPriceMovement;
 var getTradingTimes = __webpack_require__(23).getTradingTimes;
 var Contract = __webpack_require__(74);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var elementTextContent = __webpack_require__(4).elementTextContent;
+var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
 var isVisible = __webpack_require__(4).isVisible;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 /*
  * Price object handles all the functions we need to display prices
@@ -7657,7 +7653,7 @@ var Price = function () {
             if (data.display_value) {
                 $('.stake:hidden').show();
                 elementTextContent(stake, localize('Stake') + ': ');
-                elementTextContent(amount, formatMoney(currency.value || currency.getAttribute('value'), data.display_value));
+                elementInnerHtml(amount, formatMoney(currency.value || currency.getAttribute('value'), data.display_value));
                 $('.stake_wrapper:hidden').show();
             } else {
                 $('.stake_wrapper:visible').hide();
@@ -7665,7 +7661,7 @@ var Price = function () {
 
             if (data.payout) {
                 elementTextContent(payout, localize('Payout') + ': ');
-                elementTextContent(payout_amount, formatMoney(currency.value || currency.getAttribute('value'), data.payout));
+                elementInnerHtml(payout_amount, formatMoney(currency.value || currency.getAttribute('value'), data.payout));
                 $('.payout_wrapper:hidden').show();
             } else {
                 $('.payout_wrapper:visible').hide();
@@ -7803,7 +7799,7 @@ module.exports = Price;
 var moment = __webpack_require__(7);
 var localize = __webpack_require__(1).localize;
 var LocalStore = __webpack_require__(5).LocalStore;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var RealityCheckData = function () {
     'use strict';
@@ -8120,7 +8116,7 @@ var State = __webpack_require__(5).State;
 var urlFor = __webpack_require__(6).urlFor;
 var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var makeOption = __webpack_require__(4).makeOption;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 var BinarySocket = __webpack_require__(2);
 __webpack_require__(202);
 
@@ -8553,7 +8549,7 @@ module.exports = TimePicker;
 "use strict";
 
 
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(90);
 var BinarySocket = __webpack_require__(2);
 
@@ -8622,33 +8618,20 @@ var MBTick = function () {
 
     var request = function request(symbol) {
         BinarySocket.send({
-            ticks_history: symbol,
-            style: 'ticks',
-            end: 'latest',
+            ticks: symbol,
             subscribe: 1
-        }, { callback: processTickHistory });
+        }, { callback: processTickStream });
     };
 
-    var processTickHistory = function processTickHistory(response) {
-        if (response.msg_type === 'tick') {
+    var processTickStream = function processTickStream(response) {
+        if (response.msg_type === 'tick' && MBDefaults.get('underlying') === (response.echo_req.ticks || response.echo_req.ticks_history)) {
             if (response.hasOwnProperty('error')) {
                 MBNotifications.show({ text: response.error.message, uid: 'TICK_ERROR' });
                 return;
             }
-            var symbol = MBDefaults.get('underlying');
-            if (response.echo_req.ticks === symbol || response.tick && response.tick.symbol === symbol) {
-                details(response);
-                display();
-            }
-        } else if (response.history && response.history.times && response.history.prices) {
-            for (var i = 0; i < response.history.times.length; i++) {
-                details({
-                    tick: {
-                        epoch: response.history.times[i],
-                        quote: response.history.prices[i]
-                    }
-                });
-            }
+
+            details(response);
+            display();
         }
     };
 
@@ -8674,7 +8657,7 @@ var MBTick = function () {
             });
         },
         displayPriceMovement: displayPriceMovement,
-        processTickHistory: processTickHistory
+        processTickStream: processTickStream
     };
 }();
 
@@ -9061,8 +9044,8 @@ module.exports = TradingTimesUI;
 var moment = __webpack_require__(7);
 var countDecimalPlaces = __webpack_require__(23).countDecimalPlaces;
 var Contract = __webpack_require__(74);
-var Defaults = __webpack_require__(21);
-var Tick = __webpack_require__(34);
+var Defaults = __webpack_require__(22);
+var Tick = __webpack_require__(35);
 var elementTextContent = __webpack_require__(4).elementTextContent;
 var isVisible = __webpack_require__(4).isVisible;
 
@@ -9241,10 +9224,10 @@ module.exports = Barriers;
 
 
 var showChart = __webpack_require__(55).showChart;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var getActiveTab = __webpack_require__(93).getActiveTab_Beta;
 var GetTicks = __webpack_require__(56);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var AssetIndexUI = __webpack_require__(113);
 var TradingTimesUI = __webpack_require__(114);
 var PortfolioInit = __webpack_require__(85);
@@ -9439,8 +9422,8 @@ module.exports = TradingAnalysis_Beta;
 var moment = __webpack_require__(7);
 var Contract_Beta = __webpack_require__(73);
 var countDecimalPlaces = __webpack_require__(23).countDecimalPlaces;
-var Defaults = __webpack_require__(21);
-var Tick = __webpack_require__(34);
+var Defaults = __webpack_require__(22);
+var Tick = __webpack_require__(35);
 var elementTextContent = __webpack_require__(4).elementTextContent;
 var isVisible = __webpack_require__(4).isVisible;
 
@@ -9618,7 +9601,7 @@ var Contract_Beta = __webpack_require__(73);
 var Price_Beta = __webpack_require__(92);
 var commonTrading = __webpack_require__(24);
 var processTradingTimesAnswer = __webpack_require__(23).processTradingTimesAnswer;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
@@ -10051,12 +10034,13 @@ var Barriers = __webpack_require__(115);
 var commonTrading = __webpack_require__(24);
 var commonIndependent = __webpack_require__(23);
 var Contract = __webpack_require__(74);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var Price = __webpack_require__(94);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var elementTextContent = __webpack_require__(4).elementTextContent;
+var dateValueChanged = __webpack_require__(4).dateValueChanged;
 var isVisible = __webpack_require__(4).isVisible;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var toReadableFormat = __webpack_require__(18).toReadableFormat;
@@ -10228,7 +10212,7 @@ var Durations = function () {
         expiry_time_el.setAttribute('data-value', expiry_time);
         Defaults.set('expiry_date', expiry_date_iso);
         Defaults.set('expiry_time', expiry_time);
-        Durations.setTime(expiry_time);
+        setTime(expiry_time);
 
         durationPopulate();
     };
@@ -10305,17 +10289,81 @@ var Durations = function () {
             DatePicker.hide(duration_id);
         }
 
-        if ($('#expiry_date').is(':visible')) {
-            DatePicker.init({
-                selector: '#expiry_date',
-                minDate: 0,
-                maxDate: 364
-            });
-        }
+        changeExpiryTimeType();
 
         validateMinDurationAmount();
         // we need to call it here as for days we need to show absolute barriers
         Barriers.display();
+    };
+
+    var expiryDateOnChange = function expiryDateOnChange($expiry_date) {
+        $expiry_date.off('change').on('change', function () {
+            if (!dateValueChanged(this, 'date')) {
+                return false;
+            }
+            var selected_value = void 0;
+            if ($(this).is('select')) {
+                selected_value = $(this).find('option:selected').attr('data-value');
+                $expiry_date.attr('data-value', selected_value);
+            } else {
+                selected_value = this.getAttribute('data-value');
+            }
+            Durations.selectEndDate(moment(selected_value));
+            return true;
+        });
+    };
+
+    var changeExpiryTimeType = function changeExpiryTimeType() {
+        if (document.getElementById('expiry_type').value === 'endtime') {
+            var $expiry_date = $('#expiry_date');
+            var date_start_val = document.getElementById('date_start').value;
+            var is_now = isNow(date_start_val);
+            if (is_now) {
+                if (!$expiry_date.is('input')) {
+                    $expiry_date.replaceWith($('<input/>', { id: 'expiry_date', type: 'text', readonly: 'readonly', autocomplete: 'off', 'data-value': $expiry_date.attr('data-value') })).val(toReadableFormat($expiry_date.attr('data-value')));
+                    $expiry_date = $('#expiry_date');
+                    expiryDateOnChange($expiry_date);
+                }
+                DatePicker.init({
+                    selector: '#expiry_date',
+                    minDate: 0,
+                    maxDate: 364
+                });
+            } else {
+                var min_date = moment(+date_start_val * 1000);
+                var next_day = moment(+date_start_val * 1000).add(1, 'day');
+                var selected_start_day_index = document.getElementById('date_start').selectedIndex;
+                var max_date = void 0;
+                var start_dates = Contract.startDates();
+                if (start_dates && start_dates.list && start_dates.list.length) {
+                    var start_dates_length = start_dates.list.length;
+                    start_dates.list.some(function (date) {
+                        // for the last day we will add +1 day as we don't know if offered or not we let back-end decide
+                        if (moment(+date.open * 1000).format('dd') === next_day.format('dd') || selected_start_day_index === start_dates_length) {
+                            max_date = next_day;
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+                if (!$expiry_date.is('select')) {
+                    $expiry_date.replaceWith($('<select/>', { id: 'expiry_date', 'data-value': toISOFormat(min_date) }));
+                    $expiry_date = $('#expiry_date');
+                    expiryDateOnChange($expiry_date);
+                } else {
+                    $expiry_date.empty().attr('data-value', toISOFormat(min_date));
+                }
+                appendExpiryDateValues($expiry_date, min_date);
+                if (max_date) {
+                    appendExpiryDateValues($expiry_date, max_date);
+                }
+                selectEndDate(min_date);
+            }
+        }
+    };
+
+    var appendExpiryDateValues = function appendExpiryDateValues($expiry_date, date) {
+        $expiry_date.append($('<option/>', { text: date.format('ddd - DD MMM, YYYY'), 'data-value': toISOFormat(date) }));
     };
 
     var displayExpiryType = function displayExpiryType() {
@@ -10369,33 +10417,89 @@ var Durations = function () {
         target.appendChild(fragment);
     };
 
+    var isNow = function isNow(date_start) {
+        return (date_start || document.getElementById('date_start').value) === 'now';
+    };
+
+    var isSameDay = function isSameDay() {
+        var date_start = document.getElementById('date_start');
+        var date_start_val = date_start.value;
+        // if 'now' is selected, take first option's value
+        if (isNaN(+date_start_val)) {
+            date_start = date_start.options[1];
+            date_start_val = date_start.value;
+        }
+        date_start_val = moment(+date_start_val * 1000);
+        var expiry_date_day = moment(document.getElementById('expiry_date').getAttribute('data-value')).format('ddd');
+        return expiry_date_day === date_start_val.format('ddd');
+    };
+
     var selectEndDate = function selectEndDate(end_date) {
-        var expiry_time = document.getElementById('expiry_time');
+        var expiry_time = document.getElementById('expiry_time_row');
         var end_date_readable = toReadableFormat(end_date);
         var end_date_iso = toISOFormat(end_date);
-        $('#expiry_date').val(end_date_readable).attr('data-value', end_date_iso);
+        var $expiry_date = $('#expiry_date');
+        if ($expiry_date.is('input')) {
+            $expiry_date.val(end_date_readable).attr('data-value', end_date_iso);
+        }
         Defaults.set('expiry_date', end_date_iso);
         if (end_date.isAfter(window.time.format('YYYY-MM-DD HH:mm'), 'day')) {
-            Durations.setTime('');
-            Defaults.remove('expiry_time');
-            expiry_time.hide();
-            Barriers.display();
-            processTradingTimesRequest(end_date_iso);
-        } else {
-            if (!expiry_time.value) {
-                var new_time = moment(window.time).add(5, 'minutes').utc().format('HH:mm');
-                expiry_time.value = new_time;
-                expiry_time.setAttribute('data-value', new_time);
+            if (isNow()) {
+                hideExpiryTime(expiry_time);
+                processTradingTimesRequest(end_date_iso);
+            } else {
+                showExpiryTime(expiry_time);
             }
-            Durations.setTime(expiry_time.value);
-            Defaults.set('expiry_time', Defaults.get('expiry_time') || expiry_time.value);
-            expiry_time.show();
-            Barriers.display();
-            Price.processPriceRequest();
+        } else {
+            showExpiryTime(expiry_time);
         }
     };
 
+    var hideExpiryTime = function hideExpiryTime(expiry_time) {
+        setTime('');
+        Defaults.remove('expiry_time');
+        expiry_time.hide();
+        Barriers.display();
+    };
+
+    var showExpiryTime = function showExpiryTime(expiry_time) {
+        var is_same_day = isSameDay();
+        var expiry_time_val = expiry_time.value;
+        var time_start_val = document.getElementById('time_start').getAttribute('data-value');
+        var new_time = void 0;
+        if (!expiry_time_val) {
+            new_time = moment(window.time);
+            expiry_time_val = new_time.format('HH:mm');
+        }
+        if (!is_same_day && expiry_time_val >= time_start_val) {
+            var time_start = time_start_val.split(':');
+            new_time = moment(window.time).hour(time_start[0]).minute(time_start[1]).add(-10, 'minutes');
+        } else if (is_same_day && expiry_time_val <= time_start_val) {
+            var _time_start = time_start_val.split(':');
+            new_time = moment(window.time).hour(_time_start[0]).minute(_time_start[1]);
+        }
+        if (is_same_day && expiry_time_val < time_start_val) {
+            var time = time_start_val.split(':');
+            new_time = moment(window.time).hour(time[0]).minute(time[1]);
+        }
+        if (new_time) {
+            new_time = new_time.add(5, 'minutes').utc().format('HH:mm');
+            expiry_time.value = new_time;
+            expiry_time.setAttribute('data-value', new_time);
+            setTime(expiry_time.value, 1);
+        }
+        setTime(expiry_time.value);
+        Defaults.set('expiry_time', Defaults.get('expiry_time') || expiry_time.value);
+        expiry_time.show();
+        Barriers.display();
+    };
+
+    var old_date = void 0;
     var processTradingTimesRequest = function processTradingTimesRequest(date) {
+        if (old_date === date) {
+            return;
+        }
+        old_date = date;
         var trading_times = commonIndependent.getTradingTimes();
         if (trading_times.hasOwnProperty(date)) {
             Price.processPriceRequest();
@@ -10430,19 +10534,45 @@ var Durations = function () {
 
         $('#time_start_row').setVisibility(value !== 'now');
         var time_start = document.getElementById('time_start');
-        commonIndependent.checkValidTime(time_start, $date_start_select, Defaults.get('time_start'));
+        if (value === 'now') {
+            time_start.value = '';
+        } else {
+            commonIndependent.checkValidTime(time_start, $date_start_select, Defaults.get('time_start'));
+        }
 
         var make_price_request = 1;
         var $expiry_time = $('#expiry_time');
-        if (value !== 'now' && Defaults.get('expiry_type') === 'endtime') {
+        var el_expiry_date = document.getElementById('expiry_date').getAttribute('data-value');
+        if ((value !== 'now' || moment(el_expiry_date).format('dd') === moment().format('dd')) && Defaults.get('expiry_type') === 'endtime') {
             make_price_request = -1;
             var end_time = moment(parseInt(value) * 1000).add(5, 'minutes').utc();
-            Durations.setTime(commonTrading.timeIsValid($expiry_time) && Defaults.get('expiry_time') ? Defaults.get('expiry_time') : end_time.format('HH:mm'));
-            Durations.selectEndDate(commonTrading.timeIsValid($expiry_time) && Defaults.get('expiry_date') ? moment(Defaults.get('expiry_date')) : end_time);
+            setTime(Defaults.get('expiry_time') ? Defaults.get('expiry_time') : end_time.format('HH:mm'));
+            var expiry_date = Defaults.get('expiry_date') ? moment(Defaults.get('expiry_date')) : '';
+            if (expiry_date) {
+                var date_start = moment(+$date_start_select.val() * 1000);
+                // if chosen end date is not start date or one day after start date, reset its value
+                if (expiry_date.format('ddd') !== date_start.format('ddd') && expiry_date.format('ddd') !== date_start.add(1, 'day').format('ddd')) {
+                    expiry_date = end_time;
+                }
+            }
+            selectEndDate(expiry_date || end_time);
+        } else {
+            hideExpiryTime(document.getElementById('expiry_time_row'));
         }
         commonTrading.timeIsValid($expiry_time);
-        Durations.display();
+        displayDurations();
         return make_price_request;
+    };
+
+    var setTime = function setTime(time, process_new_time) {
+        var $expiry_time = $('#expiry_time');
+        if ($expiry_time.attr('data-value') !== time || $expiry_time.val() !== time || process_new_time) {
+            $expiry_time.val(time).attr('data-value', time);
+            Defaults.set('expiry_time', time);
+            if (commonTrading.timeIsValid($expiry_time)) {
+                Price.processPriceRequest();
+            }
+        }
     };
 
     return {
@@ -10452,15 +10582,15 @@ var Durations = function () {
         selectEndDate: selectEndDate,
         validateMinDurationAmount: validateMinDurationAmount,
         onStartDateChange: onStartDateChange,
-        setTime: function setTime(time) {
-            $('#expiry_time').val(time);Defaults.set('expiry_time', time);
-        },
+        setTime: setTime,
         selectAmount: function selectAmount(a) {
             selected_duration.amount = a;
         },
         selectUnit: function selectUnit(u) {
             selected_duration.unit = u;
-        }
+        },
+        isNow: isNow,
+        expiryDateOnChange: expiryDateOnChange
     };
 }();
 
@@ -10474,7 +10604,7 @@ module.exports = Durations;
 
 
 var moment = __webpack_require__(7);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var updatePurchaseStatus = __webpack_require__(121).updatePurchaseStatus;
 var BinarySocket = __webpack_require__(2);
 var ViewPopupUI = __webpack_require__(96);
@@ -10541,11 +10671,14 @@ var TickDisplay = function () {
         var end_time = parseInt(data.contract_start) + parseInt((number_of_ticks + 2) * 5);
 
         setXIndicators();
-        initializeChart({
-            plot_from: data.previous_tick_epoch * 1000,
-            plot_to: new Date(end_time * 1000).getTime(),
-            minimize: minimize,
-            width: data.width ? data.width : undefined
+        getHighstock(function (Highstock) {
+            Highcharts = Highstock;
+            initializeChart({
+                plot_from: data.previous_tick_epoch * 1000,
+                plot_to: new Date(end_time * 1000).getTime(),
+                minimize: minimize,
+                width: data.width ? data.width : undefined
+            });
         });
     };
 
@@ -10848,40 +10981,36 @@ var TickDisplay = function () {
     };
 
     var updateChart = function updateChart(data, contract) {
-        getHighstock(function (Highstock) {
-            Highcharts = Highstock;
-            subscribe = 'false';
-            if (contract) {
-                tick_underlying = contract.underlying;
-                tick_count = contract.tick_count;
-                tick_longcode = contract.longcode;
-                tick_display_name = contract.display_name;
-                tick_date_start = contract.date_start;
-                absolute_barrier = contract.barrier;
-                tick_shortcode = contract.shortcode;
-                tick_init = '';
-                var request = {
-                    ticks_history: contract.underlying,
-                    start: contract.date_start,
-                    end: 'latest'
-                };
-                if (contract.current_spot_time < contract.date_expiry) {
-                    request.subscribe = 1;
-                    subscribe = 'true';
-                } else {
-                    request.end = contract.date_expiry;
-                }
-                BinarySocket.send(request, { callback: dispatch });
+        subscribe = 'false';
+        if (contract) {
+            tick_underlying = contract.underlying;
+            tick_count = contract.tick_count;
+            tick_longcode = contract.longcode;
+            tick_display_name = contract.display_name;
+            tick_date_start = contract.date_start;
+            absolute_barrier = contract.barrier;
+            tick_shortcode = contract.shortcode;
+            tick_init = '';
+            var request = {
+                ticks_history: contract.underlying,
+                start: contract.date_start,
+                end: 'latest'
+            };
+            if (contract.current_spot_time < contract.date_expiry) {
+                request.subscribe = 1;
+                subscribe = 'true';
             } else {
-                dispatch(data);
+                request.end = contract.date_expiry;
             }
-        });
+            BinarySocket.send(request, { callback: dispatch });
+        } else {
+            dispatch(data);
+        }
     };
 
     return {
         init: initialize,
         updateChart: updateChart,
-        dispatch: dispatch,
         resetSpots: function resetSpots() {
             spots_list = {};
         }
@@ -10899,7 +11028,7 @@ module.exports = TickDisplay;
 
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var updatePurchaseStatus = function updatePurchaseStatus(final_price, pnl, contract_status) {
     $('#contract_purchase_heading').text(localize(contract_status));
@@ -10908,18 +11037,18 @@ var updatePurchaseStatus = function updatePurchaseStatus(final_price, pnl, contr
     var $profit = $('#contract_purchase_profit');
     var currency = Client.get('currency');
 
-    $payout.html($('<div/>', { text: localize('Buy price') }).append($('<p/>', { text: formatMoney(currency, Math.abs(pnl)) })));
-    $cost.html($('<div/>', { text: localize('Final price') }).append($('<p/>', { text: formatMoney(currency, final_price) })));
+    $payout.html($('<div/>', { text: localize('Buy price') }).append($('<p/>', { html: formatMoney(currency, Math.abs(pnl)) })));
+    $cost.html($('<div/>', { text: localize('Final price') }).append($('<p/>', { html: formatMoney(currency, final_price) })));
     if (!final_price) {
-        $profit.html($('<div/>', { text: localize('Loss') }).append($('<p/>', { text: formatMoney(currency, pnl) })));
+        $profit.html($('<div/>', { text: localize('Loss') }).append($('<p/>', { html: formatMoney(currency, pnl) })));
     } else {
-        $profit.html($('<div/>', { text: localize('Profit') }).append($('<p/>', { text: formatMoney(currency, final_price - pnl) })));
+        $profit.html($('<div/>', { text: localize('Profit') }).append($('<p/>', { html: formatMoney(currency, final_price - pnl) })));
         updateContractBalance(Client.get('balance'));
     }
 };
 
 var updateContractBalance = function updateContractBalance(balance) {
-    $('#contract_purchase_balance').text(localize('Account balance:') + ' ' + formatMoney(Client.get('currency'), balance));
+    $('#contract_purchase_balance').html(localize('Account balance:') + ' ' + formatMoney(Client.get('currency'), balance));
 };
 
 module.exports = {
@@ -10935,7 +11064,7 @@ module.exports = {
 
 
 var Client = __webpack_require__(3);
-var Currency = __webpack_require__(11);
+var Currency = __webpack_require__(10);
 
 var SubAccounts = function () {
     'use strict';
@@ -11276,8 +11405,8 @@ module.exports = generateBirthDate;
 
 var localize = __webpack_require__(1).localize;
 var urlForStatic = __webpack_require__(6).urlForStatic;
-var loadCSS = __webpack_require__(300).loadCSS;
-var loadJS = __webpack_require__(301).loadJS;
+var loadCSS = __webpack_require__(301).loadCSS;
+var loadJS = __webpack_require__(302).loadJS;
 
 var DeskWidget = function () {
     var showDeskLink = function showDeskLink(style, selector) {
@@ -11361,7 +11490,7 @@ module.exports = DeskWidget;
 
 var Cookies = __webpack_require__(41);
 var localize = __webpack_require__(1).localize;
-var EnjoyHint = __webpack_require__(299);
+var EnjoyHint = __webpack_require__(300);
 
 /*
  *  This is developed to simplify the usage of enjoyhint (https://github.com/xbsoftware/enjoyhint)
@@ -11691,8 +11820,7 @@ module.exports = GetStarted;
 var BinaryPjax = __webpack_require__(12);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
-var urlFor = __webpack_require__(6).urlFor;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 var BinarySocket = __webpack_require__(2);
 
 var Home = function () {
@@ -11722,7 +11850,7 @@ var Home = function () {
         if (clients_country !== 'my' || /@binary\.com$/.test(req.verify_email)) {
             return true;
         }
-        $('#frm_verify_email').find('div').html($('<p/>', { class: 'notice-msg center-text', html: localize('Sorry, account signup is not available in your country. Please contact <a href="[_1]">customer support</a> for more information.', [urlFor('contact')]) }));
+        $('#frm_verify_email').find('div').html($('<p/>', { class: 'notice-msg center-text', html: localize('Sorry, account signup is not available in your country.') }));
         return false;
     };
 
@@ -11750,7 +11878,7 @@ module.exports = Home;
 
 
 var MBContract = __webpack_require__(72);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(90);
 var MBPrice = __webpack_require__(91);
 var MBSymbols = __webpack_require__(239);
@@ -12144,11 +12272,11 @@ var Durations_Beta = __webpack_require__(118);
 var Price_Beta = __webpack_require__(92);
 var StartDates_Beta = __webpack_require__(246);
 var commonTrading = __webpack_require__(24);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var GetTicks = __webpack_require__(56);
 var Notifications = __webpack_require__(84);
 var Symbols = __webpack_require__(57);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var BinarySocket = __webpack_require__(2);
 var AssetIndexUI = __webpack_require__(113);
 var TradingTimesUI = __webpack_require__(114);
@@ -12426,13 +12554,13 @@ var Contract_Beta = __webpack_require__(73);
 var TickDisplay_Beta = __webpack_require__(160);
 var commonTrading = __webpack_require__(24);
 var Symbols = __webpack_require__(57);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
 var elementTextContent = __webpack_require__(4).elementTextContent;
 var isVisible = __webpack_require__(4).isVisible;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
 /*
@@ -12517,7 +12645,7 @@ var Purchase_Beta = function () {
             commonTrading.labelValue(payout, localize('Payout'), formatMoney(currency, payout_value, 1));
             commonTrading.labelValue(cost, localize('Stake'), formatMoney(currency, cost_value, 1));
 
-            elementTextContent(balance, localize('Account balance:') + ' ' + formatMoney(currency, receipt.balance_after));
+            elementInnerHtml(balance, localize('Account balance:') + ' ' + formatMoney(currency, receipt.balance_after));
 
             if (show_chart) {
                 chart.show();
@@ -12699,7 +12827,7 @@ module.exports = Purchase_Beta;
 
 var moment = __webpack_require__(7);
 var commonTrading = __webpack_require__(24);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var BinarySocket = __webpack_require__(2);
 var ViewPopupUI = __webpack_require__(96);
 var localize = __webpack_require__(1).localize;
@@ -13241,9 +13369,9 @@ module.exports = TickDisplay_Beta;
 "use strict";
 
 
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var State = __webpack_require__(5).State;
-var formatCurrency = __webpack_require__(11).formatCurrency;
+var formatCurrency = __webpack_require__(10).formatCurrency;
 
 /*
  * Handles currency display
@@ -13280,7 +13408,7 @@ var displayCurrencies = function displayCurrencies() {
         target.appendChild(fragment);
         Defaults.set('currency', target.value);
     } else {
-        $('#currency').replaceWith($('<span/>', { id: target.getAttribute('id'), class: target.getAttribute('class'), value: currencies[0], text: formatCurrency(currencies[0]) }));
+        $('#currency').replaceWith($('<span/>', { id: target.getAttribute('id'), class: target.getAttribute('class'), value: currencies[0], html: formatCurrency(currencies[0]) }));
         Defaults.set('currency', currencies[0]);
     }
 };
@@ -13301,18 +13429,19 @@ var TradingAnalysis = __webpack_require__(83);
 var commonTrading = __webpack_require__(24);
 var processTradingTimesAnswer = __webpack_require__(23).processTradingTimesAnswer;
 var Contract = __webpack_require__(74);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var Durations = __webpack_require__(119);
 var GetTicks = __webpack_require__(56);
 var Notifications = __webpack_require__(84);
 var Price = __webpack_require__(94);
 var StartDates = __webpack_require__(252).StartDates;
 var Symbols = __webpack_require__(57);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
+var isCryptocurrency = __webpack_require__(10).isCryptocurrency;
 
 var Process = function () {
     'use strict';
@@ -13472,7 +13601,17 @@ var Process = function () {
         }
 
         var currency = Defaults.get('currency') || document.getElementById('currency').value;
-        if (Defaults.get('amount')) $('#amount').val(Defaults.get('amount'));else Defaults.set('amount', /btc/i.test(currency) ? 0.005 : document.getElementById('amount').value);
+        var is_crypto = isCryptocurrency(currency);
+        var amount = is_crypto ? 'amount_crypto' : 'amount';
+        if (Defaults.get(amount)) {
+            $('#amount').val(Defaults.get(amount));
+        } else if (is_crypto) {
+            var default_crypto_value = 0.005;
+            Defaults.set(amount, default_crypto_value);
+            document.getElementById('amount').value = default_crypto_value;
+        } else {
+            Defaults.set(amount, document.getElementById('amount').value);
+        }
         if (Defaults.get('amount_type')) commonTrading.selectOption(Defaults.get('amount_type'), document.getElementById('amount_type'));else Defaults.set('amount_type', document.getElementById('amount_type').value);
         if (Defaults.get('currency')) commonTrading.selectOption(Defaults.get('currency'), document.getElementById('currency'));
 
@@ -13591,7 +13730,7 @@ module.exports = Process;
 
 var Contract = __webpack_require__(74);
 var Symbols = __webpack_require__(57);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var TickDisplay = __webpack_require__(120);
 var updateValues = __webpack_require__(121);
 var Client = __webpack_require__(3);
@@ -13600,7 +13739,7 @@ var urlFor = __webpack_require__(6).urlFor;
 var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
 var elementTextContent = __webpack_require__(4).elementTextContent;
 var isVisible = __webpack_require__(4).isVisible;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var padLeft = __webpack_require__(18).padLeft;
 
 /*
@@ -13852,7 +13991,7 @@ module.exports = Purchase;
 
 
 var toJapanTimeIfNeeded = __webpack_require__(27).toJapanTimeIfNeeded;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var jpClient = __webpack_require__(9).jpClient;
 
 var Portfolio = function () {
@@ -13959,7 +14098,7 @@ var GTM = __webpack_require__(50);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var urlFor = __webpack_require__(6).urlFor;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var MetaTraderConfig = function () {
     'use strict';
@@ -14067,7 +14206,7 @@ var MetaTraderConfig = function () {
                         resolve(needsRealMessage());
                     } else if (types_info[acc_type].account_type === 'financial') {
                         BinarySocket.send({ get_account_status: 1 }).then(function (response_status) {
-                            resolve($.inArray('authenticated', response_status.get_account_status.status) === -1 ? $('#msg_authenticate').html() : '');
+                            resolve(+response_status.get_account_status.prompt_client_to_authenticate ? $('#msg_authenticate').html() : '');
                         });
                     } else {
                         resolve();
@@ -14662,7 +14801,7 @@ var BinaryLoader = function () {
         }
 
         if (!isStorageSupported(localStorage) || !isStorageSupported(sessionStorage)) {
-            Header.displayNotification(localize('[_1] requires your browser\'s web storage to be enabled in order to function properly. Please enable it or exit private browsing mode.', 'Binary.com'), true, 'STORAGE_NOT_SUPPORTED');
+            Header.displayNotification(localize('[_1] requires your browser\'s web storage to be enabled in order to function properly. Please enable it or exit private browsing mode.', ['Binary.com']), true, 'STORAGE_NOT_SUPPORTED');
             $('#btn_login').addClass('button-disabled');
         }
 
@@ -18036,9 +18175,10 @@ var VirtualAccOpening = __webpack_require__(289);
 var ResetPassword = __webpack_require__(292);
 var SetCurrency = __webpack_require__(293);
 var TNCApproval = __webpack_require__(168);
+var TelegramBot = __webpack_require__(294);
 
 var CashierJP = __webpack_require__(169);
-var KnowledgeTest = __webpack_require__(296);
+var KnowledgeTest = __webpack_require__(297);
 
 /* eslint-disable max-len */
 var pages_config = {
@@ -18105,7 +18245,8 @@ var pages_config = {
     'volidx-markets': { module: StaticPages.VolidxMarkets },
     'why-us': { module: WhyUs },
     'why-us-jp': { module: WhyUs },
-    'withdraw-jp': { module: CashierJP.Withdraw, is_authenticated: true, only_real: true }
+    'withdraw-jp': { module: CashierJP.Withdraw, is_authenticated: true, only_real: true },
+    'telegram-bot': { module: TelegramBot, is_authenticated: true }
 };
 /* eslint-enable max-len */
 
@@ -18250,7 +18391,7 @@ module.exports = LoggedInHandler;
 
 
 var Client = __webpack_require__(3);
-__webpack_require__(302);
+__webpack_require__(303);
 
 var Menu = function () {
     'use strict';
@@ -18390,8 +18531,8 @@ var scrollToTop = __webpack_require__(82).scrollToTop;
 var TrafficSource = __webpack_require__(154);
 var BinarySocket = __webpack_require__(2);
 var RealityCheck = __webpack_require__(290);
-var AffiliatePopup = __webpack_require__(295);
-var PushNotification = __webpack_require__(303);
+var AffiliatePopup = __webpack_require__(296);
+var PushNotification = __webpack_require__(304);
 __webpack_require__(171);
 __webpack_require__(172);
 
@@ -19317,16 +19458,16 @@ var VideoFacility = function () {
             if (response.error) {
                 $('#error_message').setVisibility(1).text(response.error.message);
             } else {
-                var status = response.get_account_status.status;
-                if (/authenticated/.test(status)) {
-                    BinaryPjax.load(defaultRedirectUrl());
-                } else {
+                var should_authenticate = +response.get_account_status.prompt_client_to_authenticate;
+                if (should_authenticate) {
                     DeskWidget.showDeskLink('', '#facility_content');
                     if (!Client.isAccountOfType('financial')) {
                         $('#not_authenticated').setVisibility(1);
                     }
                     $('.msg_authenticate').setVisibility(1);
                     $('#generated_token').text(Client.get('token').slice(-4));
+                } else {
+                    BinaryPjax.load(defaultRedirectUrl());
                 }
             }
         });
@@ -19379,7 +19520,7 @@ module.exports = WhyUs;
 var BinarySocket = __webpack_require__(2);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var AccountTransfer = function () {
     'use strict';
@@ -19519,7 +19660,7 @@ var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var urlFor = __webpack_require__(6).urlFor;
 var jpClient = __webpack_require__(9).jpClient;
 var jpResidence = __webpack_require__(9).jpResidence;
-var isCryptocurrency = __webpack_require__(11).isCryptocurrency;
+var isCryptocurrency = __webpack_require__(10).isCryptocurrency;
 
 var Cashier = function () {
     'use strict';
@@ -19595,7 +19736,7 @@ var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var urlFor = __webpack_require__(6).urlFor;
 var template = __webpack_require__(8).template;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var DepositWithdraw = function () {
     'use strict';
@@ -19942,7 +20083,7 @@ module.exports = PaymentAgentList;
 var BinarySocket = __webpack_require__(2);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var PaymentAgentWithdraw = function () {
     'use strict';
@@ -19977,8 +20118,10 @@ var PaymentAgentWithdraw = function () {
                 insertListOption($ddl_agents, pa_list[i].name, pa_list[i].paymentagent_loginid);
             }
             setActiveView(view_ids.form);
+            var currency = Client.get('currency');
             var form_id = '#' + $(view_ids.form).find('form').attr('id');
-            FormManager.init(form_id, [{ selector: field_ids.ddl_agents, validations: ['req'], request_field: 'paymentagent_loginid' }, { selector: field_ids.txt_amount, validations: ['req', ['number', { type: 'float', decimals: '1, 2', min: 10, max: 2000 }]], request_field: 'amount' }, { selector: field_ids.txt_desc, validations: ['general'], request_field: 'description' }, { selector: field_ids.verification_code, validations: ['req', 'email_token'] }, { request_field: 'currency', value: 'USD' }, { request_field: 'paymentagent_withdraw', value: 1 }, { request_field: 'dry_run', value: 1 }]);
+            $(form_id).find('label[for="txtAmount"]').text(localize('Amount') + ' ' + currency);
+            FormManager.init(form_id, [{ selector: field_ids.ddl_agents, validations: ['req'], request_field: 'paymentagent_loginid' }, { selector: field_ids.txt_amount, validations: ['req', ['number', { type: 'float', decimals: '1, 2', min: 10, max: 2000 }]], request_field: 'amount' }, { selector: field_ids.txt_desc, validations: ['general'], request_field: 'description' }, { selector: field_ids.verification_code, validations: ['req', 'email_token'] }, { request_field: 'currency', value: currency }, { request_field: 'paymentagent_withdraw', value: 1 }, { request_field: 'dry_run', value: 1 }]);
 
             FormManager.handleSubmit({
                 form_selector: form_id,
@@ -20097,11 +20240,11 @@ module.exports = PaymentAgentWithdraw;
 
 
 var MBContract = __webpack_require__(72);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var jpClient = __webpack_require__(9).jpClient;
-var formatCurrency = __webpack_require__(11).formatCurrency;
+var formatCurrency = __webpack_require__(10).formatCurrency;
 
 /*
  * Handles currency display
@@ -20126,7 +20269,7 @@ var MBDisplayCurrencies = function MBDisplayCurrencies() {
         def_value = def_curr && currencies.indexOf(def_curr) >= 0 ? def_curr : currencies[0];
         if (currencies.length > 1) {
             currencies.forEach(function (currency) {
-                $list.append($('<div/>', { value: currency, text: formatCurrency(currency) }));
+                $list.append($('<div/>', { value: currency, html: formatCurrency(currency) }));
                 if (def_value === currency) {
                     MBContract.setCurrentItem($currency, currency);
                 }
@@ -20158,7 +20301,7 @@ module.exports = MBDisplayCurrencies;
 
 
 var MBContract = __webpack_require__(72);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(90);
 var MBPrice = __webpack_require__(91);
 var MBProcess = __webpack_require__(157);
@@ -20167,7 +20310,7 @@ var TradingAnalysis = __webpack_require__(83);
 var debounce = __webpack_require__(24).debounce;
 var localize = __webpack_require__(1).localize;
 var jpClient = __webpack_require__(9).jpClient;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 /*
  * TradingEvents object contains all the event handler function required for
@@ -20260,7 +20403,7 @@ var MBTradingEvents = function () {
         var jp_client = jpClient();
         if ($payout.length) {
             var appendActualPayout = function appendActualPayout(payout) {
-                $payout.find('.current').append($('<div/>', { class: 'hint', text: localize('Payout') }).append($('<span/>', { id: 'actual_payout', text: formatMoney('JPY', payout * 1000) })));
+                $payout.find('.current').append($('<div/>', { class: 'hint', text: localize('Payout') }).append($('<span/>', { id: 'actual_payout', html: formatMoney('JPY', payout * 1000) })));
             };
             var old_value = jp_client ? 1 : 10;
             if (!$payout.attr('value')) {
@@ -20437,7 +20580,7 @@ module.exports = MBSymbols;
 
 var MBContract = __webpack_require__(72);
 var MBDisplayCurrencies = __webpack_require__(237);
-var MBDefaults = __webpack_require__(37);
+var MBDefaults = __webpack_require__(34);
 var MBTradingEvents = __webpack_require__(238);
 var MBPrice = __webpack_require__(91);
 var MBProcess = __webpack_require__(157);
@@ -20462,9 +20605,11 @@ var MBTradePage = function () {
             MBTradingEvents.init();
         }
 
-        BinarySocket.send({ payout_currencies: 1 }).then(function () {
-            MBDisplayCurrencies();
-            MBProcess.getSymbols();
+        BinarySocket.wait('authorize').then(function () {
+            BinarySocket.send({ payout_currencies: 1 }).then(function () {
+                MBDisplayCurrencies();
+                MBProcess.getSymbols();
+            });
         });
 
         $('#tab_portfolio').find('a').text(localize('Portfolio'));
@@ -20645,7 +20790,7 @@ module.exports = TradingTimes;
 
 
 var BinarySocket = __webpack_require__(2);
-var updateBalance = __webpack_require__(294);
+var updateBalance = __webpack_require__(295);
 var Client = __webpack_require__(3);
 var Clock = __webpack_require__(27);
 var GTM = __webpack_require__(50);
@@ -20653,7 +20798,7 @@ var Header = __webpack_require__(45);
 var Login = __webpack_require__(69);
 var State = __webpack_require__(5).State;
 var getPropertyValue = __webpack_require__(8).getPropertyValue;
-var setCurrencies = __webpack_require__(11).setCurrencies;
+var setCurrencies = __webpack_require__(10).setCurrencies;
 var SessionDurationLimit = __webpack_require__(219);
 
 var BinarySocketGeneral = function () {
@@ -21064,9 +21209,9 @@ var Price_Beta = __webpack_require__(92);
 var Process_Beta = __webpack_require__(158);
 var Purchase_Beta = __webpack_require__(159);
 var setChart = __webpack_require__(55).setChart;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var GetTicks = __webpack_require__(56);
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var commonTrading = __webpack_require__(24);
 var getStartDateNode = __webpack_require__(23).getStartDateNode;
 var Notifications = __webpack_require__(84);
@@ -21075,7 +21220,7 @@ var BinaryPjax = __webpack_require__(12);
 var GTM = __webpack_require__(50);
 var dateValueChanged = __webpack_require__(4).dateValueChanged;
 var isVisible = __webpack_require__(4).isVisible;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var onlyNumericOnKeypress = __webpack_require__(110);
 var TimePicker = __webpack_require__(111);
 
@@ -21496,7 +21641,7 @@ var moment = __webpack_require__(7);
 var Contract_Beta = __webpack_require__(73);
 var Durations_Beta = __webpack_require__(118);
 var getStartDateNode = __webpack_require__(23).getStartDateNode;
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 
@@ -21618,7 +21763,7 @@ var Process_Beta = __webpack_require__(158);
 var commonTrading = __webpack_require__(24);
 var cleanupChart = __webpack_require__(55).cleanupChart;
 var displayCurrencies = __webpack_require__(161);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var BinarySocket = __webpack_require__(2);
 var PortfolioInit = __webpack_require__(85);
 var ViewPopup = __webpack_require__(58);
@@ -21626,7 +21771,7 @@ var BinaryPjax = __webpack_require__(12);
 var State = __webpack_require__(5).State;
 var jpClient = __webpack_require__(9).jpClient;
 var Guide = __webpack_require__(153);
-var ResizeSensor = __webpack_require__(304);
+var ResizeSensor = __webpack_require__(305);
 
 var TradePage_Beta = function () {
     'use strict';
@@ -21647,9 +21792,11 @@ var TradePage_Beta = function () {
             TradingEvents_Beta.init();
         }
 
-        BinarySocket.send({ payout_currencies: 1 }).then(function () {
-            displayCurrencies();
-            Process_Beta.processActiveSymbols_Beta();
+        BinarySocket.wait('authorize').then(function () {
+            BinarySocket.send({ payout_currencies: 1 }).then(function () {
+                displayCurrencies();
+                Process_Beta.processActiveSymbols_Beta();
+            });
         });
 
         if (document.getElementById('websocket_form')) {
@@ -22100,8 +22247,8 @@ module.exports = DigitInfo;
 
 var HighchartUI = __webpack_require__(250);
 var MBContract = __webpack_require__(72);
-var MBDefaults = __webpack_require__(37);
-var Defaults = __webpack_require__(21);
+var MBDefaults = __webpack_require__(34);
+var Defaults = __webpack_require__(22);
 var GetTicks = __webpack_require__(56);
 var BinarySocket = __webpack_require__(2);
 var ViewPopupUI = __webpack_require__(96);
@@ -22109,7 +22256,7 @@ var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
 var getHighstock = __webpack_require__(4).requireHighstock;
 var jpClient = __webpack_require__(9).jpClient;
-var addComma = __webpack_require__(11).addComma;
+var addComma = __webpack_require__(10).addComma;
 
 var Highchart = function () {
     var chart = void 0,
@@ -22888,7 +23035,7 @@ var moment = __webpack_require__(7);
 var TradingAnalysis = __webpack_require__(83);
 var Barriers = __webpack_require__(115);
 var commonTrading = __webpack_require__(24);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var Durations = __webpack_require__(119);
 var GetTicks = __webpack_require__(56);
 var Notifications = __webpack_require__(84);
@@ -22897,13 +23044,14 @@ var Process = __webpack_require__(162);
 var Purchase = __webpack_require__(163);
 var getMinMaxTime = __webpack_require__(23).getMinMaxTime;
 var getStartDateNode = __webpack_require__(23).getStartDateNode;
-var Tick = __webpack_require__(34);
+var Tick = __webpack_require__(35);
 var BinarySocket = __webpack_require__(2);
 var BinaryPjax = __webpack_require__(12);
 var GTM = __webpack_require__(50);
 var dateValueChanged = __webpack_require__(4).dateValueChanged;
 var isVisible = __webpack_require__(4).isVisible;
-var getDecimalPlaces = __webpack_require__(11).getDecimalPlaces;
+var getDecimalPlaces = __webpack_require__(10).getDecimalPlaces;
+var isCryptocurrency = __webpack_require__(10).isCryptocurrency;
 var onlyNumericOnKeypress = __webpack_require__(110);
 var TimePicker = __webpack_require__(111);
 
@@ -22919,6 +23067,39 @@ var TradingEvents = function () {
     'use strict';
 
     var initiate = function initiate() {
+        var attachTimePicker = function attachTimePicker(selector, checkEndTime) {
+            var minTime = window.time || moment.utc();
+            var maxTime = void 0;
+            if ($date_start && $date_start.val()) {
+                var minMaxTime = getMinMaxTime($date_start, minTime);
+                minTime = minMaxTime.minTime;
+                maxTime = minMaxTime.maxTime;
+                var date_start_val = $date_start.val();
+                // if date_start is not 'now'
+                if (checkEndTime && !Durations.isNow(date_start_val)) {
+                    var $expiry_date = $('#expiry_date');
+                    var endTime = moment($expiry_date.attr('data-value'));
+                    var start_time_val = $time_start.val().split(':');
+                    var compare = isNaN(+date_start_val) ? window.time : moment(+date_start_val * 1000);
+                    // if expiry time is one day after start time, minTime can be 0
+                    // but maxTime should be 24 hours after start time, so exact value of start time
+                    if (endTime.isAfter(compare.format('YYYY-MM-DD HH:mm'), 'day')) {
+                        minTime = 0;
+                        maxTime = endTime.utc().hour(start_time_val[0]).minute(start_time_val[1]);
+                    } else {
+                        // if expiry time is same as today, min time should be the selected start time
+                        minTime = minTime.hour(start_time_val[0]).minute(start_time_val[1]);
+                    }
+                }
+            }
+            var initObj = {
+                selector: selector,
+                minTime: minTime,
+                maxTime: maxTime || null
+            };
+            TimePicker.init(initObj);
+        };
+
         /*
          * attach event to market list, so when client change market we need to update undelryings
          * and request for new Contract details to populate the form and request price accordingly
@@ -23068,36 +23249,24 @@ var TradingEvents = function () {
         if (end_date_element) {
             // need to use jquery as datepicker is used, if we switch to some other
             // datepicker we can move back to javascript
-            $('#expiry_date').on('change input', function () {
-                if (!dateValueChanged(this, 'date')) {
-                    return false;
-                }
-                if (commonTrading.timeIsValid($('#expiry_date'))) {
-                    Durations.selectEndDate(moment(this.getAttribute('data-value')));
-                }
-                return true;
-            });
+            Durations.expiryDateOnChange($('#expiry_date'));
         }
 
         var end_time_element = document.getElementById('expiry_time');
+        var $expiry_time = $('#expiry_time');
         if (end_time_element) {
             /*
              * attach datepicker and timepicker to end time durations
              * have to use jquery
              */
             attachTimePicker('#expiry_time');
-            $('#expiry_time').on('focus click', function () {
-                attachTimePicker('#expiry_time');
-            }).on('keypress', function (ev) {
-                onlyNumericOnKeypress(ev, [58]);
+            $expiry_time.on('focus click', function () {
+                attachTimePicker('#expiry_time', 1);
             }).on('change input blur', function () {
                 if (!dateValueChanged(this, 'time')) {
                     return false;
                 }
-                if (commonTrading.timeIsValid($('#expiry_time'))) {
-                    Durations.setTime(end_time_element.value);
-                    Price.processPriceRequest();
-                }
+                Durations.setTime(end_time_element.value, 1);
                 return true;
             });
         }
@@ -23111,10 +23280,11 @@ var TradingEvents = function () {
 
             amount_element.addEventListener('input', commonTrading.debounce(function (e) {
                 e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+                var currency = Defaults.get('currency');
                 if (isStandardFloat(e.target.value)) {
-                    e.target.value = parseFloat(e.target.value).toFixed(getDecimalPlaces(Defaults.get('currency')));
+                    e.target.value = parseFloat(e.target.value).toFixed(getDecimalPlaces(currency));
                 }
-                Defaults.set('amount', e.target.value);
+                Defaults.set('amount' + (isCryptocurrency(currency) ? '_crypto' : ''), e.target.value);
                 Price.processPriceRequest();
                 commonTrading.submitForm(document.getElementById('websocket_form'));
             }));
@@ -23124,9 +23294,9 @@ var TradingEvents = function () {
         var initTimePicker = function initTimePicker() {
             if (timepicker_initialized) return;
             timepicker_initialized = true;
-            attachTimePicker('#time_start', $date_start);
-            $('#time_start').on('focus click', function () {
-                attachTimePicker('#time_start', $date_start);
+            attachTimePicker('#time_start');
+            $time_start.on('focus click', function () {
+                attachTimePicker('#time_start');
             }).on('change input blur', function () {
                 if (!dateValueChanged(this, 'time')) {
                     return false;
@@ -23156,6 +23326,7 @@ var TradingEvents = function () {
 
         var time_start_element = document.getElementById('time_start');
         var $date_start = $('#date_start');
+        var $time_start = $('#time_start');
         if (time_start_element && date_start_element.value !== 'now') {
             initTimePicker();
         }
@@ -23202,7 +23373,10 @@ var TradingEvents = function () {
         var currency_element = document.getElementById('currency');
         if (currency_element) {
             currency_element.addEventListener('change', function (e) {
-                Defaults.set('currency', e.target.value);
+                var currency = e.target.value;
+                Defaults.set('currency', currency);
+                var amount = isCryptocurrency(currency) ? 'amount_crypto' : 'amount';
+                if (Defaults.get(amount)) $('#amount').val(Defaults.get(amount));
                 Price.processPriceRequest();
             });
         }
@@ -23326,21 +23500,6 @@ var TradingEvents = function () {
         }
     };
 
-    var attachTimePicker = function attachTimePicker(selector, $setMinMaxSelector) {
-        var minTime = window.time ? window.time : moment.utc();
-        var maxTime = void 0;
-        if ($setMinMaxSelector) {
-            minTime = getMinMaxTime($setMinMaxSelector, minTime).minTime;
-            maxTime = getMinMaxTime($setMinMaxSelector, minTime).maxTime;
-        }
-        var initObj = {
-            selector: selector,
-            minTime: minTime,
-            maxTime: maxTime || null
-        };
-        TimePicker.init(initObj);
-    };
-
     return {
         init: initiate
     };
@@ -23358,7 +23517,7 @@ module.exports = TradingEvents;
 var moment = __webpack_require__(7);
 var getStartDateNode = __webpack_require__(23).getStartDateNode;
 var Contract = __webpack_require__(74);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var Durations = __webpack_require__(119);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
@@ -23431,7 +23590,7 @@ var StartDates = function () {
                     }
 
                     a = moment(Math.ceil(+a / rounding) * rounding).utc();
-                    day = a.format('ddd');
+                    day = a.format('ddd - DD MMM, YYYY');
                     $duplicated_option = $(fragment).find('option:contains(' + day + ')');
                     duplicated_length = $duplicated_option.length;
                     if (duplicated_length && !new RegExp(localize('Session')).test($duplicated_option.text())) {
@@ -23492,7 +23651,7 @@ var TradingAnalysis = __webpack_require__(83);
 var commonTrading = __webpack_require__(24);
 var cleanupChart = __webpack_require__(55).cleanupChart;
 var displayCurrencies = __webpack_require__(161);
-var Defaults = __webpack_require__(21);
+var Defaults = __webpack_require__(22);
 var TradingEvents = __webpack_require__(251);
 var Price = __webpack_require__(94);
 var Process = __webpack_require__(162);
@@ -23528,9 +23687,11 @@ var TradePage = function () {
             TradingEvents.init();
         }
 
-        BinarySocket.send({ payout_currencies: 1 }).then(function () {
-            displayCurrencies();
-            Process.processActiveSymbols();
+        BinarySocket.wait('authorize').then(function () {
+            BinarySocket.send({ payout_currencies: 1 }).then(function () {
+                displayCurrencies();
+                Process.processActiveSymbols();
+            });
         });
 
         if (document.getElementById('websocket_form')) {
@@ -23601,19 +23762,17 @@ var Authenticate = function () {
             if (response.error) {
                 $('#error_message').setVisibility(1).text(response.error.message);
             } else {
-                var status = response.get_account_status.status;
-                var authenticated = /authenticated/.test(status);
-                var age_verified = /age_verification/.test(status);
-                if (authenticated && age_verified) {
-                    $('#fully_authenticated').setVisibility(1);
-                } else if (!authenticated) {
-                    if (Client.isAccountOfType('financial')) {
-                        $('#not_authenticated_financial').setVisibility(1);
-                    } else {
-                        $('#not_authenticated').setVisibility(1);
+                var get_account_status = response.get_account_status;
+                var should_authenticate = +get_account_status.prompt_client_to_authenticate;
+                if (should_authenticate) {
+                    var status = get_account_status.status;
+                    if (!/authenticated/.test(status)) {
+                        $('#not_authenticated' + (Client.isAccountOfType('financial') ? '_financial' : '')).setVisibility(1);
+                    } else if (!/age_verification/.test(status)) {
+                        $('#needs_age_verification').setVisibility(1);
                     }
-                } else if (!age_verified) {
-                    $('#needs_age_verification').setVisibility(1);
+                } else {
+                    $('#fully_authenticated').setVisibility(1);
                 }
             }
         });
@@ -23637,7 +23796,7 @@ var BinarySocket = __webpack_require__(2);
 var BinaryPjax = __webpack_require__(12);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var ChangePassword = function () {
     'use strict';
@@ -23666,7 +23825,7 @@ var ChangePassword = function () {
 
     var onLoad = function onLoad() {
         BinarySocket.wait('get_account_status').then(function (response) {
-            if (/has_password/.test(response.get_account_status.status)) {
+            if (!/social_signup/.test(response.get_account_status.status)) {
                 init();
             } else {
                 BinaryPjax.load('user/settingsws');
@@ -23693,7 +23852,7 @@ var BinarySocket = __webpack_require__(2);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var PaymentAgentTransfer = function () {
     'use strict';
@@ -23739,7 +23898,8 @@ var PaymentAgentTransfer = function () {
         FormManager.handleSubmit({
             form_selector: form_id,
             fnc_response_handler: responseHandler,
-            fnc_additional_check: additionalCheck
+            fnc_additional_check: additionalCheck,
+            enable_button: 1
         });
 
         $('#amount').on('input change', function () {
@@ -23866,7 +24026,7 @@ var PaymentAgentTransferUI = function () {
     };
 
     var showConfirmation = function showConfirmation() {
-        $confirm_transfer.find('.errorfield').setVisibility(0).end().setVisibility(1);
+        $confirm_transfer.find('#msg_form').setVisibility(0).end().setVisibility(1);
     };
 
     var hideDone = function hideDone() {
@@ -23886,7 +24046,7 @@ var PaymentAgentTransferUI = function () {
     };
 
     var showTransferError = function showTransferError(err) {
-        $confirm_transfer.find('.errorfield').text(localize(err)).setVisibility(1);
+        $confirm_transfer.find('#msg_form').text(localize(err)).setVisibility(1);
     };
 
     var updateFormView = function updateFormView(currency) {
@@ -23939,7 +24099,7 @@ module.exports = PaymentAgentTransferUI;
 var moment = __webpack_require__(7);
 var Client = __webpack_require__(3);
 var jpClient = __webpack_require__(9).jpClient;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var ProfitTable = function () {
     'use strict';
@@ -24130,7 +24290,7 @@ var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var toJapanTimeIfNeeded = __webpack_require__(27).toJapanTimeIfNeeded;
 var jpClient = __webpack_require__(9).jpClient;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var showTooltip = __webpack_require__(54).showTooltip;
 var Table = __webpack_require__(70);
 
@@ -24177,7 +24337,7 @@ var ProfitTableUI = function () {
         var jp_client = jpClient();
         var sub_total_type = total_profit >= 0 ? 'profit' : 'loss';
 
-        $('#pl-day-total').find(' > .pl').text(formatMoney(currency, Number(total_profit), !jp_client)).removeClass('profit loss').addClass(sub_total_type);
+        $('#pl-day-total').find(' > .pl').html(formatMoney(currency, Number(total_profit), !jp_client)).removeClass('profit loss').addClass(sub_total_type);
     };
 
     var createProfitTableRow = function createProfitTableRow(transaction) {
@@ -24262,7 +24422,7 @@ var Settings = function () {
                 $(class_real).not(jpClient() ? '.ja-hide' : '').removeClass(class_hidden);
             }
 
-            if (/has_password/.test(response.get_account_status.status)) {
+            if (!/social_signup/.test(response.get_account_status.status)) {
                 $('#change_password').removeClass(class_hidden);
             }
 
@@ -24290,7 +24450,7 @@ var showLocalTimeOnHover = __webpack_require__(27).showLocalTimeOnHover;
 var localize = __webpack_require__(1).localize;
 var FlexTableUI = __webpack_require__(109);
 var jpClient = __webpack_require__(9).jpClient;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
 var APIToken = function () {
@@ -24636,7 +24796,7 @@ module.exports = ApplicationsUI;
 var BinarySocket = __webpack_require__(2);
 var BinaryPjax = __webpack_require__(12);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var CashierPassword = function () {
     'use strict';
@@ -24852,7 +25012,7 @@ var FinancialAssessment = function () {
             $(form_selector).setVisibility(0);
             $('#msg_main').setVisibility(1);
             BinarySocket.send({ get_account_status: 1 }).then(function (response_status) {
-                if ($.inArray('authenticated', response_status.get_account_status.status) === -1) {
+                if (+response_status.get_account_status.prompt_client_to_authenticate) {
                     $('#msg_authenticate').setVisibility(1);
                 }
             });
@@ -25115,7 +25275,8 @@ var LimitsUI = __webpack_require__(274);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var elementTextContent = __webpack_require__(4).elementTextContent;
-var formatMoney = __webpack_require__(11).formatMoney;
+var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var LimitsInit = function () {
     'use strict';
@@ -25144,7 +25305,7 @@ var LimitsInit = function () {
                 // MX
                 txt_withdraw_lim = 'Your [_1] day withdrawal limit is currently [_2] [_3] (or equivalent in other currency).';
                 txt_withdraw_amt = 'You have already withdrawn the equivalent of [_1] [_2] in aggregate over the last [_3] days.';
-                elementTextContent(el_withdraw_limit, localize(txt_withdraw_lim, [limits.num_of_days, currency, days_limit]));
+                elementInnerHtml(el_withdraw_limit, localize(txt_withdraw_lim, [limits.num_of_days, currency, days_limit]));
                 elementTextContent(el_withdrawn, localize(txt_withdraw_amt, [currency, withdrawn, limits.num_of_days]));
             } else {
                 if (/^(costarica|japan)$/i.test(Client.get('landing_company_shortcode'))) {
@@ -25154,10 +25315,10 @@ var LimitsInit = function () {
                     txt_current_max_withdrawal = 'Therefore your current immediate maximum withdrawal (subject to your account having sufficient funds) is [_1] [_2].';
                     currency = Client.get('currency') || Client.currentLandingCompany().legal_default_currency;
                 }
-                elementTextContent(el_withdraw_limit, localize(txt_withdraw_lim, [currency, days_limit]));
+                elementInnerHtml(el_withdraw_limit, localize(txt_withdraw_lim, [currency, days_limit]));
                 elementTextContent(el_withdrawn, localize(txt_withdraw_amt, [currency, withdrawn]));
             }
-            elementTextContent(el_withdraw_limit_agg, localize(txt_current_max_withdrawal, [currency, remainder]));
+            elementInnerHtml(el_withdraw_limit_agg, localize(txt_current_max_withdrawal, [currency, remainder]));
         }
     };
 
@@ -25190,8 +25351,8 @@ module.exports = LimitsInit;
 var Table = __webpack_require__(70);
 var localize = __webpack_require__(1).localize;
 var Client = __webpack_require__(3);
-var elementTextContent = __webpack_require__(4).elementTextContent;
-var formatMoney = __webpack_require__(11).formatMoney;
+var elementInnerHtml = __webpack_require__(4).elementInnerHtml;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var LimitsUI = function () {
     'use strict';
@@ -25199,7 +25360,7 @@ var LimitsUI = function () {
     var client_limits = '';
 
     var appendRowTable = function appendRowTable(name, turnover_limit, padding, font_weight) {
-        client_limits.append($('<tr/>', { class: 'flex-tr' }).append($('<td/>', { class: 'flex-tr-child', style: 'padding-left: ' + padding + '; font-weight: ' + font_weight + ';', text: localize(name) })).append($('<td/>', { text: turnover_limit })));
+        client_limits.append($('<tr/>', { class: 'flex-tr' }).append($('<td/>', { class: 'flex-tr-child', style: 'padding-left: ' + padding + '; font-weight: ' + font_weight + ';', text: localize(name) })).append($('<td/>', { html: turnover_limit })));
     };
 
     var fillLimitsTable = function fillLimitsTable(limits) {
@@ -25214,10 +25375,10 @@ var LimitsUI = function () {
         var payout = document.getElementById('payout');
         var payout_per = document.getElementById('payout-per-symbol-and-contract-type');
 
-        elementTextContent(open_position, formatMoney(currency, limits.open_positions, 1));
-        elementTextContent(account_balance, formatMoney(currency, limits.account_balance, 1));
-        elementTextContent(payout, formatMoney(currency, limits.payout, 1));
-        elementTextContent(payout_per, formatMoney(currency, limits.payout_per_symbol_and_contract_type, 1));
+        elementInnerHtml(open_position, limits.open_positions);
+        elementInnerHtml(account_balance, formatMoney(currency, limits.account_balance, 1));
+        elementInnerHtml(payout, formatMoney(currency, limits.payout, 1));
+        elementInnerHtml(payout_per, formatMoney(currency, limits.payout_per_symbol_and_contract_type, 1));
 
         var market_specific = limits.market_specific;
         client_limits = $('#client-limits');
@@ -25270,8 +25431,8 @@ var State = __webpack_require__(5).State;
 var urlFor = __webpack_require__(6).urlFor;
 var detectHedging = __webpack_require__(4).detectHedging;
 var makeOption = __webpack_require__(4).makeOption;
-var formatMoney = __webpack_require__(11).formatMoney;
-var FormManager = __webpack_require__(22);
+var formatMoney = __webpack_require__(10).formatMoney;
+var FormManager = __webpack_require__(21);
 var moment = __webpack_require__(7);
 __webpack_require__(202);
 
@@ -25394,7 +25555,7 @@ var PersonalDetails = function () {
                     } else if (/(SELECT|INPUT)/.test($key.prop('nodeName'))) {
                         $key.val(data_key.split(',')).trigger('change');
                     } else if (key !== 'country') {
-                        $key.text(data_key ? localize(data_key) : '-');
+                        $key.html(data_key ? localize(data_key) : '-');
                     }
                 }
             }
@@ -25600,7 +25761,8 @@ var localize = __webpack_require__(1).localize;
 var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var dateValueChanged = __webpack_require__(4).dateValueChanged;
 var jpClient = __webpack_require__(9).jpClient;
-var FormManager = __webpack_require__(22);
+var getDecimalPlaces = __webpack_require__(10).getDecimalPlaces;
+var FormManager = __webpack_require__(21);
 var scrollToHashSection = __webpack_require__(82).scrollToHashSection;
 var DatePicker = __webpack_require__(71);
 var TimePicker = __webpack_require__(111);
@@ -25679,6 +25841,10 @@ var SelfExclusion = function () {
                 options.max = self_exclusion_data[id];
             } else {
                 options.allow_empty = true;
+            }
+            if (!/(session_duration_limit|max_open_bets)/.test(id)) {
+                options.type = 'float';
+                options.decimals = '0, ' + getDecimalPlaces(Client.get('currency'));
             }
             checks.push(['number', options]);
 
@@ -25845,7 +26011,8 @@ var moment = __webpack_require__(7);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var toJapanTimeIfNeeded = __webpack_require__(27).toJapanTimeIfNeeded;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatCurrency = __webpack_require__(10).formatCurrency;
+var formatMoney = __webpack_require__(10).formatMoney;
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
 var Statement = function () {
@@ -25887,7 +26054,7 @@ var Statement = function () {
             // eslint-disable-next-line no-control-regex
             csv = csv.concat(all_data.map(function (data) {
                 return columns.map(function (key) {
-                    return data[key] ? data[key].replace(new RegExp(sep, 'g'), '').replace(new RegExp('\n|<br />', 'g'), ' ') : '';
+                    return data[key] ? data[key].replace(formatCurrency(currency), '¥').replace(new RegExp(sep, 'g'), '').replace(new RegExp('\n|<br />', 'g'), ' ') : '';
                 }).join(sep);
             }));
         }
@@ -25920,6 +26087,7 @@ var addTooltip = __webpack_require__(54).addTooltip;
 var buildOauthApps = __webpack_require__(54).buildOauthApps;
 var dateValueChanged = __webpack_require__(4).dateValueChanged;
 var jpClient = __webpack_require__(9).jpClient;
+var jpResidence = __webpack_require__(9).jpResidence;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var DatePicker = __webpack_require__(71);
 
@@ -26000,7 +26168,7 @@ var StatementInit = function () {
                 $('#statement-table').find('tbody').append($('<tr/>', { class: 'flex-tr' }).append($('<td/>', { colspan: 7 }).append($('<p/>', { class: 'notice-msg center-text', text: localize('Your account has no trading activity.') }))));
             } else {
                 $('#util_row').setVisibility(1);
-                if (getLanguage() === 'JA') {
+                if (getLanguage() === 'JA' && jpResidence()) {
                     $('#download_csv').setVisibility(1).find('a').unbind('click').click(function () {
                         StatementUI.exportCSV();
                     });
@@ -26411,7 +26579,8 @@ var Accounts = function () {
                         Client.processNewAccount({
                             email: Client.get('email'),
                             loginid: new_account.client_id,
-                            token: new_account.oauth_token
+                            token: new_account.oauth_token,
+                            redirect_url: urlFor('user/set-currency') + '#new_account'
                         });
                     }
                 });
@@ -26444,7 +26613,7 @@ var ViewPopup = __webpack_require__(58);
 var BinarySocket = __webpack_require__(2);
 var localize = __webpack_require__(1).localize;
 var showLoadingImage = __webpack_require__(8).showLoadingImage;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 
 var ICOPortfolio = function () {
     'use strict';
@@ -26478,7 +26647,7 @@ var ICOPortfolio = function () {
         var action = / successful/i.test(long_code) ? 'claim' : 'cancel';
         var shortcode = data.shortcode.split('_');
         var $div = $('<div/>');
-        $div.append($('<tr/>', { class: 'tr-first ' + new_class + ' ' + data.contract_id, id: data.contract_id }).append($('<td/>', { class: 'ref', text: data.transaction_id })).append($('<td/>', { class: 'payout' }).append($('<strong/>', { text: shortcode[2] }))).append($('<td/>', { class: 'bid' }).append($('<strong/>', { text: formatMoney(data.currency, shortcode[1]) }))).append($('<td/>', { class: 'purchase' }).append($('<strong/>', { text: formatMoney(data.currency, data.buy_price) }))).append($('<td/>', { class: 'details', text: long_code })).append($('<td/>', { class: 'button' }).append($('<button/>', { class: 'button ' + button_class + ' nowrap', contract_id: data.contract_id, action: action, text: localize(status) })))).append($('<tr/>', { class: 'tr-desc ' + new_class + ' ' + data.contract_id }).append($('<td/>', { colspan: '6', text: long_code })));
+        $div.append($('<tr/>', { class: 'tr-first ' + new_class + ' ' + data.contract_id, id: data.contract_id }).append($('<td/>', { class: 'ref', text: data.transaction_id })).append($('<td/>', { class: 'payout' }).append($('<strong/>', { text: shortcode[2] }))).append($('<td/>', { class: 'bid' }).append($('<strong/>', { html: formatMoney(data.currency, shortcode[1]) }))).append($('<td/>', { class: 'purchase' }).append($('<strong/>', { html: formatMoney(data.currency, data.buy_price) }))).append($('<td/>', { class: 'details', text: long_code })).append($('<td/>', { class: 'button' }).append($('<button/>', { class: 'button ' + button_class + ' nowrap', contract_id: data.contract_id, action: action, text: localize(status) })))).append($('<tr/>', { class: 'tr-desc ' + new_class + ' ' + data.contract_id }).append($('<td/>', { colspan: '6', text: long_code })));
         $('#portfolio-body').prepend($div.html());
     };
 
@@ -26594,10 +26763,10 @@ var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var jpClient = __webpack_require__(9).jpClient;
-var getDecimalPlaces = __webpack_require__(11).getDecimalPlaces;
-var formatMoney = __webpack_require__(11).formatMoney;
+var getDecimalPlaces = __webpack_require__(10).getDecimalPlaces;
+var formatMoney = __webpack_require__(10).formatMoney;
 var onlyNumericOnKeypress = __webpack_require__(110);
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var ICOSubscribe = function () {
     var form_id = '#frm_ico_bid';
@@ -26631,7 +26800,7 @@ var ICOSubscribe = function () {
             if (currency) {
                 $('.currency').text(currency);
             } else {
-                $(form_id).find('.topMenuBalance').text(formatMoney(currency, 0));
+                $(form_id).find('.topMenuBalance').html(formatMoney(currency, 0));
             }
             $duration = $('#duration');
             $price = $('#price');
@@ -26669,7 +26838,7 @@ var ICOSubscribe = function () {
         if (duration_val && price_val) {
             total = +duration_val * +price_val;
         }
-        $total.text(formatMoney(currency, total));
+        $total.html(formatMoney(currency, total));
     };
 
     var handleResponse = function handleResponse(response) {
@@ -26703,7 +26872,7 @@ module.exports = ICOSubscribe;
 
 var BinaryPjax = __webpack_require__(12);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var LostPassword = function () {
     'use strict';
@@ -26741,7 +26910,7 @@ module.exports = LostPassword;
 
 var Client = __webpack_require__(3);
 var showLoadingImage = __webpack_require__(8).showLoadingImage;
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var Validation = __webpack_require__(89);
 var MetaTraderConfig = __webpack_require__(166);
 
@@ -26845,7 +27014,7 @@ var MetaTraderUI = function () {
         $acc_item.find('.mt-type').text('' + types_info[acc_type].title);
         if (types_info[acc_type].account_info) {
             $acc_item.find('.mt-login').text(types_info[acc_type].account_info.login);
-            $acc_item.find('.mt-balance').text(formatMoney('USD', +types_info[acc_type].account_info.balance));
+            $acc_item.find('.mt-balance').html(formatMoney('USD', +types_info[acc_type].account_info.balance));
             $acc_item.find('.mt-new').setVisibility(0);
         } else {
             $acc_item.find('.mt-new').setVisibility(1);
@@ -26862,7 +27031,7 @@ var MetaTraderUI = function () {
             $detail.find('.acc-info div[data]').map(function () {
                 var key = $(this).attr('data');
                 var info = types_info[acc_type].account_info[key];
-                $(this).text(key === 'balance' ? formatMoney('USD', +info) : key === 'leverage' ? '1:' + info : info);
+                $(this).html(key === 'balance' ? formatMoney('USD', +info) : key === 'leverage' ? '1:' + info : info);
             });
             $detail.find('.act_deposit, .act_withdrawal').setVisibility(!types_info[acc_type].is_demo);
             $detail.find('.has-account').setVisibility(1);
@@ -27005,7 +27174,7 @@ var Client = __webpack_require__(3);
 var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var isEmptyObject = __webpack_require__(8).isEmptyObject;
 var AccountOpening = __webpack_require__(108);
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 var toISOFormat = __webpack_require__(18).toISOFormat;
 
 var FinancialAccOpening = function () {
@@ -27102,7 +27271,7 @@ var BinaryPjax = __webpack_require__(12);
 var Client = __webpack_require__(3);
 var AccountOpening = __webpack_require__(108);
 var detectHedging = __webpack_require__(4).detectHedging;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var JapanAccOpening = function () {
     'use strict';
@@ -27149,7 +27318,7 @@ var BinaryPjax = __webpack_require__(12);
 var Client = __webpack_require__(3);
 var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
 var AccountOpening = __webpack_require__(108);
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var RealAccOpening = function () {
     'use strict';
@@ -27199,7 +27368,7 @@ var urlFor = __webpack_require__(6).urlFor;
 var getPropertyValue = __webpack_require__(8).getPropertyValue;
 var makeOption = __webpack_require__(4).makeOption;
 var jpClient = __webpack_require__(9).jpClient;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 var TrafficSource = __webpack_require__(154);
 
 var VirtualAccOpening = function () {
@@ -27409,7 +27578,7 @@ var RealityCheckData = __webpack_require__(95);
 var BinarySocket = __webpack_require__(2);
 var showLocalTimeOnHover = __webpack_require__(27).showLocalTimeOnHover;
 var urlFor = __webpack_require__(6).urlFor;
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 __webpack_require__(171);
 __webpack_require__(172);
 
@@ -27458,12 +27627,12 @@ var RealityCheckUI = function () {
 
         $('#loginid').text(summary.loginid);
         $('#rc_currency').text(summary.currency);
-        $('#turnover').text(summary.turnover);
-        $('#profit_loss').text(summary.profit_loss);
+        $('#turnover').html(summary.turnover);
+        $('#profit_loss').html(summary.profit_loss);
         $('#bought').text(summary.contracts_bought);
         $('#sold').text(summary.contracts_sold);
         $('#open').text(summary.open_contracts);
-        $('#potential').text(summary.potential_profit);
+        $('#potential').html(summary.potential_profit);
 
         showLocalTimeOnHover('#start_time, #login_time, #current_time');
     };
@@ -27559,7 +27728,7 @@ module.exports = RealityCheckUI;
 var localize = __webpack_require__(1).localize;
 var Login = __webpack_require__(69);
 var generateBirthDate = __webpack_require__(151);
-var FormManager = __webpack_require__(22);
+var FormManager = __webpack_require__(21);
 
 var ResetPassword = function () {
     'use strict';
@@ -27568,7 +27737,7 @@ var ResetPassword = function () {
         $('#container_reset_password').setVisibility(0);
         if (response.error) {
             var $form_error = $('#form_error');
-            var reset_error_template = '[_1] Please click the link below to restart the password recovery process. If you require further assistance, please contact our Customer Support.';
+            var reset_error_template = '[_1] Please click the link below to restart the password recovery process.';
             var error_code = response.error.code;
 
             $('#msg_reset_password').setVisibility(0);
@@ -27632,22 +27801,27 @@ var BinaryPjax = __webpack_require__(12);
 var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(5).State;
-var urlFor = __webpack_require__(6).urlFor;
-var urlForStatic = __webpack_require__(6).urlForStatic;
-var defaultRedirectUrl = __webpack_require__(6).defaultRedirectUrl;
-var Currency = __webpack_require__(11);
+var Url = __webpack_require__(6);
+var Currency = __webpack_require__(10);
 
 var SetCurrency = function () {
     'use strict';
 
     var onLoad = function onLoad() {
-        if (Client.get('currency')) {
-            BinaryPjax.load(defaultRedirectUrl());
-            return;
-        }
         var hash_value = window.location.hash;
         var el = /new_account/.test(hash_value) ? 'show' : 'hide';
         $('#' + el + '_new_account').setVisibility(1);
+
+        if (Client.get('currency')) {
+            if (/new_account/.test(hash_value)) {
+                $('#set_currency_loading').remove();
+                $('#has_currency, #set_currency').setVisibility(1);
+            } else {
+                BinaryPjax.load(Url.defaultRedirectUrl());
+            }
+            return;
+        }
+
         BinarySocket.wait('payout_currencies').then(function (response) {
             var authorize = State.getResponse('authorize');
             var payout_currencies = response.payout_currencies;
@@ -27655,13 +27829,13 @@ var SetCurrency = function () {
             var currencies = getCurrencies(authorize, payout_currencies, currency_values);
             var $currencies = $('<div/>');
             currencies.forEach(function (c) {
-                $currencies.append($('<div/>', { class: 'gr-3 currency_wrapper', id: c }).append($('<div/>').append($('<img/>', { src: urlForStatic('images/pages/set_currency/' + c.toLowerCase() + '.svg') }))).append($('<div/>', { text: Currency.formatCurrency(c) + ' ' + c })));
+                $currencies.append($('<div/>', { class: 'gr-3 currency_wrapper', id: c }).append($('<div/>').append($('<img/>', { src: Url.urlForStatic('images/pages/set_currency/' + c.toLowerCase() + '.svg') }))).append($('<div/>', { html: Currency.formatCurrency(c) + ' ' + c })));
             });
             var $currency_list = $('#currency_list');
             $currency_list.html($currencies.html());
 
             $('#set_currency_loading').remove();
-            $('#set_currency').setVisibility(1);
+            $('#set_currency, .select_currency').setVisibility(1);
 
             var allow_omnibus = authorize.allow_omnibus;
             var $chosen_currency_type = $('#chosen_currency_type');
@@ -27693,8 +27867,8 @@ var SetCurrency = function () {
                             BinarySocket.send({ balance: 1 });
                             BinarySocket.send({ payout_currencies: 1 }, { forced: true });
 
-                            var redirect_url = 'trading',
-                                hash = '';
+                            var redirect_url = void 0,
+                                hash = void 0;
                             if (/deposit/.test(hash_value)) {
                                 redirect_url = 'cashier/forwardws';
                                 hash = '#deposit';
@@ -27702,7 +27876,12 @@ var SetCurrency = function () {
                                 redirect_url = 'cashier/forwardws';
                                 hash = '#withdraw';
                             }
-                            window.location.href = urlFor(redirect_url) + hash; // load without pjax
+                            if (redirect_url) {
+                                window.location.href = Url.urlFor(redirect_url) + hash; // load without pjax
+                            } else {
+                                $('.select_currency').setVisibility(0);
+                                $('#has_currency').setVisibility(1);
+                            }
                         }
                     });
                 } else {
@@ -27747,10 +27926,51 @@ module.exports = SetCurrency;
 "use strict";
 
 
+var FormManager = __webpack_require__(21);
+
+var TelegramBot = function () {
+    'use strict';
+
+    var form = '#frm_telegram_bot';
+
+    var onLoad = function onLoad() {
+        var bot_name = 'binary_test_bot';
+
+        FormManager.init(form, [{ selector: '#token', validations: ['req'], exclude_request: 1 }]);
+
+        FormManager.handleSubmit({
+            form_selector: form,
+            fnc_response_handler: function fnc_response_handler() {
+                var token = $('#token').val();
+                var url = 'https://t.me/' + bot_name + '/?start=' + token;
+                window.location.assign(url);
+            }
+        });
+    };
+
+    var onUnload = function onUnload() {
+        $(form).off('submit');
+    };
+
+    return {
+        onLoad: onLoad,
+        onUnload: onUnload
+    };
+}();
+
+module.exports = TelegramBot;
+
+/***/ }),
+/* 295 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var PortfolioInit = __webpack_require__(85);
 var updateContractBalance = __webpack_require__(121).updateContractBalance;
 var Client = __webpack_require__(3);
-var formatMoney = __webpack_require__(11).formatMoney;
+var formatMoney = __webpack_require__(10).formatMoney;
 var BinarySocket = __webpack_require__(2);
 
 var updateBalance = function updateBalance(response) {
@@ -27768,14 +27988,14 @@ var updateBalance = function updateBalance(response) {
         }
         var view = formatMoney(currency, balance);
         updateContractBalance(balance);
-        $('.topMenuBalance').text(view).css('visibility', 'visible');
+        $('.topMenuBalance').html(view).css('visibility', 'visible');
     });
 };
 
 module.exports = updateBalance;
 
 /***/ }),
-/* 295 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27820,14 +28040,14 @@ var AffiliatePopup = function () {
 module.exports = AffiliatePopup;
 
 /***/ }),
-/* 296 */
+/* 297 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Cookies = __webpack_require__(41);
-var KnowledgeTestUI = __webpack_require__(297);
+var KnowledgeTestUI = __webpack_require__(298);
 var BinaryPjax = __webpack_require__(12);
 var Client = __webpack_require__(3);
 var toJapanTimeIfNeeded = __webpack_require__(27).toJapanTimeIfNeeded;
@@ -28070,7 +28290,7 @@ var KnowledgeTest = function () {
 module.exports = KnowledgeTest;
 
 /***/ }),
-/* 297 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28178,7 +28398,7 @@ var KnowledgeTestUI = function () {
 module.exports = KnowledgeTestUI;
 
 /***/ }),
-/* 298 */
+/* 299 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28216,7 +28436,7 @@ $(window).on('pageshow', function (e) {
 });
 
 /***/ }),
-/* 299 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28228,7 +28448,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 // (+ some custom changes for binary.com)
 
 var $ = __webpack_require__(80);
-var Kinetic = __webpack_require__(486);
+var Kinetic = __webpack_require__(487);
 
 module.exports = function (_options) {
     var that = this;
@@ -29212,7 +29432,7 @@ $.fn.enjoyhint = function (method) {
 };
 
 /***/ }),
-/* 300 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29253,7 +29473,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 301 */
+/* 302 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29275,7 +29495,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 302 */
+/* 303 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29703,7 +29923,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 }(jQuery);
 
 /***/ }),
-/* 303 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29712,7 +29932,7 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var Client = __webpack_require__(3);
 var getLanguage = __webpack_require__(17).get;
 var urlForStatic = __webpack_require__(6).urlForStatic;
-var Pushwoosh = __webpack_require__(493).Pushwoosh;
+var Pushwoosh = __webpack_require__(494).Pushwoosh;
 
 var BinaryPushwoosh = function () {
     var pw = new Pushwoosh();
@@ -29760,7 +29980,7 @@ var BinaryPushwoosh = function () {
 module.exports = BinaryPushwoosh;
 
 /***/ }),
-/* 304 */
+/* 305 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29982,7 +30202,6 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 });
 
 /***/ }),
-/* 305 */,
 /* 306 */,
 /* 307 */,
 /* 308 */,
@@ -30172,17 +30391,18 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /* 492 */,
 /* 493 */,
 /* 494 */,
-/* 495 */
-/***/ (function(module, exports) {
-
-/* (ignored) */
-
-/***/ }),
+/* 495 */,
 /* 496 */
 /***/ (function(module, exports) {
 
 /* (ignored) */
 
+/***/ }),
+/* 497 */
+/***/ (function(module, exports) {
+
+/* (ignored) */
+
 /***/ })
-],[298]);
+],[299]);
 //# sourceMappingURL=binary.js.map

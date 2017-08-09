@@ -28,7 +28,7 @@
         <p>Спасибо за то, что заполнили форму Финансовой оценки и зарегистрировали Финансовый счёт. Теперь Вы можете внести на счёт средства и торговать на рынке Forex на реальные деньги, пользуюсь счётом на MT5.</p>
         <div id="msg_authenticate" class="invisible">
             <div><strong>Важная информация</strong></div>
-            <p>Пройдите аутентификацию счёта сейчас, подтвердив Вашу личность и адрес. Для начала, просто отправьте нам копии следующих документов по адресу <a href='mailto:support@binary.com' rel='nofollow'>support@binary.com</a>:</p>
+            <p>Пройдите аутентификацию счёта сейчас, подтвердив Вашу личность и адрес. Для начала, просто отправьте нам копии следующих документов по адресу <a href='mailto:authentications@binary.com' rel='nofollow'>authentications@binary.com</a>:</p>
 <ul class="checked">
     <li>Подтверждение личности: отсканированная копия Вашего паспорта, водительских прав (временных или постоянных) или любого удостоверения личности, содержащего Ваше имя и дату рождения.</li>
     <li>Подтверждение адреса: отсканированный счёт за коммунальные услуги или выписка с Вашего банковского счёта (датированные не позднее, чем за 3 месяца до текущей даты). Документ, подтверждающий адрес, должен содержать Ваше имя, адрес, дату, а также название выдавшей его организации.</li>
@@ -252,6 +252,44 @@
 
     <div class="gr-row form-row center-text-m ">
         <div class="gr-4 gr-12-m">
+            <label for="income_source">
+                Источник дохода
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="income_source" class="form_input " > 
+        <option value="">Выберите</option>
+        <option value="Salaried Employee">Наемный работник</option>
+        <option value="Self-Employed">Частный предприниматель</option>
+        <option value="Investments &amp; Dividends">Инвестиции и дивиденды</option>
+        <option value="Pension">Пенсия</option>
+        <option value="Other">Другое</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="employment_status">
+                Employment Status
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="employment_status" class="form_input " > 
+        <option value="">Выберите</option>
+        <option value="Employed">Employed</option>
+        <option value="Pensioner">Pensioner</option>
+        <option value="Self-Employed">Частный предприниматель</option>
+        <option value="Student">Student</option>
+        <option value="Unemployed">Unemployed</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
             <label for="employment_industry">
                 Сфера занятости
             </label>
@@ -299,6 +337,28 @@
 
     <div class="gr-row form-row center-text-m ">
         <div class="gr-4 gr-12-m">
+            <label for="source_of_wealth">
+                Source of Wealth
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="source_of_wealth" class="form_input " > 
+        <option value="">Выберите</option>
+        <option value="Accumulation of Income/Savings">Accumulation of Income/Savings</option>
+        <option value="Cash Business">Cash Business</option>
+        <option value="Company Ownership">Company Ownership</option>
+        <option value="Divorce Settlement">Divorce Settlement</option>
+        <option value="Inheritance">Inheritance</option>
+        <option value="Investment Income">Investment Income</option>
+        <option value="Sale of Property">Sale of Property</option>
+        <option value="Other">Другое</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
             <label for="education_level">
                 Уровень образования
             </label>
@@ -309,25 +369,6 @@
         <option value="Primary">Начальное</option>
         <option value="Secondary">Среднее</option>
         <option value="Tertiary">Высшее</option>
-                        </select>
-            
-        </div>
-    </div>
-
-    <div class="gr-row form-row center-text-m ">
-        <div class="gr-4 gr-12-m">
-            <label for="income_source">
-                Источник дохода
-            </label>
-        </div>
-        <div class="gr-8 gr-12-m">
-                                <select id="income_source" class="form_input " > 
-        <option value="">Выберите</option>
-        <option value="Salaried Employee">Наемный работник</option>
-        <option value="Self-Employed">Частный предприниматель</option>
-        <option value="Investments &amp; Dividends">Инвестиции и дивиденды</option>
-        <option value="Pension">Пенсия</option>
-        <option value="Other">Другое</option>
                         </select>
             
         </div>
@@ -346,7 +387,7 @@
     <option value="$25,000 - $50,000">$25,000 - $50,000</option>
     <option value="$50,001 - $100,000">$50,001 - $100,000</option>
     <option value="$100,001 - $500,000">$100,001 - $500,000</option>
-    <option value="Over $500,000">Over $500,000</option>
+    <option value="Over $500,000">Более $500 000</option>
                         </select>
             
         </div>
@@ -384,7 +425,7 @@
     <option value="$25,000 - $50,000">$25,000 - $50,000</option>
     <option value="$50,001 - $100,000">$50,001 - $100,000</option>
     <option value="$100,001 - $500,000">$100,001 - $500,000</option>
-    <option value="Over $500,000">Over $500,000</option>
+    <option value="Over $500,000">Более $500 000</option>
                         </select>
             
         </div>

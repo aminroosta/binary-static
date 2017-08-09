@@ -97,7 +97,6 @@
         <option value="">請選擇</option>
         <option value="Speculative">投機</option>
         <option value="Income Earning">賺取收入</option>
-        <option value="Assets Saving">資產保存</option>
         <option value="Hedging">Hedging</option>
                         </select>
             
@@ -206,7 +205,7 @@
         
     </fieldset>
 
-        <fieldset>
+        <fieldset class="security">
         <legend>安全</legend>
         
             <div class="gr-row form-row center-text-m ">
@@ -452,6 +451,44 @@
 
     <div class="gr-row form-row center-text-m ">
         <div class="gr-4 gr-12-m">
+            <label for="income_source">
+                收入來源
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="income_source" class="form_input " > 
+        <option value="">請選擇</option>
+        <option value="Salaried Employee">支薪員工</option>
+        <option value="Self-Employed">自雇者</option>
+        <option value="Investments &amp; Dividends">投資&amp;分紅</option>
+        <option value="Pension">退休金</option>
+        <option value="Other">其它</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="employment_status">
+                就業狀況
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="employment_status" class="form_input " > 
+        <option value="">請選擇</option>
+        <option value="Employed">就業</option>
+        <option value="Pensioner">退休金領取人</option>
+        <option value="Self-Employed">自雇者</option>
+        <option value="Student">Student</option>
+        <option value="Unemployed">Unemployed</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
             <label for="employment_industry">
                 職業領域
             </label>
@@ -499,6 +536,28 @@
 
     <div class="gr-row form-row center-text-m ">
         <div class="gr-4 gr-12-m">
+            <label for="source_of_wealth">
+                財富來源
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="source_of_wealth" class="form_input " > 
+        <option value="">請選擇</option>
+        <option value="Accumulation of Income/Savings">收入/儲蓄積累</option>
+        <option value="Cash Business">現金業務</option>
+        <option value="Company Ownership">公司擁有權</option>
+        <option value="Divorce Settlement">離婚協定</option>
+        <option value="Inheritance">繼承</option>
+        <option value="Investment Income">投資收入</option>
+        <option value="Sale of Property">財產出售</option>
+        <option value="Other">其它</option>
+                        </select>
+            
+        </div>
+    </div>
+
+    <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
             <label for="education_level">
                 教育水平
             </label>
@@ -509,25 +568,6 @@
         <option value="Primary">主要</option>
         <option value="Secondary">次要</option>
         <option value="Tertiary">三級</option>
-                        </select>
-            
-        </div>
-    </div>
-
-    <div class="gr-row form-row center-text-m ">
-        <div class="gr-4 gr-12-m">
-            <label for="income_source">
-                收入來源
-            </label>
-        </div>
-        <div class="gr-8 gr-12-m">
-                                <select id="income_source" class="form_input " > 
-        <option value="">請選擇</option>
-        <option value="Salaried Employee">支薪員工</option>
-        <option value="Self-Employed">自雇者</option>
-        <option value="Investments &amp; Dividends">投資&amp;分紅</option>
-        <option value="Pension">退休金</option>
-        <option value="Other">其它</option>
                         </select>
             
         </div>
@@ -601,7 +641,12 @@
 
     <div class="gr-padding-10 gr-12">
         <input id="not_pep" type="checkbox" />
-        <label for="not_pep">我聲明本人不是政治公眾人士(PEP)。</label>
+        <label for="not_pep">
+            我聲明本人不是政治公眾人士(PEP)。
+            <span data-balloon-length="xlarge" data-balloon="政治公眾人士(PEP) 是被委託進行特出公眾任務的個人。此身份包括了其直系親屬和眾所周知為其親近的人，但不包括中級或初級官員。所指個人包括國家首長、部長、國會秘書、國會議員、法官、大使、高級政府官員、軍事高層官員、中央銀行的審計委員、國營企業董事等。以上各例的直系親屬也都屬於政治公眾人士，包括其配偶/伴侶、父母和孩子。再者，眾所周知的與政治公眾人士有親密關係的人士包括其商業合夥人也屬於政治公眾人士。一般來說，已經停止被委託進行特出公眾任務為期超過十二個月的個人不屬於政治公眾人士。">
+                這是甚麽？
+            </span>
+        </label>
     </div>
 
     </fieldset>
