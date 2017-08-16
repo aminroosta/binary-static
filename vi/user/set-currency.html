@@ -45,14 +45,14 @@
 
          
 
-         <link rel="stylesheet" href="/binary-static/css/binary.min.css?j1qdlpw5" />
-         <link rel="stylesheet" href="https://aminroosta.github.io/binary-style/binary.css?j1qdlpw5" />
+         <link rel="stylesheet" href="/binary-static/css/binary.min.css?ogjxc91m" />
+         <link rel="stylesheet" href="https://aminroosta.github.io/binary-style/binary.css?ogjxc91m" />
         
-         <script src='/binary-static/js/texts/vi.js?j1qdlpw5'></script>
-         <script src='/binary-static/js/manifest.js?j1qdlpw5'></script>
-         <script src='/binary-static/js/vendor.min.js?892d3671'></script>
-         <script src='/binary-static/js/binary.js?j1qdlpw5'></script>
-         <script src='https://style.binary.com/binary.js?j1qdlpw5'></script>
+         <script src='/binary-static/js/texts/vi.js?ogjxc91m'></script>
+         <script src='/binary-static/js/manifest.js?ogjxc91m'></script>
+         <script src='/binary-static/js/vendor.min.js?76487e9d'></script>
+         <script src='/binary-static/js/binary.js?ogjxc91m'></script>
+         <script src='https://style.binary.com/binary.js?ogjxc91m'></script>
         
     </head>
 
@@ -417,33 +417,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div class="invisible" id="show_new_account">
             <img src="/binary-static/images/pages/set_currency/account-created.svg" />
             <div class="gr-padding-10"></div>
-            <h1>Congratulations!</h1>
+            <h1>Chúc mừng!</h1>
             <p>You have successfully created your account!</p>
         </div>
 
-        <div class=" gr-padding-10">
+        <div class=" gr-parent gr-padding-10">
     <div class="separator-line "></div>
 </div>
 
         <div class="invisible" id="has_currency">
             <div>
-                <a class="button-secondary" href="/binary-static/vi/cashier/forwardws.html#deposit"><span>Deposit page</span></a>
-                <a class="button-secondary gr-gutter-left" href="/binary-static/vi/trading.html"><span>Trade page</span></a>
+                <a class="button" href="/binary-static/vi/cashier/forwardws.html#deposit"><span>Gửi tiền</span></a>
             </div>
-            <p class="hint">or go to <a href="/binary-static/vi/user/accounts.html">Accounts page</a></p>
         </div>
 
         <div class="invisible select_currency">
             <p>Please select the currency of this account:</p>
-            <p class="invisible notice-msg hint gr-5 gr-12-m gr-centered" id="currency_notice">
-                Fact: The currency you chose (<span id="chosen_currency"></span>) is a <span id="chosen_currency_type"></span>.
-            </p>
         </div>
     </div>
 
     <div class="center-text invisible select_currency">
-        <form class="gr-7 gr-12-m gr-centered" id="frm_set_currency">
-            <div class="gr-row gr-row-align-center gr-padding-20 gr-parent" id="currency_list"></div>
+        <form id="frm_set_currency">
+            
+            <div class="section-divider gr-padding-20 gr-row invisible" id="fiat_currencies">
+                    <div class="align-self-center border-bottom-light-gray"></div>
+                    <div class="faded">Fiat Currency</div>
+                    <div class="align-self-center border-bottom-light-gray"></div>
+                </div>
+                <div class="gr-5 gr-12-m gr-centered">
+                    <div class="gr-row gr-row-align-center gr-padding-20 gr-parent currency_list" id="fiat_currency_list"></div>
+                </div>
+            <div class="section-divider gr-padding-20 gr-row invisible" id="crypto_currencies">
+                    <div class="align-self-center border-bottom-light-gray"></div>
+                    <div class="faded">Cryptocurrency</div>
+                    <div class="align-self-center border-bottom-light-gray"></div>
+                </div>
+                <div class="gr-5 gr-12-m gr-centered">
+                    <div class="gr-row gr-row-align-center gr-padding-20 gr-parent currency_list" id="crypto_currency_list"></div>
+                </div>
+
             <p class="invisible error-msg"></p>
             <button type="submit">Xác nhận</button>
         </form>
