@@ -2,14 +2,14 @@
 <html>
     <head>
         <style id="antiClickjack">body{display:none !important;}</style>
-        <script type="text/javascript">
-            if (self === top) {
-                var antiClickjack = document.getElementById("antiClickjack");
-                antiClickjack.parentNode.removeChild(antiClickjack);
-            } else {
-                top.location = self.location;
-            }
-        </script>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <meta http-equiv="Content-Language" content="ZH_TW" />
         <meta name="description" content=" Binary.com ICO。在全球領先的二元期權交易平台投資" />
@@ -65,8 +65,8 @@
         
     <link rel="icon" sizes="32x32" type="image/png" href="https://style.binary.com/images/favicons/favicon-32x32.png">
 
-        <link href="/binary-static/css/ico.css" rel="stylesheet" />
-        <link href="https://style.binary.com/binary.css" rel="stylesheet" />
+        <link href="/binary-static/css/ico.css?wxhhp7w8" rel="stylesheet" />
+        <link href="https://style.binary.com/binary.css?wxhhp7w8" rel="stylesheet" />
     </head>
 
     <body>
@@ -79,16 +79,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-MZWFF7');</script>
 <!-- End Google Tag Manager -->
-        <div class="navbar-fixed-top" role="navigation">
+        <div class="navbar-fixed-top" role="navigation" id="navigation">
             <div class="">
                 <div class="navbar-header">
                     <span id="toggle-menu" href="button" class="navbar-toggle"></span>
-                    <a class="navbar-brand page-scroll logo" href="#page-top"></a>
+                    <a class="navbar-brand logo" href="/binary-static/zh_tw/home.html"></a>
                 </div>
                 <div class="navbar-collapse">
                     <ul class="nav navbar-nav">
                         <li class="invisible">
                             <a href="#page-top"></a>
+                        </li>
+                        <li>
+                            <a href="ico-disclaimer.html">資訊備忘錄</a>
                         </li>
                         <li>
                             <a class="page-scroll" href="#how-ico-works">ICO如何操作</a>
@@ -98,6 +101,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </li>
                         <li>
                             <a class="page-scroll" href="#our-growth">我們的增長</a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" class="faq-btn">常見問題集</a>
                         </li>
                     </ul>
                 </div>
@@ -134,6 +140,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                             <input type="hidden" name="meta_message" value="1001" />
                                             <input type="hidden" name="meta_required" value="email" />
                                             <input type="hidden" name="meta_tooltip" value="" />
+                                            <input type="hidden" name="custom language" value="" class="frm-language" />
                                         </div>
                                         <div id="af-form-713141817" class="af-form">
                                             <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
@@ -155,7 +162,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                         document.getElementById('redirect_600c7e6a647457c51ede13e8b4d377e6').value = document.location + '#done';
                                     </script>
                                     <!-- /AWeber Web Form Generator 3.0.1 -->
-                                    <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Thanks for subscribing! Keep an eye on your inbox for the latest updates on our ICO.</p>
+                                    <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">感謝您訂閱 ！留意收件匣收取ICO最新消息 。</p>
                                 </div>
                             </div>
                         </div>
@@ -174,7 +181,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <div class="box">
                             <img class="icon" src="/binary-static/images/ico/icons/coins_icon.svg" />
                             <h4>買入權杖</h4>
-                            <p>初步代幣發售期內，Binary.com將發售多個權杖。</p>
+                            <p>首次公開發行(ICO) 期內，Binary.com將發售多個權杖。</p>
                         </div>
                         <img class="arrow" src="/binary-static/images/ico/icons/arrow1.svg" />
                     </div>
@@ -204,6 +211,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             </div>
                         </div>
                     </div>
+                    <p class="gr-12">
+                        <a class="button" href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">
+                            <span>如何參與Binary.com的 ICO</span>
+                        </a>
+                    </p>
                 </div>
             </div>
             <hr>
@@ -230,13 +242,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
             </div>
 
+            <div id="read-im-section" class="content-section primary-bg-color center-text">
+                <div class="gr-row">
+                    <div class="gr-6 gr-push-3 gr-12-m gr-push-0-m">
+                        <h2 class="content-inverse-color">閱讀資訊備忘錄草案獲取出價的詳細資訊。</h2>
+                        <button onclick="window.location.href='ico-disclaimer.html'" class="button">檢視備忘錄</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="faq-section" class="content-section fill-bg-color center-text">
                 <div class="gr-row">
                     <div class="gr-12">
                         <h2>想得到ICO更多資訊?</h2>
                     </div>
                     <div class="gr-12">
-                        <button id="faq-btn" class="button">閱讀常見問題集</button>
+                        <button id="faq-btn" class="button faq-btn">閱讀常見問題集</button>
                     </div>
                 </div>
             </div>
@@ -298,7 +319,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div id="our-growth" class="content-section center-text">
                 <div class="gr-row">
                     <div class="gr-12">
-                        <h2>Binary.com數字</h2>
+                        <h2>Binary.com的統計數字</h2>
                         <p class="section-intro">這些關鍵指標將顯示一個屢獲殊榮的二元期權交易平台增長與成功的一面。</p>
                     </div>
                 </div>
@@ -340,12 +361,62 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div class="gr-6 gr-12-m">
                         <div class="chart">
-                            <h5 class="chart-heading chart-heading-left">僱員</h5>
+                            <h5 class="chart-heading chart-heading-left">員工和承包商</h5>
                             <img src="/binary-static/images/ico/images/nec_chart.svg" />
-                            <p>多年來，無論在人力和辦公室方面，&mdash;&mdash; 我們的規模不斷擴大。目前在馬來西亞、馬爾他和日本這三個國家有五個辦事處和130多名員工。</p>
+                            <p>多年來，無論在人力和辦公室方面，&mdash;&mdash; 我們的規模不斷擴大。目前在馬來西亞、馬爾他和日本這三個國家有四個辦事處和130多名員工。</p>
                         </div>
                     </div>
                     <div class="vertical-line"></div>
+                    <p class="chart-note">註： 2017年數字是根據 8 月中期數字估計得出</p>
+                </div>
+            </div>
+            <div id="acquired-section" class="content-section center-text acquired-bg">
+                <div class="container">
+                    <div class="gr-row">
+                        <div class="gr-6 gr-push-3 gr-12-m gr-push-0-m">
+                            <h2 class="content-inverse-color">Binary 集團有限公司於2017年8月收購Binary有限公司100%股權，目的是推行ICO。</h2>
+                            <a class="button" href="https://ico_documents.binary.com/binary_ltd_2016_annual_report.pdf" target="_blank">
+                                <span>檢視Binary有限公司 2016年年度報告</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="board-of-directors" class="content-section">
+                <div class="gr-row center-text">
+                    <div class="gr-4">
+                        <h2 class="boxed-heading-center">董事局成員</h2>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="gr-row">
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/jy@2x.png" />
+                                <h4>Jean-Yves Sireau</h4>
+                                <a href="https://www.linkedin.com/in/jeanyvessireau/" target="_blank"><img class="icon--sm social--linkedin" /></a>
+                                <a href="https://twitter.com/jysireau" target="_blank"><img class="icon--sm social--twitter" /></a>
+                            </div>
+                            <p>Jean-Yves Sireau 是公司創始人。他是天生的多元企業家，他的第一家公司成立於1991年。由於他的非凡成就，僅21歲就榮獲法國總理Edith Cresson 頒發年青創業家Foundation Jacques Dounce獎以及當時未來的法國總統Nicolas Sarkozy頒發Neuilly Professions獎。 Jean-Yves Sireau於1993年成立了Fortitude Fund Management對沖資金管理集團，並於1999年成立了Binary.com（前名為Betonmarkets.com）。</p>
+                        </div>
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/joanna@2x.png" />
+                                <h4>Joanna Frendo</h4>
+                                <a href="https://www.linkedin.com/in/joanna-frendo-prof-pgdip-fcc-4449975/" target="_blank"><img class="icon--sm social--linkedin" /></a>
+                            </div>
+                            <p>Joanna監督Binary.com集團各種發牌司法管轄區的程序和法規遵從性。除了監督集團的各個領域如付款和客戶帳戶管理等關鍵性業務以外，Joanna自1999 年以來曾是馬爾他管理研究所成員，擁有金融服務運營與法規遵從性文憑，以及國際法規遵從性協會的金融犯罪法規遵從性專業研究生文憑。</p>
+                        </div>
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/jm@2x.png" />
+                                <h4>Jim Mellon</h4>
+                                <a href="https://twitter.com/jimmhk" target="_blank"><img class="icon--sm social--twitter" /></a>
+                                <a href="https://www.youtube.com/results?search_query=jim+mellon" target="_blank"><img class="icon--sm social--youtube" /></a>
+                            </div>
+                            <p>Jim Mellon是知名和成功的企業家。他的職業生涯從基金管理開始，如今在許多領域都有投資，包括生物醫藥、地產、採礦和信息技術。Jim在《週日時報 》的富豪榜排名第 140，擁有財富淨值九億二千萬&英鎊;，在多個公開上市公司擔任董事。他是香港股票交易所掛牌的Regent Pacific集團創始人和最大股東，而這個集團於1999 年創始投資Binary.com。</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="content-section blue-bg">
@@ -451,62 +522,104 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <div class="gr-12">
                         <div class="faq">
                             <h4>什麼是ICO？</h4>
-                            <p>「首次公開售幣」（或簡稱為「ICO」）是類似於首次公開募股(IPO)的一種融資方法。 ICO所發行的不是股份，而是加密代幣，例如「彩色硬幣」或「以太坊權杖」。</p>
+                            <p>「首次公開售幣」（或簡稱為「ICO」）是類似於首次公開募股(IPO) 的一種融資方法。 ICO給投資者發行的不是股份，而是加密代幣，例如「彩色硬幣」或「以太坊權杖」。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Binary.com為何推行ICO?</h4>
-                            <p>Binary.com成立於1999年，是根基穩固的公司。就像其他成功的企業，基於業務增長，我們考慮進行首次公開募股(IPO)。但是我們深信未來十年內股票交易將被加密貨幣交易取代，而首次公開募股將由首次代幣公開預售(ICO)取代。因此我們決定進行ICO，而不是IPO。</p>
+                            <p>Binary.com 成立於 1999 年。如今是實力雄厚、非常成功的公司。跟很多成功的公司一樣，我們的業務增長促使我們考慮發展 IPO。</p>
+                            <p>然而，我們相信，在未來十年裡， 區塊鏈交易將逐漸取代傳統的股票交易。ICO 將逐漸取代 IPO。這是因為區塊鏈技術比傳統股票交易技術的性能更好，可降低交易費用、有更快的結算時間和不會出錯、永恆不變的審計追踪。因此，我們決定推行ICO，而不是IPO 。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>ICO將如何操作?</h4>
-                            <p>Binary.com將為投資者提供一些程式塊鏈權杖。這些權杖可以各種形式在不同的程式塊鏈上發布，例如比特幣程式塊鏈上的「彩色硬幣」和「以太坊程式塊鏈」上的「ERC20」權杖。</p>
-                            <p>無論是何類型，每一權杖將為您提供兩種權利：</p>
+                            <p>Binary.com將為投資者提供一些區塊鏈權杖。這些權杖可以各種形式在不同的區塊鏈上發布，例如以太坊區塊鏈上的「ERC20」權杖。</p>
+                            <p>無論發行的權杖是何類型，每一權杖將為投資者提供兩種權利：</p>
                             <ol>
-                                <li>獲取與Binary集團有限公司普通股紅利等值的款項權利</li>
-                                <li>將權杖轉換成普通股的權利</li>
+                                <li>獲取與Binary集團有限公司普通股紅利等值的款項權利，以及</li>
+                                <li>將權杖轉換成普通股的權利.</li>
                             </ol>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
+                            <h4>為什麼權杖要轉換成股份，而不是直接代表股份？</h4>
+                            <p>大多數司法管轄區（包括我們集團公司的成立地，英屬維爾京群島） 的公司法律尚不支持基於區塊鏈的股份註冊。</p>
+                            <p>因此，權杖被發放為衍生證券，可轉換成普通股。</p>
+                            <p>權杖授權持有人收取紅利相關款項，並擁有相當於普通股的經濟利益。因此，通常權杖持有人不會將其權杖轉換為股票。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>權杖何時預售?</h4>
+                            <p>ICO 的確切日期尚待確定，但我們估計將於2017 年第四季推出 。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
                             <h4>權杖如何預售?</h4>
-                            <p>權杖預售期為一個月。 ICO的準確日期還未確定，但我們打算於2017年第四季啟動。我們將在恰當的時候公佈ICO價格與售賣方式。</p>
+                            <p>權杖將通過拍賣過程提供出價。請到我們的 <a href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">指南</a> 檢視權杖拍賣。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>誰能購入權杖?</h4>
-                            <p>權杖僅售予擁有真實資金帳戶，並已完成帳戶驗證程序的Binary.com客戶。</p>
+                            <p>權杖僅售予擁有真實資金帳戶，並已完成<a href="https://ico_documents.binary.com/2017_Authentication_Process.pdf" target="_blank">帳戶驗證/KYC程序</a>的Binary.com客戶。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>ICO是否可在所有交易管轄區內使用？</h4>
-                            <p>一些管轄區將按照其規則和規定限制合格或專業投資者參與ICO。</p>
+                            <p>一些管轄區將按照管轄區內的規則和規定限制ICO僅供合格者或專業投資者參與。尤其是，美國投資者不可使用ICO。</p>
+                            <p>要曉得 ICO 是否可在貴國管轄範圍內使用，並且，如果可用，您是否合格訂購權杖，請從 <a href="/binary-static/zh_tw/ico-disclaimer.html">資訊備忘錄</a> 頁面上的下拉清單中選擇您的國家。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>如何買入權杖?</h4>
-                            <p>您可使用Binary.com帳戶的資金購入權杖。我們即將推出原生<strong>BTC (比特幣)</strong>與<strong>ETH (以太坊)</strong>帳戶工具，以便您參與ICO。</p>
+                            <p>您可使用 Binary.com 帳戶中的資金購買權杖。您可使用我們 <a href="/binary-static/zh_tw/cashier/payment_methods.html" target="_blank">收銀台系統</a>內的任何適用貨幣。如果您選擇以美元以外的貨幣出價，買入金額須在拍賣結束時按照現行匯率轉換成美元。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>權杖何時發佈?</h4>
+                            <p>Binary.com 已和<a href="https://www.lykke.com" target="_blank">Lykke.com</a> 加密貨幣交易所簽訂協議公佈權杖。Lykke是瑞士一家金融科技公司，專為證券相關權杖建立全球區塊鏈動力市場。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>購買權杖的益處是什麼？</h4>
+                            <p>購買權杖將有兩個主要的好處。</p>
+                            <p>首先，權杖持有者將收到相當於公司普通股紅利的紅利相關款項。因此，權杖持有人將與公司股東一樣分享公司將來的成功獲利。</p>
+                            <p>其次，權杖持有人將能夠自由交易權杖。相比之下，普通股票沒有被公開發行，因此不能在任何交易所交易。因此，權杖是比普通股票更加優越的投資。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>購買權杖的風險是什麼？</h4>
+                            <p>雖然Binary.com自 1999 年成立以來已經成為成功的公司，其權杖應被視為高風險投資。Binary.com 的業務承擔系列的風險，可能會對公司產生不利影響並因此影響權杖的未來價值。風險的詳細資料請參考 <a href="/binary-static/zh_tw/ico-disclaimer.html">資訊備忘錄</a>，並在任何權杖投資前應該對這些風險給予慎重考慮。</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>我如何能獲得更多關於 Binary.com的詳細資料？</h4>
+                            <p>要瞭解更多關於 Binary.com的詳細資料，您可以閱讀我們的 <a href="/binary-static/zh_tw/group-history.html" target="_blank">集團歷史</a>，<a href="/binary-static/zh_tw/regulation.html" target="_blank">監管狀況</a> 和 <a href="/binary-static/zh_tw/careers.html" target="_blank">公司文化</a>。您還可以閱讀 <a href="https://blog.binary.com/" target="_blank">公司部落格</a>。</p>
+                            <p>您還可以在 <a href="https://www.financemagnates.com/binary-options/brokers/exclusive-binary-com-ico-shows-company-profits-surpass-20-mln-2017/" target="_blank">FinanceMagnates</a> 和 <a href="https://www.leaprate.com/binary-options/broker/binary-com-ico-finances-binary-options-broker/" target="_blank">Leaprate</a>閱讀關於 ICO的詳細資料。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>如何了解更多關於ICO和加密代幣的詳情？</h4>
-                            <p>欲了解比特幣的更多詳情，請<a href='https://blockchain.info/wallet/#/'>使用程式塊鏈開立比特幣錢包</a>並<a href='https://www.bitcoin.com/buy-bitcoin'>通過您的國家的當地交易所購入比特幣</a>。</p>
-                            <p>欲了解以太坊的更多詳情，請在<a href='https://metamask.io/'>Chrome瀏覽器上安裝Metamask外掛程式</a>，即可將比特幣轉換成以太幣。</p>
-                            <p>欲了解加密代幣資產的交易方法，請在美國的<a href='https://poloniex.com/'>POLONIEX</a>加密代幣交易所開立帳戶。</p>
+                            <p>欲了解比特幣的更多詳情，請使用<a href="https://bitcoin-wallet.binary.com/" target="_blank">Binary.com的簡單型比特幣錢包</a>開立比特幣錢包並通過您的國家的當地交易所購入比特幣。</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>如何繼續獲悉關於Binary.com ICO的更新消息？</h4>
                             <p>請使用以下表格訂閱郵遞清單，陸續收取關於ICO的最新公佈消息。</p>
+                            <p>您也可以<a href="/binary-static/zh_tw/home.html" target="_blank">開立免費 Binary.com 帳戶</a>。</p>
                         </div>
                     </div>
                 </div>
@@ -529,6 +642,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 <input type="hidden" name="meta_message" value="1001" />
                                 <input type="hidden" name="meta_required" value="email" />
                                 <input type="hidden" name="meta_tooltip" value="" />
+                                <input type="hidden" name="custom language" value="" class="frm-language" />
                             </div>
                             <div id="af-form-713141817" class="af-form">
                                 <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
@@ -550,7 +664,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             document.getElementById('redirect_600c7e6a647457c51ede13e8b4d377e6').value = document.location + '#done';
                         </script>
                         <!-- /AWeber Web Form Generator 3.0.1 -->
-                        <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Thanks for subscribing! Keep an eye on your inbox for the latest updates on our ICO.</p>
+                        <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">感謝您訂閱 ！留意收件匣收取ICO最新消息 。</p>
                     </div>
                 </div>
             </div>
@@ -561,7 +675,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <p>我們所推薦的權杖投資含高度風險，也不保証投入資金的權杖持有人將獲得利潤或回本。潛在投資者須仔細了解資訊備忘錄上列出的風險因素。</p>
             </div>
         </div>
-        <script src="/binary-static/js/ico/ico.js"></script>
+        <script src="/binary-static/js/landing_pages/common.js?wxhhp7w8"></script>
+        <script src="/binary-static/js/landing_pages/ico.js?wxhhp7w8"></script>
     </body>
 
 </html>

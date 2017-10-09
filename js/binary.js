@@ -7,7 +7,7 @@ webpackJsonp([2],[
 
 
 var moment = __webpack_require__(8);
-var template = __webpack_require__(4).template;
+var template = __webpack_require__(2).template;
 
 var Localize = function () {
     var localized_texts = void 0;
@@ -51,13 +51,208 @@ module.exports = Localize;
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+/**
+ * Write loading image to a container for ajax request
+ *
+ * @param container: a DOM element
+ * @param theme: dark or white
+ */
+var showLoadingImage = function showLoadingImage(container) {
+    var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'dark';
+
+    var loading_div = createElement('div', { class: 'barspinner ' + theme, html: Array.from(new Array(5)).map(function (x, i) {
+            return '<div class="rect' + (i + 1) + '"></div>';
+        }).join('') });
+    container.html(loading_div);
+};
+
+/**
+ * Returns the highest z-index in the page.
+ * Accepts a jquery style selector to only check those elements,
+ * uses all container tags by default
+ * If no element found, returns null.
+ *
+ * @param selector: a jquery style selector for target elements
+ * @return int|null
+ */
+var getHighestZIndex = function getHighestZIndex() {
+    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'div,p,area,nav,section,header,canvas,aside,span';
+
+    var elements = selector.split(',');
+    var all = [];
+
+    for (var i = 0; i < elements.length; i++) {
+        var els = document.getElementsByTagName(elements);
+        for (var j = 0; j < els.length; j++) {
+            if (els[i].offsetParent) {
+                var z = els[i].style['z-index'];
+                if (!isNaN(z)) {
+                    all.push(z);
+                }
+            }
+        }
+    }
+
+    return all.length ? Math.max.apply(Math, all) : null;
+};
+
+var downloadCSV = function downloadCSV(csv_contents) {
+    var filename = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'data.csv';
+
+    if (navigator.msSaveBlob) {
+        // IE 10+
+        navigator.msSaveBlob(new Blob([csv_contents], { type: 'text/csv;charset=utf-8;' }), filename);
+    } else {
+        // Other browsers
+        var csv = 'data:text/csv;charset=utf-8,' + csv_contents;
+        var download_link = createElement('a', { href: encodeURI(csv), download: filename });
+
+        document.body.appendChild(download_link);
+        download_link.click();
+        document.body.removeChild(download_link);
+    }
+};
+
+var template = function template(string, content) {
+    return string.replace(/\[_(\d+)]/g, function (s, index) {
+        return content[+index - 1];
+    });
+};
+
+var isEmptyObject = function isEmptyObject(obj) {
+    var is_empty = true;
+    if (obj && obj instanceof Object) {
+        Object.keys(obj).forEach(function (key) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) is_empty = false;
+        });
+    }
+    return is_empty;
+};
+
+var cloneObject = function cloneObject(obj) {
+    return !isEmptyObject(obj) ? $.extend(true, Array.isArray(obj) ? [] : {}, obj) : obj;
+};
+
+var getPropertyValue = function getPropertyValue(obj, k) {
+    var keys = k;
+    if (!Array.isArray(keys)) keys = [keys];
+    if (!isEmptyObject(obj) && keys[0] in obj && keys && keys.length > 1) {
+        return getPropertyValue(obj[keys[0]], keys.slice(1));
+    }
+    // else return clone of object to avoid overwriting data
+    return obj ? cloneObject(obj[keys[0]]) : undefined;
+};
+
+var handleHash = function handleHash() {
+    var hash = window.location.hash;
+    if (hash) {
+        document.querySelector('a[href="' + hash + '"]').click();
+    }
+};
+
+var clearable = function clearable(element) {
+    element.addClass('clear');
+    document.addEventListener('mousemove', function (e) {
+        if (/clear/.test(e.target.classList)) {
+            e.stopPropagation();
+            e.target.toggleClass('onClear', e.target.offsetWidth - 18 < e.clientX - e.target.getBoundingClientRect().left);
+        }
+    });
+    document.addEventListener('mousedown', function (e) {
+        if (/onClear/.test(e.target.classList)) {
+            e.stopPropagation();
+            e.target.setAttribute('data-value', '');
+            e.target.classList.remove('clear', 'onClear');
+            e.target.value = '';
+            e.target.dispatchEvent(new Event('change'));
+        }
+    });
+};
+
+/**
+ * Creates a DOM element and adds any attributes to it.
+ *
+ * @param {String} tag_name: the tag to create, e.g. 'div', 'a', etc
+ * @param {Object} attributes: all the attributes to assign, e.g. { id: '...', class: '...', html: '...', ... }
+ * @return the created DOM element
+ */
+var createElement = function createElement(tag_name, attributes) {
+    var el = document.createElement(tag_name);
+    Object.keys(attributes).forEach(function (attr) {
+        var value = attributes[attr];
+        if (attr === 'text') {
+            el.textContent = value;
+        } else if (attr === 'html') {
+            el.html(value);
+        } else {
+            el.setAttribute(attr, value);
+        }
+    });
+    return el;
+};
+
+/**
+ * Apply function to all elements based on selector passed
+ *
+ * @param {String|Element} selector: selector of the elements to apply the function to, e.g. '.class', '#id', 'tag', etc
+ * can also be a DOM element
+ * @param {Function} funcToRun: function to apply
+ * @param {String} func_selector: method of finding the selector, optional
+ * @param {Element} el_parent: parent of the selector, document by default
+ */
+var applyToAllElements = function applyToAllElements(selector, funcToRun, func_selector, el_parent) {
+    if (!selector || !funcToRun) {
+        return;
+    }
+
+    var function_selector = func_selector;
+    var element_to_select = selector;
+    if (!func_selector && !element_to_select.nodeName) {
+        if (/[\s#]/.test(element_to_select) || element_to_select.lastIndexOf('.') !== 0) {
+            function_selector = 'querySelectorAll';
+        } else if (element_to_select.lastIndexOf('.') === 0) {
+            function_selector = 'getElementsByClassName';
+            element_to_select = element_to_select.substring(1);
+        } else if (/^[a-zA-Z]+$/.test(element_to_select)) {
+            function_selector = 'getElementsByTagName';
+        }
+    }
+    var parent_element = el_parent || document;
+    var el = element_to_select.nodeName || (typeof element_to_select === 'undefined' ? 'undefined' : _typeof(element_to_select)) === 'object' ? element_to_select : parent_element[function_selector](element_to_select);
+    for (var i = 0; i < el.length; i++) {
+        funcToRun(el[i]);
+    }
+};
+
+module.exports = {
+    showLoadingImage: showLoadingImage,
+    getHighestZIndex: getHighestZIndex,
+    downloadCSV: downloadCSV,
+    template: template,
+    isEmptyObject: isEmptyObject,
+    getPropertyValue: getPropertyValue,
+    handleHash: handleHash,
+    clearable: clearable,
+    createElement: createElement,
+    applyToAllElements: applyToAllElements
+};
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 var getAppId = __webpack_require__(59).getAppId;
 var getSocketURL = __webpack_require__(59).getSocketURL;
 
@@ -394,7 +589,7 @@ var PromiseClass = function PromiseClass() {
 module.exports = BinarySocket;
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -406,11 +601,13 @@ var Cookies = __webpack_require__(42);
 var moment = __webpack_require__(8);
 var LocalStore = __webpack_require__(6).LocalStore;
 var State = __webpack_require__(6).State;
-var defaultRedirectUrl = __webpack_require__(10).defaultRedirectUrl;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var jpClient = __webpack_require__(9).jpClient;
-var BinarySocket = __webpack_require__(2);
+var defaultRedirectUrl = __webpack_require__(9).defaultRedirectUrl;
+var applyToAllElements = __webpack_require__(2).applyToAllElements;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var jpClient = __webpack_require__(10).jpClient;
+var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
+var BinarySocket = __webpack_require__(3);
 var RealityCheckData = __webpack_require__(121);
 
 var Client = function () {
@@ -503,20 +700,37 @@ var Client = function () {
 
     var isAccountOfType = function isAccountOfType(type) {
         var loginid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : current_loginid;
+        var only_enabled = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
 
         var this_type = getAccountType(loginid);
-        return type === 'virtual' && this_type === 'virtual' || type === 'real' && this_type !== 'virtual' || type === this_type;
+        return (type === 'virtual' && this_type === 'virtual' || type === 'real' && this_type !== 'virtual' || type === this_type) && (only_enabled ? !get('is_disabled', loginid) : true);
     };
 
     var getAccountOfType = function getAccountOfType(type, only_enabled) {
         var id = getAllLoginids().find(function (loginid) {
-            return isAccountOfType(type, loginid) && (only_enabled ? !get('is_disabled', loginid) : true);
+            return isAccountOfType(type, loginid, only_enabled);
         });
         return id ? $.extend({ loginid: id }, get(null, id)) : {};
     };
 
     var hasAccountType = function hasAccountType(type, only_enabled) {
         return !isEmptyObject(getAccountOfType(type, only_enabled));
+    };
+
+    // only considers currency of real money accounts
+    // @param {String} type = crypto|fiat
+    var hasCurrencyType = function hasCurrencyType(type) {
+        var loginids = getAllLoginids();
+        if (type === 'crypto') {
+            // find if has crypto currency account
+            return loginids.find(function (loginid) {
+                return !get('is_virtual', loginid) && isCryptocurrency(get('currency', loginid));
+            });
+        }
+        // else find if have fiat currency account
+        return loginids.find(function (loginid) {
+            return !get('is_virtual', loginid) && !isCryptocurrency(get('currency', loginid));
+        });
     };
 
     var types_map = {
@@ -633,24 +847,44 @@ var Client = function () {
         return !data.gaming_company && hasShortCode(data.financial_company, 'japan');
     };
 
-    var activateByClientType = function activateByClientType() {
-        var section = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'body';
+    var activateByClientType = function activateByClientType(section_id) {
+        var topbar = document.getElementById('topbar');
+        if (!topbar) {
+            return;
+        }
+        var topbar_class = topbar.classList;
+        var el_section = section_id ? document.getElementById(section_id) : document.body;
+        var primary_bg_color_dark = 'primary-bg-color-dark';
+        var secondary_bg_color = 'secondary-bg-color';
 
         if (isLoggedIn()) {
             BinarySocket.wait('authorize', 'website_status').then(function () {
-                $('#client-logged-in').addClass('gr-centered');
-                $('.client_logged_in').setVisibility(1);
+                document.getElementById('client-logged-in').classList.add('gr-centered');
+                applyToAllElements('.client_logged_in', function (el) {
+                    el.setVisibility(1);
+                });
                 if (get('is_virtual')) {
-                    $(section).find('.client_virtual').setVisibility(1);
-                    $('#topbar').addClass('secondary-bg-color').removeClass('primary-bg-color-dark');
+                    applyToAllElements('.client_virtual', function (el) {
+                        el.setVisibility(1);
+                    }, '', el_section);
+                    topbar_class.add(secondary_bg_color);
+                    topbar_class.remove(primary_bg_color_dark);
                 } else {
-                    $(section).find('.client_real').not(jpClient() ? '.ja-hide' : '').setVisibility(1);
-                    $('#topbar').addClass('primary-bg-color-dark').removeClass('secondary-bg-color');
+                    applyToAllElements('.client_real', function (el) {
+                        if (!jpClient() || !/ja-hide/.test(el.classList)) {
+                            el.setVisibility(1);
+                        }
+                    }, '', el_section);
+                    topbar_class.add(primary_bg_color_dark);
+                    topbar_class.remove(secondary_bg_color);
                 }
             });
         } else {
-            $(section).find('.client_logged_out').setVisibility(1);
-            $('#topbar').addClass('primary-bg-color-dark').removeClass('secondary-bg-color');
+            applyToAllElements('.client_logged_out', function (el) {
+                el.setVisibility(1);
+            }, '', el_section);
+            topbar_class.add(primary_bg_color_dark);
+            topbar_class.remove(secondary_bg_color);
         }
     };
 
@@ -668,7 +902,12 @@ var Client = function () {
         clearAllAccounts();
         set('loginid', '');
         RealityCheckData.clear();
-        window.location.reload();
+        var redirect_to = getPropertyValue(response, ['echo_req', 'passthrough', 'redirect_to']);
+        if (redirect_to) {
+            window.location.href = redirect_to;
+        } else {
+            window.location.reload();
+        }
     };
 
     var cleanupCookies = function cleanupCookies() {
@@ -758,6 +997,10 @@ var Client = function () {
         return (landing_company_object || {})[key];
     };
 
+    var canTransferFunds = function canTransferFunds() {
+        return Client.hasAccountType('financial', true) && Client.hasAccountType('gaming', true) || hasCurrencyType('crypto') && hasCurrencyType('fiat');
+    };
+
     return {
         init: init,
         validateLoginid: validateLoginid,
@@ -768,6 +1011,7 @@ var Client = function () {
         getAccountOfType: getAccountOfType,
         isAccountOfType: isAccountOfType,
         hasAccountType: hasAccountType,
+        hasCurrencyType: hasCurrencyType,
         responseAuthorize: responseAuthorize,
         shouldAcceptTnc: shouldAcceptTnc,
         clearAllAccounts: clearAllAccounts,
@@ -782,144 +1026,12 @@ var Client = function () {
         getAccountTitle: getAccountTitle,
         activateByClientType: activateByClientType,
         currentLandingCompany: currentLandingCompany,
-        getLandingCompanyValue: getLandingCompanyValue
+        getLandingCompanyValue: getLandingCompanyValue,
+        canTransferFunds: canTransferFunds
     };
 }();
 
 module.exports = Client;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Write loading image to a container for ajax request
- *
- * @param $container: a jQuery object
- * @param theme: dark or white
- */
-var showLoadingImage = function showLoadingImage($container) {
-    var theme = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'dark';
-
-    $container.html($('<div/>', {
-        class: 'barspinner ' + theme,
-        html: Array.from(new Array(5)).map(function (x, i) {
-            return '<div class="rect' + (i + 1) + '"></div>';
-        }).join('')
-    }));
-};
-
-/**
- * Returns the highest z-index in the page.
- * Accepts a jquery style selector to only check those elements,
- * uses all container tags by default
- * If no element found, returns null.
- *
- * @param selector: a jquery style selector for target elements
- * @return int|null
- */
-var getHighestZIndex = function getHighestZIndex() {
-    var selector = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'div,p,area,nav,section,header,canvas,aside,span';
-
-    var all = [];
-    var store_zindex = function store_zindex() {
-        if ($(this).is(':visible')) {
-            var z = $(this).css('z-index');
-            if (!isNaN(z)) {
-                all.push(z);
-            }
-        }
-    };
-    $(selector).each(store_zindex);
-
-    return all.length ? Math.max.apply(Math, all) : null;
-};
-
-var downloadCSV = function downloadCSV(csv_contents) {
-    var filename = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'data.csv';
-
-    if (navigator.msSaveBlob) {
-        // IE 10+
-        navigator.msSaveBlob(new Blob([csv_contents], { type: 'text/csv;charset=utf-8;' }), filename);
-    } else {
-        // Other browsers
-        var csv = 'data:text/csv;charset=utf-8,' + csv_contents;
-        var download_link = document.createElement('a');
-        download_link.href = encodeURI(csv);
-        download_link.download = filename;
-
-        document.body.appendChild(download_link);
-        download_link.click();
-        document.body.removeChild(download_link);
-    }
-};
-
-var template = function template(string, content) {
-    return string.replace(/\[_(\d+)]/g, function (s, index) {
-        return content[+index - 1];
-    });
-};
-
-var isEmptyObject = function isEmptyObject(obj) {
-    var is_empty = true;
-    if (obj && obj instanceof Object) {
-        Object.keys(obj).forEach(function (key) {
-            if (Object.prototype.hasOwnProperty.call(obj, key)) is_empty = false;
-        });
-    }
-    return is_empty;
-};
-
-var cloneObject = function cloneObject(obj) {
-    return !isEmptyObject(obj) ? $.extend(true, Array.isArray(obj) ? [] : {}, obj) : obj;
-};
-
-var getPropertyValue = function getPropertyValue(obj, k) {
-    var keys = k;
-    if (!Array.isArray(keys)) keys = [keys];
-    if (!isEmptyObject(obj) && keys[0] in obj && keys && keys.length > 1) {
-        return getPropertyValue(obj[keys[0]], keys.slice(1));
-    }
-    // else return clone of object to avoid overwriting data
-    return obj ? cloneObject(obj[keys[0]]) : undefined;
-};
-
-var handleHash = function handleHash() {
-    var hash = window.location.hash;
-    if (hash) {
-        $('a[href="' + hash + '"]').click();
-    }
-};
-
-var clearable = function clearable(element) {
-    element.addClass('clear');
-    $(document).on('mousemove', '.clear', function (e) {
-        e.stopPropagation();
-        $(e.currentTarget)[toggleAddRemoveClass(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onClear');
-    }).on('mousedown', '.onClear', function (e) {
-        e.stopPropagation();
-        $(e.currentTarget).attr('data-value', '');
-        $(e.currentTarget).removeClass('clear onClear').val('').change();
-    });
-};
-
-var toggleAddRemoveClass = function toggleAddRemoveClass(condition) {
-    return condition ? 'addClass' : 'removeClass';
-};
-
-module.exports = {
-    showLoadingImage: showLoadingImage,
-    getHighestZIndex: getHighestZIndex,
-    downloadCSV: downloadCSV,
-    template: template,
-    isEmptyObject: isEmptyObject,
-    getPropertyValue: getPropertyValue,
-    handleHash: handleHash,
-    clearable: clearable
-};
 
 /***/ }),
 /* 5 */
@@ -927,6 +1039,8 @@ module.exports = {
 
 "use strict";
 
+
+var createElement = __webpack_require__(2).createElement;
 
 // show hedging value if trading purpose is set to hedging else hide it
 var detectHedging = function detectHedging($purpose, $hedging) {
@@ -947,12 +1061,11 @@ var jqueryuiTabsToDropdown = function jqueryuiTabsToDropdown($container) {
 };
 
 var makeOption = function makeOption(options) {
-    var option_el = document.createElement('option');
-    option_el.text = options.text;
     // setting null value helps with detecting required error
     // on 'Please select' options
     // that have no value of their own
-    option_el.value = options.value || '';
+    var option_el = createElement('option', { text: options.text, value: options.value || '' });
+
     if (options.is_disabled && options.is_disabled.toLowerCase() === 'disabled') {
         option_el.setAttribute('disabled', 'disabled');
     }
@@ -979,9 +1092,7 @@ var isVisible = function isVisible(elem) {
  * send a wrong val in case browser 'pretends' to support
  */
 var checkInput = function checkInput(type, wrong_val) {
-    var input = document.createElement('input');
-    input.setAttribute('type', type);
-    input.setAttribute('value', wrong_val);
+    var input = createElement('input', { type: type, value: wrong_val });
     return input.value !== wrong_val;
 };
 
@@ -1050,8 +1161,8 @@ module.exports = {
 
 
 var Cookies = __webpack_require__(42);
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 var getObject = function getObject(key) {
     return JSON.parse(this.getItem(key) || '{}');
@@ -1272,10 +1383,10 @@ module.exports = {
 "use strict";
 
 
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 
 var currencies_config = {};
 
@@ -1393,11 +1504,125 @@ module.exports = {
 "use strict";
 
 
+var urlLang = __webpack_require__(17).urlLang;
+var urlForLanguage = __webpack_require__(17).urlFor;
+var jpClient = __webpack_require__(10).jpClient;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var createElement = __webpack_require__(2).createElement;
+__webpack_require__(492);
+
+var Url = function () {
+    var location_url = void 0,
+        static_host = void 0;
+
+    var init = function init(url) {
+        location_url = url ? getLocation(url) : window.location;
+    };
+
+    var getLocation = function getLocation(url) {
+        return createElement('a', { href: decodeURIComponent(url) });
+    };
+
+    var reset = function reset() {
+        location_url = window ? window.location : location_url;
+    };
+
+    var params = function params(href) {
+        var arr_params = [];
+        var parsed = ((href ? new URL(href) : location_url).search || '').substr(1).split('&');
+        var p_l = parsed.length;
+        while (p_l--) {
+            var param = parsed[p_l].split('=');
+            arr_params.push(param);
+        }
+        return arr_params;
+    };
+
+    var paramsHash = function paramsHash(href) {
+        var param_hash = {};
+        var arr_params = params(href);
+        var param = arr_params.length;
+        while (param--) {
+            if (arr_params[param][0]) {
+                param_hash[arr_params[param][0]] = arr_params[param][1] || '';
+            }
+        }
+        return param_hash;
+    };
+
+    var paramsHashToString = function paramsHashToString(pars) {
+        return isEmptyObject(pars) ? '' : Object.keys(pars).map(function (key) {
+            return key + '=' + (pars[key] || '');
+        }).join('&');
+    };
+
+    var normalizePath = function normalizePath(path) {
+        return path ? path.replace(/(^\/|\/$|[^a-zA-Z0-9-_/])/g, '') : '';
+    };
+
+    var urlFor = function urlFor(path, pars, language) {
+        var lang = (language || urlLang()).toLowerCase();
+        // url language might differ from passed language, so we will always replace using the url language
+        var url_lang = language ? urlLang().toLowerCase() : lang;
+        var url = window.location.href;
+        var new_url = '' + url.substring(0, url.indexOf('/' + url_lang + '/') + url_lang.length + 2) + (normalizePath(path) || 'home' + (lang === 'ja' ? '-jp' : '')) + '.html' + (pars ? '?' + pars : '');
+        // replace old lang with new lang
+        return urlForLanguage(lang, new_url);
+    };
+
+    var urlForStatic = function urlForStatic() {
+        var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+        if (!static_host || static_host.length === 0) {
+            static_host = document.querySelector('script[src*="binary.min.js"],script[src*="binary.js"]').getAttribute('src');
+
+            if (static_host && static_host.length > 0) {
+                static_host = static_host.substr(0, static_host.indexOf('/js/') + 1);
+            } else {
+                static_host = Url.websiteUrl();
+            }
+        }
+
+        return static_host + path.replace(/(^\/)/g, '');
+    };
+
+    var defaultRedirectUrl = function defaultRedirectUrl() {
+        return urlFor(jpClient() ? 'multi_barriers_trading' : 'trading');
+    };
+
+    return {
+        init: init,
+        reset: reset,
+        paramsHash: paramsHash,
+        getLocation: getLocation,
+        paramsHashToString: paramsHashToString,
+        urlFor: urlFor,
+        urlForStatic: urlForStatic,
+        defaultRedirectUrl: defaultRedirectUrl,
+
+        param: function param(name) {
+            return paramsHash()[name];
+        },
+        websiteUrl: function websiteUrl() {
+            return 'https://www.binary.com/';
+        }
+    };
+}();
+
+module.exports = Url;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var Crowdin = __webpack_require__(148);
 var Language = __webpack_require__(17);
 var LocalStore = __webpack_require__(6).LocalStore;
 var createLanguageDropDown = __webpack_require__(221);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 
 var checkClientsCountry = function checkClientsCountry() {
     if (Crowdin.isInContext()) return;
@@ -1461,122 +1686,8 @@ module.exports = {
 };
 
 /***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var urlLang = __webpack_require__(17).urlLang;
-var urlForLanguage = __webpack_require__(17).urlFor;
-var jpClient = __webpack_require__(9).jpClient;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-__webpack_require__(492);
-
-var Url = function () {
-    var location_url = void 0,
-        static_host = void 0;
-
-    var init = function init(url) {
-        location_url = url ? getLocation(url) : window.location;
-    };
-
-    var getLocation = function getLocation(url) {
-        return $('<a>', { href: decodeURIComponent(url) })[0];
-    };
-
-    var reset = function reset() {
-        location_url = window ? window.location : location_url;
-    };
-
-    var params = function params(href) {
-        var arr_params = [];
-        var parsed = ((href ? new URL(href) : location_url).search || '').substr(1).split('&');
-        var p_l = parsed.length;
-        while (p_l--) {
-            var param = parsed[p_l].split('=');
-            arr_params.push(param);
-        }
-        return arr_params;
-    };
-
-    var paramsHash = function paramsHash(href) {
-        var param_hash = {};
-        var arr_params = params(href);
-        var param = arr_params.length;
-        while (param--) {
-            if (arr_params[param][0]) {
-                param_hash[arr_params[param][0]] = arr_params[param][1] || '';
-            }
-        }
-        return param_hash;
-    };
-
-    var paramsHashToString = function paramsHashToString(pars) {
-        return isEmptyObject(pars) ? '' : Object.keys(pars).map(function (key) {
-            return key + '=' + (pars[key] || '');
-        }).join('&');
-    };
-
-    var normalizePath = function normalizePath(path) {
-        return path ? path.replace(/(^\/|\/$|[^a-zA-Z0-9-_/])/g, '') : '';
-    };
-
-    var urlFor = function urlFor(path, pars, language) {
-        var lang = (language || urlLang()).toLowerCase();
-        // url language might differ from passed language, so we will always replace using the url language
-        var url_lang = language ? urlLang().toLowerCase() : lang;
-        var url = window.location.href;
-        var new_url = '' + url.substring(0, url.indexOf('/' + url_lang + '/') + url_lang.length + 2) + (normalizePath(path) || 'home' + (lang === 'ja' ? '-jp' : '')) + '.html' + (pars ? '?' + pars : '');
-        // replace old lang with new lang
-        return urlForLanguage(lang, new_url);
-    };
-
-    var urlForStatic = function urlForStatic() {
-        var path = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-
-        if (!static_host || static_host.length === 0) {
-            static_host = $('script[src*="binary.min.js"],script[src*="binary.js"]').attr('src');
-
-            if (static_host && static_host.length > 0) {
-                static_host = static_host.substr(0, static_host.indexOf('/js/') + 1);
-            } else {
-                static_host = Url.websiteUrl();
-            }
-        }
-
-        return static_host + path.replace(/(^\/)/g, '');
-    };
-
-    var defaultRedirectUrl = function defaultRedirectUrl() {
-        return urlFor(jpClient() ? 'multi_barriers_trading' : 'trading');
-    };
-
-    return {
-        init: init,
-        reset: reset,
-        paramsHash: paramsHash,
-        getLocation: getLocation,
-        paramsHashToString: paramsHashToString,
-        urlFor: urlFor,
-        urlForStatic: urlForStatic,
-        defaultRedirectUrl: defaultRedirectUrl,
-
-        param: function param(name) {
-            return paramsHash()[name];
-        },
-        websiteUrl: function websiteUrl() {
-            return 'https://www.binary.com/';
-        }
-    };
-}();
-
-module.exports = Url;
-
-/***/ }),
 /* 11 */,
-/* 12 */,
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1584,18 +1695,15 @@ module.exports = Url;
 
 var getLanguage = __webpack_require__(17).get;
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
+var createElement = __webpack_require__(2).createElement;
+var applyToAllElements = __webpack_require__(2).applyToAllElements;
 
 var BinaryPjax = function () {
-    var xhr = void 0,
-        previous_url = void 0;
+    var previous_url = void 0;
 
     var params = {};
     var cache = {};
-    var defaults = {
-        type: 'GET',
-        dataType: 'html'
-    };
 
     var init = function init(container, content_selector) {
         if (!(window.history && window.history.pushState && window.history.replaceState &&
@@ -1604,40 +1712,52 @@ var BinaryPjax = function () {
             return;
         }
 
-        var $container = $(container);
-
-        if (!$container.length || !(content_selector && content_selector.length)) {
+        if (!container || !content_selector) {
             return;
         }
 
-        params.container = $container;
+        params.container = container;
         params.content_selector = content_selector;
 
         var url = window.location.href;
         var title = document.title;
-        var content = $container.find(content_selector);
+        var content = container.querySelector(content_selector);
 
         // put current content to cache, so we won't need to load it again
-        if (content && content.length) {
+        if (content) {
             window.history.replaceState({ url: url }, title, url);
             setDataPage(content, url);
-            params.container.trigger('binarypjax:after', content);
+            params.container.dispatchEvent(new CustomEvent('binarypjax:after', { detail: content }));
         }
 
-        $(document).find('#all-accounts a').on('click', handleClick);
-        $(document).on('click', 'a', handleClick);
-        $(window).on('popstate', handlePopstate);
+        applyToAllElements('a', function (el) {
+            el.addEventListener('click', handleClick);
+        }, '', document.getElementById('all-accounts'));
+        document.addEventListener('click', function (event) {
+            if (event.target.nodeName === 'A') {
+                handleClick(event);
+            }
+        });
+        window.addEventListener('popstate', handlePopstate);
     };
 
     var setDataPage = function setDataPage(content, url) {
-        content.attr('data-page', url.match(/.+\/(.+)\.html.*/)[1]);
+        content.setAttribute('data-page', url.match(/.+\/(.+)\.html.*/)[1]);
     };
 
     var handleClick = function handleClick(event) {
-        var link = event.currentTarget;
+        var link = void 0;
+        if (event.target.nodeName === 'A') {
+            link = event.target;
+        } else if (event.target.parentNode.nodeName === 'A') {
+            link = event.target.parentNode;
+        } else {
+            return;
+        }
+
         var url = link.href;
 
-        if (url.length <= 0) {
+        if (!url) {
             return;
         }
 
@@ -1657,7 +1777,7 @@ var BinaryPjax = function () {
         }
 
         // Ignore event with default prevented
-        if (event.isDefaultPrevented()) {
+        if (event.defaultPrevented) {
             return;
         }
 
@@ -1686,18 +1806,21 @@ var BinaryPjax = function () {
      */
     var load = function load(url, replace) {
         var lang = getLanguage();
-        var options = $.extend(true, {}, $.ajaxSettings, defaults, {
-            url: url.replace(new RegExp('/' + lang + '/', 'i'), '/' + lang.toLowerCase() + '/pjax/')
-        });
+        var xhttp = new XMLHttpRequest();
 
-        options.success = function (data) {
-            var result = {};
+        xhttp.onreadystatechange = function () {
+            if (this.readyState !== 4 || this.status !== 200) {
+                return;
+            }
+            var div = createElement('div', { html: this.responseText });
 
-            result.title = $(data).find('title').text().trim();
-            result.content = $('<div/>', { html: data }).find(params.content_selector);
+            var result = {
+                title: div.getElementsByTagName('title')[0].textContent.trim(),
+                content: div.querySelector(params.content_selector)
+            };
 
             // If failed to find title or content, load the page in traditional way
-            if (result.title.length === 0 || result.content.length === 0) {
+            if (!result.title || !result.content) {
                 locationReplace(url);
                 return;
             }
@@ -1707,14 +1830,12 @@ var BinaryPjax = function () {
             replaceContent(url, result, replace);
         };
 
-        // Cancel the current request if we're already loading some page
-        abortXHR(xhr);
-
-        xhr = $.ajax(options);
+        xhttp.open('GET', url.replace(new RegExp('/' + lang + '/', 'i'), '/' + lang.toLowerCase() + '/pjax/'), true);
+        xhttp.send();
     };
 
     var handlePopstate = function handlePopstate(e) {
-        var url = e.originalEvent.state ? e.originalEvent.state.url : window.location.href;
+        var url = e.state ? e.state.url : window.location.href;
         if (url) {
             processUrl(url, true);
         }
@@ -1725,20 +1846,14 @@ var BinaryPjax = function () {
         previous_url = window.location.href;
         window.history[replace ? 'replaceState' : 'pushState']({ url: url }, content.title, url);
 
-        params.container.trigger('binarypjax:before');
+        params.container.dispatchEvent(new Event('binarypjax:before'));
 
         document.title = content.title;
-        params.container.find(params.content_selector).remove();
-        params.container.append(content.content.clone());
+        params.container.querySelector(params.content_selector).remove();
+        $(params.container).append($(content.content).clone());
 
-        params.container.trigger('binarypjax:after', content.content);
+        params.container.dispatchEvent(new CustomEvent('binarypjax:after', { detail: content.content }));
         $.scrollTo('body', 500);
-    };
-
-    var abortXHR = function abortXHR(xhr_obj) {
-        if (xhr_obj && xhr_obj.readyState < 4) {
-            xhr_obj.abort();
-        }
     };
 
     var cachePut = function cachePut(url, content) {
@@ -1779,6 +1894,7 @@ var BinaryPjax = function () {
 module.exports = BinaryPjax;
 
 /***/ }),
+/* 13 */,
 /* 14 */,
 /* 15 */,
 /* 16 */,
@@ -1790,6 +1906,8 @@ module.exports = BinaryPjax;
 
 var Cookies = __webpack_require__(42);
 var CookieStorage = __webpack_require__(6).CookieStorage;
+var applyToAllElements = __webpack_require__(2).applyToAllElements;
+var elementTextContent = __webpack_require__(5).elementTextContent;
 
 var Language = function () {
     var all_languages = {
@@ -1840,7 +1958,7 @@ var Language = function () {
             var crowdin_lang = Cookies.get('jipt_language_code_binary-static'); // selected language for in-context translation
             if (crowdin_lang) {
                 current_lang = crowdin_lang.toUpperCase().replace('-', '_').toUpperCase();
-                $('body').addClass(current_lang); // set the body class removed by crowdin code
+                document.body.classList.add(current_lang); // set the body class removed by crowdin code
             }
         }
         current_lang = current_lang || (languageFromUrl() || Cookies.get('language') || 'EN').toUpperCase();
@@ -1853,15 +1971,16 @@ var Language = function () {
     };
 
     var onChangeLanguage = function onChangeLanguage() {
-        var $this = void 0;
-        $('#select_language').find('li').on('click', function () {
-            $this = $(this);
-            var lang = $this.attr('class');
-            if (getLanguage() === lang) return;
-            $('#display_language').find('.language').text($this.text());
-            setCookieLanguage(lang);
-            document.location = urlForLanguage(lang);
-        });
+        applyToAllElements('li', function (el) {
+            el.addEventListener('click', function (e) {
+                var lang = e.target.getAttribute('class');
+                if (getLanguage() === lang) return;
+                var display_language = document.getElementById('display_language').getElementsByClassName('language');
+                elementTextContent(display_language, e.target.textContent);
+                setCookieLanguage(lang);
+                document.location = urlForLanguage(lang);
+            });
+        }, '', document.getElementById('select_language'));
     };
 
     return {
@@ -1950,19 +2069,17 @@ module.exports = {
 };
 
 /***/ }),
-/* 19 */,
-/* 20 */,
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Validation = __webpack_require__(71);
-var urlParam = __webpack_require__(10).param;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
-var BinarySocket = __webpack_require__(2);
+var urlParam = __webpack_require__(9).param;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
+var BinarySocket = __webpack_require__(3);
 
 var FormManager = function () {
     var forms = {};
@@ -2049,7 +2166,7 @@ var FormManager = function () {
         if ($btn.length && !$btn.find('.barspinner').length) {
             $btn.attr('disabled', 'disabled');
             var $btn_text = $('<span/>', { text: $btn.text(), class: 'invisible' });
-            showLoadingImage($btn, 'white');
+            showLoadingImage($btn[0], 'white');
             $btn.append($btn_text);
         }
     };
@@ -2110,14 +2227,16 @@ var FormManager = function () {
 module.exports = FormManager;
 
 /***/ }),
+/* 20 */,
+/* 21 */,
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Url = __webpack_require__(10);
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var Url = __webpack_require__(9);
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 var isVisible = __webpack_require__(5).isVisible;
 var State = __webpack_require__(6).State;
 
@@ -2214,8 +2333,8 @@ module.exports = Defaults;
 
 var moment = __webpack_require__(8);
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
-var jpClient = __webpack_require__(9).jpClient;
-var BinarySocket = __webpack_require__(2);
+var jpClient = __webpack_require__(10).jpClient;
+var BinarySocket = __webpack_require__(3);
 
 var Clock = function () {
     var clock_started = false;
@@ -2344,11 +2463,12 @@ var Defaults = __webpack_require__(22);
 var Notifications = __webpack_require__(85);
 var Symbols = __webpack_require__(57);
 var Tick = __webpack_require__(35);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var urlFor = __webpack_require__(10).urlFor;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var urlFor = __webpack_require__(9).urlFor;
+var createElement = __webpack_require__(2).createElement;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 var formatMoney = __webpack_require__(7).formatMoney;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
@@ -2373,9 +2493,8 @@ var commonTrading = function () {
             var tree = getContractCategoryTree(elements);
             for (var i = 0; i < tree.length; i++) {
                 var el1 = tree[i];
-                var li = document.createElement('li');
+                var li = createElement('li', { class: 'tm-li' });
 
-                li.classList.add('tm-li');
                 if (i === 0) {
                     li.classList.add('first');
                 } else if (i === tree.length - 1) {
@@ -2388,10 +2507,9 @@ var commonTrading = function () {
                     var first = '';
                     for (var j = 0; j < el1[1].length; j++) {
                         var el2 = el1[1][j];
-                        var li2 = document.createElement('li');
-                        var a2 = document.createElement('a');
+                        var li2 = createElement('li', { class: 'tm-li-2' });
+                        var a2 = createElement('a', { class: 'tm-a-2', menuitem: el2.toLowerCase(), id: el2.toLowerCase() });
                         var content2 = document.createTextNode(elements[el2]);
-                        li2.classList.add('tm-li-2');
 
                         if (j === 0) {
                             first = el2.toLowerCase();
@@ -2406,26 +2524,15 @@ var commonTrading = function () {
                             flag = 1;
                         }
 
-                        a2.classList.add('tm-a-2');
                         a2.appendChild(content2);
-                        a2.setAttribute('menuitem', el2.toLowerCase());
-                        a2.setAttribute('id', el2.toLowerCase());
-
                         li2.appendChild(a2);
-
                         fragment2.appendChild(li2);
                     }
                     if (fragment2.hasChildNodes()) {
-                        var ul = document.createElement('ul');
-                        var a = document.createElement('a');
-                        var content = document.createTextNode(elements[el1[0]]);
+                        var ul = createElement('ul', { class: 'tm-ul-2', id: el1[0] + '-submenu' });
+                        var a = createElement('a', { class: 'tm-a', menuitem: first, text: elements[el1[0]] });
 
-                        a.appendChild(content);
-                        a.setAttribute('class', 'tm-a');
-                        a.setAttribute('menuitem', first);
                         ul.appendChild(fragment2);
-                        ul.setAttribute('class', 'tm-ul-2');
-                        ul.setAttribute('id', el1[0] + '-submenu');
 
                         if (flag) {
                             li.classList.add('active');
@@ -2436,16 +2543,13 @@ var commonTrading = function () {
                     }
                 } else {
                     var content3 = document.createTextNode(elements[el1]);
-                    var a3 = document.createElement('a');
+                    var a3 = createElement('a', { class: 'tm-a', menuitem: el1, id: el1.toLowerCase() });
 
                     if (selected && selected === el1.toLowerCase()) {
                         a3.classList.add('a-active');
                         li.classList.add('active');
                     }
                     a3.appendChild(content3);
-                    a3.classList.add('tm-a');
-                    a3.setAttribute('menuitem', el1);
-                    a3.setAttribute('id', el1.toLowerCase());
                     li.appendChild(a3);
                 }
                 fragment.appendChild(li);
@@ -2477,21 +2581,17 @@ var commonTrading = function () {
         var keys1 = Object.keys(elements).sort(submarketSort);
         for (var i = 0; i < keys1.length; i++) {
             var key = keys1[i];
-            var content = document.createTextNode(elements[key].name);
-            var option = document.createElement('option');
-            option.setAttribute('value', key);
+            var option = createElement('option', { value: key, text: elements[key].name });
             if (selected && selected === key) {
                 option.setAttribute('selected', 'selected');
             }
-            option.appendChild(content);
             fragment.appendChild(option);
 
             if (elements[key].submarkets && !isEmptyObject(elements[key].submarkets)) {
                 var keys2 = Object.keys(elements[key].submarkets).sort(submarketSort);
                 for (var j = 0; j < keys2.length; j++) {
                     var key2 = keys2[j];
-                    option = document.createElement('option');
-                    option.setAttribute('value', key2);
+                    option = createElement('option', { value: key2 });
                     if (selected && selected === key2) {
                         option.setAttribute('selected', 'selected');
                     }
@@ -2552,13 +2652,10 @@ var commonTrading = function () {
         for (var j = 0; j < keys2.length; j++) {
             for (var k = 0; k < submarkets[keys2[j]].length; k++) {
                 var key = submarkets[keys2[j]][k];
-                var option = document.createElement('option');
-                var content = document.createTextNode(localize(elements[key].display));
-                option.setAttribute('value', key);
+                var option = createElement('option', { value: key, text: localize(elements[key].display) });
                 if (selected && selected === key) {
                     option.setAttribute('selected', 'selected');
                 }
-                option.appendChild(content);
                 fragment.appendChild(option);
             }
         }
@@ -3082,7 +3179,7 @@ module.exports = commonTrading;
 
 
 var moment = __webpack_require__(8);
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 
 /*
  * Display price/spot movement variation to depict price moved up or down
@@ -3201,7 +3298,7 @@ module.exports = {
 "use strict";
 
 
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 /*
  * Handles trading page default values
@@ -3462,19 +3559,23 @@ module.exports = Tick;
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var GTM = __webpack_require__(50);
 var localize = __webpack_require__(1).localize;
 var Login = __webpack_require__(69);
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
-var checkClientsCountry = __webpack_require__(9).checkClientsCountry;
-var jpClient = __webpack_require__(9).jpClient;
+var Url = __webpack_require__(9);
+var createElement = __webpack_require__(2).createElement;
+var applyToAllElements = __webpack_require__(2).applyToAllElements;
+var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
+var elementTextContent = __webpack_require__(5).elementTextContent;
+var checkClientsCountry = __webpack_require__(10).checkClientsCountry;
+var jpClient = __webpack_require__(10).jpClient;
 var toTitleCase = __webpack_require__(18).toTitleCase;
-var BinarySocket = __webpack_require__(2);
-var MetaTrader = __webpack_require__(168);
-var getCurrencies = __webpack_require__(166).getCurrencies;
+var BinarySocket = __webpack_require__(3);
+var MetaTrader = __webpack_require__(167);
+var getCurrencies = __webpack_require__(165).getCurrencies;
 
 var Header = function () {
     var onLoad = function onLoad() {
@@ -3483,29 +3584,56 @@ var Header = function () {
         if (!Login.isLoginPages()) {
             checkClientsCountry();
         }
-        if (Client.isLoggedIn()) {
-            $('ul#menu-top').addClass('smaller-font');
+        var menu = document.getElementById('menu-top');
+        if (menu && Client.isLoggedIn()) {
+            menu.classList.add('smaller-font');
             displayAccountStatus();
+            if (!Client.get('virtual')) {
+                BinarySocket.wait('website_status', 'authorize', 'balance').then(function () {
+                    if (Client.canTransferFunds()) {
+                        document.getElementById('user_menu_account_transfer').setVisibility(1);
+                    }
+                });
+            }
         }
     };
 
     var bindClick = function bindClick() {
-        $('#logo').off('click').on('click', function () {
-            BinaryPjax.load(Client.isLoggedIn() ? Url.defaultRedirectUrl() : Url.urlFor(''));
+        var logo = document.getElementById('logo');
+        if (logo) {
+            logo.removeEventListener('click', logoOnClick);
+            logo.addEventListener('click', logoOnClick);
+        }
+
+        var btn_login = document.getElementById('btn_login');
+        if (btn_login) {
+            btn_login.removeEventListener('click', loginOnClick);
+            btn_login.addEventListener('click', loginOnClick);
+        }
+
+        applyToAllElements('a.logout', function (el) {
+            el.removeEventListener('click', function () {
+                Client.sendLogoutRequest();
+            });
+            el.addEventListener('click', function () {
+                Client.sendLogoutRequest();
+            });
         });
-        $('#btn_login').off('click').on('click', function (e) {
-            e.preventDefault();
-            Login.redirectToLogin();
-        });
-        $('a.logout').off('click').on('click', function () {
-            Client.sendLogoutRequest();
-        });
+    };
+
+    var logoOnClick = function logoOnClick() {
+        BinaryPjax.load(Client.isLoggedIn() ? Url.defaultRedirectUrl() : Url.urlFor(''));
+    };
+
+    var loginOnClick = function loginOnClick(e) {
+        e.preventDefault();
+        Login.redirectToLogin();
     };
 
     var showOrHideLoginForm = function showOrHideLoginForm() {
         if (!Client.isLoggedIn()) return;
         BinarySocket.wait('authorize').then(function () {
-            var loginid_select = $('<div/>');
+            var loginid_select = document.createElement('div');
             Client.getAllLoginids().forEach(function (loginid) {
                 if (!Client.get('is_disabled', loginid)) {
                     var account_title = Client.getAccountTitle(loginid);
@@ -3514,26 +3642,42 @@ var Header = function () {
                     var localized_type = localize('[_1] Account', [is_real && currency ? currency : account_title]);
                     if (loginid === Client.get('loginid')) {
                         // default account
-                        $('.account-type').html(localized_type);
-                        $('.account-id').html(loginid);
+                        applyToAllElements('.account-type', function (el) {
+                            elementInnerHtml(el, localized_type);
+                        });
+                        applyToAllElements('.account-id', function (el) {
+                            elementInnerHtml(el, loginid);
+                        });
                     } else {
-                        loginid_select.append($('<a/>', { href: 'java' + 'script:;', 'data-value': loginid }).append($('<li/>', { text: localized_type }).append($('<div/>', { text: loginid })))).append($('<div/>', { class: 'separator-line-thin-gray' }));
+                        var link = createElement('a', { href: 'java' + 'script:;', 'data-value': loginid });
+                        var li_type = createElement('li', { text: localized_type });
+
+                        li_type.appendChild(createElement('div', { text: loginid }));
+                        link.appendChild(li_type);
+                        loginid_select.appendChild(link).appendChild(createElement('div', { class: 'separator-line-thin-gray' }));
                     }
                 }
-                var $this = void 0;
-                $('.login-id-list').html(loginid_select).find('a').off('click').on('click', function (e) {
-                    e.preventDefault();
-                    $this = $(this);
-                    $this.attr('disabled', 'disabled');
-                    switchLoginid($this.attr('data-value'));
+                applyToAllElements('.login-id-list', function (el) {
+                    el.html(loginid_select.innerHTML);
+                    applyToAllElements('a', function (ele) {
+                        ele.removeEventListener('click', loginIDOnClick);
+                        ele.addEventListener('click', loginIDOnClick);
+                    }, '', el);
                 });
             });
         });
     };
 
+    var loginIDOnClick = function loginIDOnClick(e) {
+        e.preventDefault();
+        var el_loginid = e.target.closest('A');
+        el_loginid.setAttribute('disabled', 'disabled');
+        switchLoginid(el_loginid.getAttribute('data-value'));
+    };
+
     var metatraderMenuItemVisibility = function metatraderMenuItemVisibility(landing_company_response) {
         if (MetaTrader.isEligible(landing_company_response)) {
-            $('#all-accounts').find('#user_menu_metatrader').setVisibility(1);
+            document.getElementById('user_menu_metatrader').setVisibility(1);
         }
     };
 
@@ -3549,17 +3693,24 @@ var Header = function () {
         // set local storage
         GTM.setLoginFlag();
         Client.set('loginid', loginid);
-        $('.login-id-list a').removeAttr('disabled');
         window.location.reload();
     };
 
     var upgradeMessageVisibility = function upgradeMessageVisibility() {
         BinarySocket.wait('authorize', 'landing_company', 'get_settings').then(function () {
             var landing_company = State.getResponse('landing_company');
-            var $upgrade_msg = $('.upgrademessage');
+            var upgrade_msg = document.getElementsByClassName('upgrademessage');
 
             var showUpgrade = function showUpgrade(url, msg) {
-                $upgrade_msg.setVisibility(1).find('a').setVisibility(1).attr('href', Url.urlFor(url)).html($('<span/>', { text: localize(msg) }));
+                var span = createElement('span', { text: localize(msg) });
+
+                applyToAllElements(upgrade_msg, function (el) {
+                    el.setVisibility(1);
+                    applyToAllElements('a', function (ele) {
+                        ele.setVisibility(1).setAttribute('href', Url.urlFor(url));
+                        ele.html(span);
+                    }, '', el);
+                });
             };
 
             var jp_account_status = State.getResponse('get_settings.jp_account_status.status');
@@ -3567,7 +3718,16 @@ var Header = function () {
             var show_upgrade_msg = upgrade_info.can_upgrade;
 
             if (Client.get('is_virtual')) {
-                $upgrade_msg.setVisibility(1).find('> span').setVisibility(1).end().find('a').setVisibility(0);
+                applyToAllElements(upgrade_msg, function (el) {
+                    el.setVisibility(1);
+                    var span = el.getElementsByTagName('span')[0];
+                    if (span) {
+                        span.setVisibility(1);
+                    }
+                    applyToAllElements('a', function (ele) {
+                        ele.setVisibility(0);
+                    }, '', el);
+                });
 
                 if (jp_account_status) {
                     var has_disabled_jp = jpClient() && Client.getAccountOfType('real').is_disabled;
@@ -3575,27 +3735,36 @@ var Header = function () {
                         // do not show upgrade for user that filled up form
                         showUpgrade('/new_account/knowledge_testws', '{JAPAN ONLY}Take knowledge test');
                     } else if (show_upgrade_msg || has_disabled_jp && jp_account_status !== 'disabled') {
-                        $upgrade_msg.setVisibility(1);
+                        applyToAllElements(upgrade_msg, function (el) {
+                            el.setVisibility(1);
+                        });
                         if (jp_account_status === 'jp_activation_pending') {
-                            if ($('.activation-message').length === 0) {
-                                $('#virtual-text').append($('<div/>', { class: 'activation-message', text: ' ' + localize('Your Application is Being Processed.') }));
+                            if (document.getElementsByClassName('activation-message').length === 0) {
+                                document.getElementById('virtual-text').appendChild(createElement('div', { class: 'activation-message', text: ' ' + localize('Your Application is Being Processed.') }));
                             }
                         } else if (jp_account_status === 'activated') {
-                            if ($('.activated-message').length === 0) {
-                                $('#virtual-text').append($('<div/>', { class: 'activated-message', text: ' ' + localize('{JAPAN ONLY}Your Application has Been Processed. Please Re-Login to Access Your Real-Money Account.') }));
+                            if (document.getElementsByClassName('activated-message').length === 0) {
+                                document.getElementById('virtual-text').appendChild(createElement('div', { class: 'activated-message', text: ' ' + localize('{JAPAN ONLY}Your Application has Been Processed. Please Re-Login to Access Your Real-Money Account.') }));
                             }
                         }
                     }
                 } else if (show_upgrade_msg) {
                     showUpgrade(upgrade_info.upgrade_link, 'Upgrade to a ' + toTitleCase(upgrade_info.type) + ' Account');
                 } else {
-                    $upgrade_msg.find('a').setVisibility(0).html('');
+                    applyToAllElements(upgrade_msg, function (el) {
+                        applyToAllElements('a', function (ele) {
+                            ele.setVisibility(0);
+                            ele.innerHTML = '';
+                        }, '', el);
+                    });
                 }
             } else if (show_upgrade_msg) {
-                $('#virtual-text').parent().setVisibility(0);
+                document.getElementById('virtual-text').parentNode.setVisibility(0);
                 showUpgrade(upgrade_info.upgrade_link, 'Open a Financial Account');
             } else {
-                $upgrade_msg.setVisibility(0);
+                applyToAllElements(upgrade_msg, function (el) {
+                    el.setVisibility(0);
+                });
             }
             showHideNewAccount(show_upgrade_msg);
         });
@@ -3612,33 +3781,48 @@ var Header = function () {
     };
 
     var changeAccountsText = function changeAccountsText(add_new_style, text) {
-        $('#user_accounts')[(add_new_style ? 'add' : 'remove') + 'Class']('create_new_account').find('li').text(localize(text));
+        var user_accounts = document.getElementById('user_accounts');
+        user_accounts.classList[add_new_style ? 'add' : 'remove']('create_new_account');
+        var localized_text = localize(text);
+        applyToAllElements('li', function (el) {
+            elementTextContent(el, localized_text);
+        }, '', user_accounts);
     };
 
-    var displayNotification = function displayNotification(message, is_error) {
+    var displayNotification = function displayNotification(message) {
+        var is_error = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
         var msg_code = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : '';
 
-        var $msg_notification = $('#msg_notification');
-        if ($msg_notification.attr('data-code') === 'STORAGE_NOT_SUPPORTED') return;
-        $msg_notification.html(message).attr({ 'data-message': message, 'data-code': msg_code });
-        if ($msg_notification.is(':hidden')) {
-            $msg_notification.slideDown(500, function () {
-                if (is_error) $msg_notification.addClass('error');
+        var msg_notification = document.getElementById('msg_notification');
+        if (!msg_notification) return;
+        if (msg_notification.getAttribute('data-code') === 'STORAGE_NOT_SUPPORTED') return;
+
+        msg_notification.html(message);
+        msg_notification.setAttribute('data-message', message);
+        msg_notification.setAttribute('data-code', msg_code);
+
+        if (!msg_notification.offsetParent) {
+            $(msg_notification).slideDown(500, function () {
+                if (is_error) msg_notification.classList.add('error');
             });
-        } else if (is_error) {
-            $msg_notification.addClass('error');
         } else {
-            $msg_notification.removeClass('error');
+            msg_notification.toggleClass('error', is_error);
         }
     };
 
     var hideNotification = function hideNotification(msg_code) {
-        var $msg_notification = $('#msg_notification');
-        if ($msg_notification.attr('data-code') === 'STORAGE_NOT_SUPPORTED') return;
-        if (msg_code && $msg_notification.attr('data-code') !== msg_code) return;
-        if ($msg_notification.is(':visible')) $msg_notification.removeClass('error').slideUp(500, function () {
-            $msg_notification.html('').removeAttr('data-message data-code');
-        });
+        var msg_notification = document.getElementById('msg_notification');
+        if (msg_notification.getAttribute('data-code') === 'STORAGE_NOT_SUPPORTED' || msg_code && msg_notification.getAttribute('data-code') !== msg_code) {
+            return;
+        }
+
+        if (msg_notification.offsetParent) {
+            msg_notification.classList.remove('error');
+            $(msg_notification).slideUp(500, function () {
+                elementInnerHtml(msg_notification, '');
+                msg_notification.removeAttribute('data-message data-code');
+            });
+        }
     };
 
     var displayAccountStatus = function displayAccountStatus() {
@@ -3776,12 +3960,12 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var Cookies = __webpack_require__(42);
 var moment = __webpack_require__(8);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
 var Login = __webpack_require__(69);
 var State = __webpack_require__(6).State;
 var isVisible = __webpack_require__(5).isVisible;
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var getAppId = __webpack_require__(59).getAppId;
 
 var GTM = function () {
@@ -4001,8 +4185,8 @@ var MBDefaults = __webpack_require__(34);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var jpClient = __webpack_require__(9).jpClient;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var jpClient = __webpack_require__(10).jpClient;
 var Config = __webpack_require__(59);
 
 var WebtraderChart = function () {
@@ -4120,11 +4304,11 @@ module.exports = WebtraderChart;
 
 var Barriers = __webpack_require__(114);
 var Barriers_Beta = __webpack_require__(116);
-var DigitInfo_Beta = __webpack_require__(247);
+var DigitInfo_Beta = __webpack_require__(248);
 var Purchase_Beta = __webpack_require__(157);
 var TickDisplay_Beta = __webpack_require__(158);
 var updateWarmChart = __webpack_require__(24).updateWarmChart;
-var DigitInfo = __webpack_require__(251);
+var DigitInfo = __webpack_require__(252);
 var Defaults = __webpack_require__(22);
 var getActiveTab = __webpack_require__(93).getActiveTab;
 var getActiveTab_Beta = __webpack_require__(93).getActiveTab_Beta;
@@ -4133,7 +4317,7 @@ var Tick = __webpack_require__(35);
 var TickDisplay = __webpack_require__(119);
 var MBDefaults = __webpack_require__(34);
 var MBTick = __webpack_require__(111);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var State = __webpack_require__(6).State;
 
 var GetTicks = function () {
@@ -4319,16 +4503,19 @@ module.exports = Symbols;
 
 var moment = __webpack_require__(8);
 var ViewPopupUI = __webpack_require__(95);
-var BinarySocket = __webpack_require__(2);
-var Highchart = __webpack_require__(252);
+var BinarySocket = __webpack_require__(3);
+var Highchart = __webpack_require__(253);
 var TickDisplay = __webpack_require__(119);
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
 var setViewPopupTimer = __webpack_require__(23).setViewPopupTimer;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var urlFor = __webpack_require__(9).urlFor;
+var createElement = __webpack_require__(2).createElement;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var jpClient = __webpack_require__(10).jpClient;
 var addComma = __webpack_require__(7).addComma;
 var formatMoney = __webpack_require__(7).formatMoney;
 
@@ -4445,7 +4632,7 @@ var ViewPopup = function () {
         }
 
         if (current_spot) {
-            containerSetText('trade_details_current_spot', addComma(current_spot));
+            containerSetText('trade_details_current_spot > span', addComma(current_spot));
         } else {
             $('#trade_details_current_spot').parent().setVisibility(0);
         }
@@ -4475,11 +4662,11 @@ var ViewPopup = function () {
         }
 
         if (!is_started) {
-            containerSetText('trade_details_entry_spot', '-');
+            containerSetText('trade_details_entry_spot > span', '-');
             containerSetText('trade_details_message', localize('Contract has not started yet'));
         } else {
             if (contract.entry_spot > 0) {
-                containerSetText('trade_details_entry_spot', addComma(contract.entry_spot));
+                containerSetText('trade_details_entry_spot > span', addComma(contract.entry_spot));
             }
             containerSetText('trade_details_message', contract.validation_error ? contract.validation_error : '&nbsp;');
         }
@@ -4558,6 +4745,264 @@ var ViewPopup = function () {
         $container.find('#errMsg').setVisibility(0);
         sellSetVisibility(false);
         // showWinLossStatus(is_win);
+        // don't show for japanese clients or contracts that are manually sold before starting
+        if (!jpClient() && (!contract.sell_spot_time || contract.sell_spot_time > contract.date_start)) {
+            initAuditTable(0);
+        }
+    };
+
+    var appendAuditLink = function appendAuditLink(element_id) {
+        var link = createElement('a', { href: 'java' + 'script:;', class: 'link-audit button-secondary' });
+        var span = createElement('span', { text: localize('Audit') });
+        link.appendChild(span);
+        link.addEventListener('click', function () {
+            initAuditTable(1);
+        });
+        document.getElementById(element_id).appendChild(link);
+    };
+
+    // by default shows audit table and hides chart
+    var setAuditVisibility = function setAuditVisibility() {
+        var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+        setAuditButtonsVisibility(!show);
+        document.getElementById('sell_details_chart_wrapper').setVisibility(!show);
+        document.getElementById('sell_details_audit').setVisibility(show);
+        ViewPopupUI.repositionConfirmation();
+    };
+
+    var setAuditButtonsVisibility = function setAuditButtonsVisibility() {
+        var show = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
+
+        var links = document.getElementsByClassName('link-audit');
+        for (var i = 0; i < links.length; i++) {
+            links[i].setVisibility(show);
+        }
+    };
+
+    var initAuditTable = function initAuditTable(show) {
+        if (document.getElementById('sell_details_audit')) {
+            if (show) {
+                setAuditVisibility(1);
+            } else {
+                setAuditButtonsVisibility(1);
+            }
+            return;
+        }
+
+        var div = createElement('div', { id: 'sell_details_audit', class: 'gr-8 gr-12-m gr-no-gutter invisible' });
+        var table = createElement('table', { id: 'audit_header', class: 'gr-12' });
+        var tr = createElement('tr', { class: 'gr-row' });
+        var th_previous = createElement('th', { class: 'gr-2 gr-3-t gr-3-p gr-3-m' });
+        var link = createElement('a', { class: 'previous-wrapper' });
+
+        link.appendChild(createElement('span', { class: 'previous align-self-center' }));
+        link.appendChild(createElement('span', { class: 'nowrap', text: localize('View Chart') }));
+        link.addEventListener('click', function () {
+            setAuditVisibility(0);
+        });
+        th_previous.appendChild(link);
+
+        tr.appendChild(th_previous);
+        tr.appendChild(createElement('th', { class: 'gr-8 gr-6-t gr-6-p gr-6-m', text: localize('Audit Page') }));
+        tr.appendChild(createElement('th', { class: 'gr-2 gr-3-t gr-3-p gr-3-m' }));
+        table.appendChild(tr);
+        populateAuditTable(show);
+
+        div.appendChild(table);
+        showExplanation(div);
+        div.insertAfter(document.getElementById('sell_details_chart_wrapper'));
+    };
+
+    var map_contract_type = {
+        'expiry': 'endsinout',
+        'asian': 'asian',
+        'even|odd': 'evenodd',
+        'over|under': 'overunder',
+        'digit': 'digits',
+        'upordown|range': 'staysinout',
+        'touch': 'touchnotouch',
+        'call|put': function callPut() {
+            return +contract.entry_tick === +contract.barrier ? 'risefall' : 'higherlower';
+        }
+    };
+
+    var showExplanation = function showExplanation(div) {
+        var explanation_section = 'explain_';
+        Object.keys(map_contract_type).some(function (type) {
+            if (new RegExp(type, 'i').test(contract.contract_type)) {
+                explanation_section += typeof map_contract_type[type] === 'function' ? map_contract_type[type]() : map_contract_type[type];
+                return true;
+            }
+            return false;
+        });
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState !== 4 || this.status !== 200) {
+                return;
+            }
+            var div_response = createElement('div', { html: this.responseText });
+            var div_to_show = div_response.querySelector('#' + explanation_section);
+            if (div_to_show) {
+                div_to_show.classList.add('align-start', 'gr-padding-20', 'explanation-section', 'gr-parent');
+                div.appendChild(div_to_show);
+                div_to_show.setVisibility(1);
+            }
+        };
+        xhttp.open('GET', urlFor('explanation'), true);
+        xhttp.send();
+    };
+
+    var parseTicksResponse = function parseTicksResponse(table, response, tick_time, remark) {
+        return new Promise(function (resolve) {
+            if (!response.history) {
+                return;
+            }
+            var has_start_time = !/entry/i.test(remark);
+            var has_end_time = !/exit/i.test(remark);
+            var secondary_classes = ['fill-bg-color', 'secondary-time'];
+            var found = response.history.times.some(function (time, idx) {
+                if (+time === +tick_time) {
+                    var i = idx - 3;
+                    for (i; i < idx + 4; i++) {
+                        var this_time = response.history.times[i];
+                        var this_price = response.history.prices[i];
+                        var is_start_time = +this_time === +contract.date_start;
+                        var is_end_time = +this_time === +contract.date_expiry;
+
+                        if (!has_start_time && +this_time > +contract.date_start) {
+                            createAuditRow(table, contract.date_start, '', localize('Start Time'), secondary_classes);
+                            has_start_time = true;
+                        } else if (!has_end_time && +this_time > +contract.date_expiry) {
+                            createAuditRow(table, contract.date_expiry, '', localize('End Time'), secondary_classes);
+                            has_end_time = true;
+                        }
+
+                        var pre_remark = is_end_time ? 'End Time and' : '';
+                        if (is_start_time) {
+                            pre_remark = 'Start Time and';
+                        }
+
+                        if (i === idx) {
+                            createAuditRow(table, this_time, this_price, localize(pre_remark + ' ' + remark), ['secondary-bg-color', 'content-inverse-color']);
+                        } else if (is_start_time) {
+                            createAuditRow(table, this_time, this_price, localize('Start Time'), secondary_classes);
+                            has_start_time = true;
+                        } else if (is_end_time) {
+                            createAuditRow(table, this_time, this_price, localize('End Time'), secondary_classes);
+                            has_end_time = true;
+                        } else {
+                            createAuditRow(table, this_time, this_price);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            });
+            resolve(found);
+        });
+    };
+
+    var createAuditTable = function createAuditTable(title) {
+        var div = createElement('div', { class: 'audit-table' });
+        var fieldset = createElement('fieldset', { class: 'align-start' });
+        var table = createElement('table', { class: 'gr-10 gr-centered gr-12-p gr-12-m' });
+        fieldset.appendChild(createElement('legend', { text: localize('Contract ' + title) }));
+        fieldset.appendChild(table);
+        div.appendChild(fieldset);
+        var insert_after = document.getElementById('audit_header');
+        var audit_table = document.getElementsByClassName('audit-table')[0];
+        if (audit_table) {
+            insert_after = audit_table;
+        }
+        div.insertAfter(insert_after);
+        return {
+            table: table,
+            div: div
+        };
+    };
+
+    var createAuditHeader = function createAuditHeader(table) {
+        var tr = createElement('tr', { class: 'gr-row' });
+
+        tr.appendChild(createElement('td', { class: 'gr-3' }));
+        tr.appendChild(createElement('td', { class: 'gr-4 no-margin secondary-color', text: localize('Spot') }));
+        tr.appendChild(createElement('td', { class: 'gr-5 no-margin secondary-color', text: localize('Spot Time') }));
+
+        table.insertBefore(tr, table.childNodes[0]);
+    };
+
+    var createAuditRow = function createAuditRow(table, date, tick, remark, td_class) {
+        // if we have already added this timestamp in first table, skip adding it again to second table
+        if (document.querySelector('.audit-dates[data-value=\'' + date + '\']')) {
+            return;
+        }
+
+        var tr = createElement('tr', { class: 'gr-row' });
+        var td_remark = createElement('td', { class: 'gr-3 remark', text: remark });
+        var td_tick = createElement('td', { class: 'gr-4', text: tick && !isNaN(tick) ? addComma(tick) : tick });
+        var td_date = createElement('td', { class: 'gr-5 audit-dates', 'data-value': date, 'data-balloon-pos': 'down', text: date && !isNaN(date) ? moment.utc(+date * 1000).format('YYYY-MM-DD HH:mm:ss') : date });
+
+        tr.appendChild(td_remark);
+        tr.appendChild(td_tick);
+        tr.appendChild(td_date);
+
+        if (td_class && td_class.length) {
+            td_class.forEach(function (c) {
+                td_tick.classList.add(c);
+                td_date.classList.add(c);
+            });
+        }
+
+        table.appendChild(tr);
+    };
+
+    var populateAuditTable = function populateAuditTable(show_audit_table) {
+        BinarySocket.send({
+            ticks_history: contract.underlying,
+            start: +contract.entry_tick_time - 5 * 60,
+            end: +contract.entry_tick_time + 5 * 60
+        }).then(function (response_entry) {
+            if (response_entry.error) {
+                return;
+            }
+            var contract_starts = createAuditTable('Starts');
+            parseTicksResponse(contract_starts.table, response_entry, contract.entry_tick_time, 'Entry Spot').then(function (found_entry) {
+                if (found_entry) {
+                    createAuditHeader(contract_starts.table);
+                    appendAuditLink('trade_details_entry_spot');
+                } else {
+                    contract_starts.div.remove();
+                }
+                // don't show exit tick information if missing or manual sold
+                if (contract.exit_tick_time && !(contract.sell_time && contract.sell_time < contract.date_expiry)) {
+                    BinarySocket.send({
+                        ticks_history: contract.underlying,
+                        start: +contract.exit_tick_time - 5 * 60,
+                        end: +contract.exit_tick_time + 5 * 60
+                    }).then(function (response_exit) {
+                        var contract_ends = createAuditTable('Ends');
+                        parseTicksResponse(contract_ends.table, response_exit, contract.exit_tick_time, 'Exit Spot').then(function (found_exit) {
+                            if (found_exit) {
+                                createAuditHeader(contract_ends.table);
+                                appendAuditLink('trade_details_current_spot');
+                            } else {
+                                contract_ends.div.remove();
+                            }
+                        });
+                    }).then(function () {
+                        onAuditTableComplete(show_audit_table);
+                    });
+                } else {
+                    onAuditTableComplete(show_audit_table);
+                }
+            });
+        });
+    };
+
+    var onAuditTableComplete = function onAuditTableComplete(show_audit_table) {
+        showLocalTimeOnHover('.audit-dates');
+        setAuditVisibility(show_audit_table);
     };
 
     var makeTemplate = function makeTemplate() {
@@ -4574,7 +5019,7 @@ var ViewPopup = function () {
             barrier_text = 'Target';
         }
 
-        $sections.find('#sell_details_table').append($('<table>\n            <tr id="contract_tabs"><th colspan="2" id="contract_information_tab">' + localize('Contract Information') + '</th></tr><tbody id="contract_information_content">\n            ' + createRow('Contract ID', '', 'trade_details_contract_id') + '\n            ' + createRow('Reference ID', '', 'trade_details_ref_id') + '\n            ' + createRow('Start Time', '', 'trade_details_start_date') + '\n            ' + (!contract.tick_count ? createRow('End Time', '', 'trade_details_end_date') + createRow('Remaining Time', '', 'trade_details_live_remaining') : '') + '\n            ' + createRow('Entry Spot', '', 'trade_details_entry_spot') + '\n            ' + createRow(barrier_text, '', 'trade_details_barrier', true) + '\n            ' + (contract.barrier_count > 1 ? createRow('Low Barrier', '', 'trade_details_barrier_low', true) : '') + '\n            ' + createRow('Potential Payout', '', 'trade_details_payout') + '\n            ' + createRow('Purchase Price', '', 'trade_details_purchase_price') + '\n            </tbody>\n            <th colspan="2" id="barrier_change" class="invisible">' + localize('Barrier Change') + '</th>\n            <tbody id="barrier_change_content" class="invisible"></tbody>\n            <tr><th colspan="2" id="trade_details_current_title">' + localize('Current') + '</th></tr>\n            ' + createRow('Spot', 'trade_details_spot_label', 'trade_details_current_spot') + '\n            ' + createRow('Spot Time', 'trade_details_spottime_label', 'trade_details_current_date') + '\n            ' + createRow('Current Time', '', 'trade_details_live_date') + '\n            ' + createRow('Indicative', 'trade_details_indicative_label', 'trade_details_indicative_price') + '\n            ' + createRow('Profit/Loss', '', 'trade_details_profit_loss') + '\n            <tr><td colspan="2" class="last_cell" id="trade_details_message">&nbsp;</td></tr>\n            </table>\n            <div id="errMsg" class="notice-msg ' + hidden_class + '"></div>\n            <div id="trade_details_bottom"><div id="contract_sell_wrapper" class="' + hidden_class + '"></div><div id="contract_sell_message"></div><div id="contract_win_status" class="' + hidden_class + '"></div></div>'));
+        $sections.find('#sell_details_table').append($('<table>\n            <tr id="contract_tabs"><th colspan="2" id="contract_information_tab">' + localize('Contract Information') + '</th></tr><tbody id="contract_information_content">\n            ' + createRow('Contract ID', '', 'trade_details_contract_id') + '\n            ' + createRow('Reference ID', '', 'trade_details_ref_id') + '\n            ' + createRow('Start Time', '', 'trade_details_start_date') + '\n            ' + (!contract.tick_count ? createRow('End Time', '', 'trade_details_end_date') + createRow('Remaining Time', '', 'trade_details_live_remaining') : '') + '\n            ' + createRow('Entry Spot', '', 'trade_details_entry_spot', 0, '<span></span>') + '\n            ' + createRow(barrier_text, '', 'trade_details_barrier', true) + '\n            ' + (contract.barrier_count > 1 ? createRow('Low Barrier', '', 'trade_details_barrier_low', true) : '') + '\n            ' + createRow('Potential Payout', '', 'trade_details_payout') + '\n            ' + createRow('Purchase Price', '', 'trade_details_purchase_price') + '\n            </tbody>\n            <th colspan="2" id="barrier_change" class="invisible">' + localize('Barrier Change') + '</th>\n            <tbody id="barrier_change_content" class="invisible"></tbody>\n            <tr><th colspan="2" id="trade_details_current_title">' + localize('Current') + '</th></tr>\n            ' + createRow('Spot', 'trade_details_spot_label', 'trade_details_current_spot', 0, '<span></span>') + '\n            ' + createRow('Spot Time', 'trade_details_spottime_label', 'trade_details_current_date') + '\n            ' + createRow('Current Time', '', 'trade_details_live_date') + '\n            ' + createRow('Indicative', 'trade_details_indicative_label', 'trade_details_indicative_price') + '\n            ' + createRow('Profit/Loss', '', 'trade_details_profit_loss') + '\n            <tr><td colspan="2" class="last_cell" id="trade_details_message">&nbsp;</td></tr>\n            </table>\n            <div id="errMsg" class="notice-msg ' + hidden_class + '"></div>\n            <div id="trade_details_bottom"><div id="contract_sell_wrapper" class="' + hidden_class + '"></div><div id="contract_sell_message"></div><div id="contract_win_status" class="' + hidden_class + '"></div></div>'));
 
         $sections.find('#sell_details_chart_wrapper').html($('<div/>', { id: contract.tick_count ? 'tick_chart' : 'analysis_live_chart', class: 'live_chart_wrapper' }));
 
@@ -4826,7 +5271,7 @@ module.exports = {
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
 var getAppId = __webpack_require__(59).getAppId;
 var isStorageSupported = __webpack_require__(6).isStorageSupported;
@@ -4991,10 +5436,14 @@ module.exports = Table;
 "use strict";
 
 
-var localize = __webpack_require__(1).localize;
+var Password = __webpack_require__(222);
 var addComma = __webpack_require__(7).addComma;
-var urlParam = __webpack_require__(10).param;
+var getDecimalPlaces = __webpack_require__(7).getDecimalPlaces;
 var compareBigUnsignedInt = __webpack_require__(18).compareBigUnsignedInt;
+var Client = __webpack_require__(4);
+var localize = __webpack_require__(1).localize;
+var urlParam = __webpack_require__(9).param;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 var Validation = function () {
     var forms = {};
@@ -5019,8 +5468,13 @@ var Validation = function () {
         return field.$.is(':checked') ? '1' : '';
     };
 
-    var getFieldValue = function getFieldValue(field) {
-        var value = field.type === 'checkbox' ? isChecked(field) : field.$.val();
+    var getFieldValue = function getFieldValue(field, options) {
+        var value = void 0;
+        if (typeof options.value === 'function') {
+            value = options.value();
+        } else {
+            value = field.type === 'checkbox' ? isChecked(field) : field.$.val();
+        }
         return value || '';
     };
 
@@ -5053,7 +5507,10 @@ var Validation = function () {
                     } else {
                         var $parent = field.$.parent();
                         // Add indicator to required fields
-                        if (/req/.test(field.validations)) {
+                        if (field.validations.find(function (v) {
+                            return (/^req$/.test(v) && (isEmptyObject(v[1]) || !v[1].hide_asterisk)
+                            );
+                        })) {
                             var $label = $parent.parent().find('label');
                             if (!$label.length) $label = $parent.find('label');
                             if ($label.length && $label.find('span.required_field_asterisk').length === 0) {
@@ -5099,9 +5556,13 @@ var Validation = function () {
         return (/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$/.test(value)
         );
     };
-    var validPassword = function validPassword(value) {
-        return (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]+/.test(value)
-        );
+    var validPassword = function validPassword(value, options, field) {
+        if (/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]+/.test(value)) {
+            Password.checkPassword(field.selector);
+            return true;
+        }
+        // else
+        return false;
     };
     var validLetterSymbol = function validLetterSymbol(value) {
         return !/[`~!@#$%^&*)(_=+[}{\]\\/";:?><,|\d]+/.test(value);
@@ -5110,7 +5571,7 @@ var Validation = function () {
         return !/[`~!@#$%^&*)(_=+[}{\]\\/";:?><|]+/.test(value);
     };
     var validAddress = function validAddress(value) {
-        return !/[`~!#$%^&*)(_=+[}{\]\\";:?><|]+/.test(value);
+        return !/[`~!$%^&*_=+[}{\]\\"?><|]+/.test(value);
     };
     var validPostCode = function validPostCode(value) {
         return (/^[a-zA-Z\d-\s]*$/.test(value)
@@ -5148,24 +5609,24 @@ var Validation = function () {
         var is_ok = true;
         var message = '';
 
-        if (+options.max < +options.min && options.custom_message) {
-            is_ok = false;
-            message = localize(options.custom_message);
-        } else if (!(options.type === 'float' ? /^\d+(\.\d+)?$/ : /^\d+$/).test(value) || !$.isNumeric(value)) {
+        if (!(options.type === 'float' ? /^\d+(\.\d+)?$/ : /^\d+$/).test(value) || !$.isNumeric(value)) {
             is_ok = false;
             message = localize('Should be a valid number');
         } else if (options.type === 'float' && options.decimals && !new RegExp('^\\d+(\\.\\d{' + options.decimals.replace(/ /g, '') + '})?$').test(value)) {
             is_ok = false;
             message = localize('Only [_1] decimal points are allowed.', [options.decimals]);
+        } else if ('min' in options && 'max' in options && +options.min === +options.max && +value !== +options.min) {
+            is_ok = false;
+            message = localize('Should be [_1]', [addComma(options.min, options.format_money ? getDecimalPlaces(Client.get('currency')) : undefined)]);
         } else if ('min' in options && 'max' in options && (+value < +options.min || isMoreThanMax(value, options))) {
             is_ok = false;
-            message = localize('Should be between [_1] and [_2]', [options.min, addComma(options.max)]);
+            message = localize('Should be between [_1] and [_2]', [addComma(options.min, options.format_money ? getDecimalPlaces(Client.get('currency')) : undefined), addComma(options.max, options.format_money ? getDecimalPlaces(Client.get('currency')) : undefined)]);
         } else if ('min' in options && +value < +options.min) {
             is_ok = false;
-            message = localize('Should be more than [_1]', [options.min]);
+            message = localize('Should be more than [_1]', [addComma(options.min, options.format_money ? getDecimalPlaces(Client.get('currency')) : undefined)]);
         } else if ('max' in options && isMoreThanMax(value, options)) {
             is_ok = false;
-            message = localize('Should be less than [_1]', [addComma(options.max)]);
+            message = localize('Should be less than [_1]', [addComma(options.max, options.format_money ? getDecimalPlaces(Client.get('currency')) : undefined)]);
         }
 
         validators_map.number.message = message;
@@ -5181,7 +5642,7 @@ var Validation = function () {
         email: { func: validEmail, message: 'Invalid email address' },
         password: { func: validPassword, message: 'Password should have lower and uppercase letters with numbers.' },
         general: { func: validGeneral, message: 'Only letters, numbers, space, hyphen, period, and apostrophe are allowed.' },
-        address: { func: validAddress, message: 'Only letters, numbers, space, hyphen, period, and apostrophe are allowed.' },
+        address: { func: validAddress, message: 'Only letters, numbers, space, and these special characters are allowed: - . \' # ; : ( ) , @ /' },
         letter_symbol: { func: validLetterSymbol, message: 'Only letters, space, hyphen, period, and apostrophe are allowed.' },
         postcode: { func: validPostCode, message: 'Only letters, numbers, space, and hyphen are allowed.' },
         phone: { func: validPhone, message: 'Only numbers and spaces are allowed.' },
@@ -5217,13 +5678,13 @@ var Validation = function () {
                 options = valid[1];
             }
 
-            if (type === 'password' && !validLength(getFieldValue(field), pass_length(options))) {
+            if (type === 'password' && !validLength(getFieldValue(field, options), pass_length(options))) {
                 field.is_ok = false;
                 type = 'length';
                 options = pass_length(options);
             } else {
                 var validator = type === 'custom' ? options.func : validators_map[type].func;
-                field.is_ok = validator(getFieldValue(field), options, field);
+                field.is_ok = validator(getFieldValue(field, options), options, field);
             }
 
             if (!field.is_ok) {
@@ -5258,6 +5719,7 @@ var Validation = function () {
 
     var showError = function showError(field, message) {
         clearError(field);
+        Password.removeCheck(field.selector);
         field.$error.text(localize(message)).setVisibility(1);
     };
 
@@ -5296,8 +5758,8 @@ module.exports = Validation;
 
 var moment = __webpack_require__(8);
 var localize = __webpack_require__(1).localize;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var clearable = __webpack_require__(4).clearable;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var clearable = __webpack_require__(2).clearable;
 var checkInput = __webpack_require__(5).checkInput;
 var toReadableFormat = __webpack_require__(18).toReadableFormat;
 var padLeft = __webpack_require__(18).padLeft;
@@ -5470,11 +5932,11 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 var moment = __webpack_require__(8);
 var MBDefaults = __webpack_require__(34);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var jpClient = __webpack_require__(9).jpClient;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var jpClient = __webpack_require__(10).jpClient;
 var padLeft = __webpack_require__(18).padLeft;
 
 /*
@@ -5844,8 +6306,8 @@ module.exports = MBContract;
 var getFormNameBarrierCategory = __webpack_require__(24).getFormNameBarrierCategory;
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 /*
  * Contract object mocks the trading form we have on our website
@@ -6065,8 +6527,8 @@ module.exports = Contract_Beta;
 var getFormNameBarrierCategory = __webpack_require__(24).getFormNameBarrierCategory;
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 /*
  * Contract object mocks the trading form we have on our website
@@ -6422,7 +6884,7 @@ var GetTicks = __webpack_require__(56);
 var MBDefaults = __webpack_require__(34);
 var getLanguage = __webpack_require__(17).get;
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
 var JapanPortfolio = __webpack_require__(171);
 
 /*
@@ -6476,11 +6938,9 @@ var TradingAnalysis = function () {
      */
     var loadAnalysisTab = function loadAnalysisTab(tab) {
         var current_tab = tab || getActiveTab();
-
         $('#betsBottomPage').find('li').removeClass('active');
         $('#' + current_tab).addClass('active');
         toggleActiveAnalysisTabs();
-
         JapanPortfolio.init();
         if (State.get('is_mb_trading')) {
             showChart();
@@ -6492,13 +6952,18 @@ var TradingAnalysis = function () {
             if (current_tab === 'tab_graph') {
                 showChart();
             } else if (current_tab === 'tab_last_digit') {
-                var underlying = $('#digit_underlying option:selected').val() || $('#underlying').find('option:selected').val();
+                var el_digit_underlying = $('#digit_underlying');
+                var underlying = $('#underlying option:selected').val();
                 var tick = $('#tick_count').val() || 100;
-                GetTicks.request('', {
-                    ticks_history: underlying,
-                    count: tick.toString(),
-                    end: 'latest'
-                });
+                if (underlying !== el_digit_underlying.val() && el_digit_underlying.val() !== null) {
+                    el_digit_underlying.find('option[value="' + underlying + '"]').prop('selected', true).trigger('change');
+                } else {
+                    GetTicks.request('', {
+                        ticks_history: underlying,
+                        count: tick.toString(),
+                        end: 'latest'
+                    });
+                }
             } else if (current_tab === 'tab_explanation') {
                 showExplanation();
             }
@@ -6663,14 +7128,14 @@ module.exports = Notifications;
 
 var Portfolio = __webpack_require__(162).Portfolio;
 var ViewPopup = __webpack_require__(58);
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
 var localize = __webpack_require__(1).localize;
-var urlParam = __webpack_require__(10).param;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var jpClient = __webpack_require__(9).jpClient;
+var urlParam = __webpack_require__(9).param;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var jpClient = __webpack_require__(10).jpClient;
 var formatMoney = __webpack_require__(7).formatMoney;
 var GetAppDetails = __webpack_require__(54);
 
@@ -6692,7 +7157,7 @@ var PortfolioInit = function () {
         oauth_apps = {};
         $portfolio_loading = $('#portfolio-loading');
         $portfolio_loading.show();
-        showLoadingImage($portfolio_loading);
+        showLoadingImage($portfolio_loading[0]);
         is_first_response = true;
         BinarySocket.send({ portfolio: 1 }).then(function (response) {
             updatePortfolio(response);
@@ -6999,9 +7464,9 @@ var displayPriceMovement = __webpack_require__(25).displayPriceMovement;
 var getStartDateNode = __webpack_require__(25).getStartDateNode;
 var getTradingTimes = __webpack_require__(25).getTradingTimes;
 var Defaults = __webpack_require__(22);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var isVisible = __webpack_require__(5).isVisible;
@@ -7314,7 +7779,7 @@ module.exports = Price_Beta;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var State = __webpack_require__(6).State;
 
 /*
@@ -7364,9 +7829,9 @@ var displayPriceMovement = __webpack_require__(25).displayPriceMovement;
 var getTradingTimes = __webpack_require__(25).getTradingTimes;
 var Contract = __webpack_require__(75);
 var Defaults = __webpack_require__(22);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var isVisible = __webpack_require__(5).isVisible;
@@ -7535,22 +8000,17 @@ var Price = function () {
         var setData = function setData() {
             var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            if (data.display_value) {
-                $('.stake:hidden').show();
-                elementTextContent(stake, localize('Stake') + ': ');
-                elementInnerHtml(amount, formatMoney(currency.value || currency.getAttribute('value'), data.display_value));
-                $('.stake_wrapper:hidden').show();
-            } else {
-                $('.stake_wrapper:visible').hide();
+            if (!data.display_value) {
+                amount.classList.remove('price_moved_up', 'price_moved_down');
             }
+            elementTextContent(stake, localize('Stake') + ': ');
+            elementInnerHtml(amount, data.display_value ? formatMoney(currency.value || currency.getAttribute('value'), data.display_value) : '-');
 
-            if (data.payout) {
-                elementTextContent(payout, localize('Payout') + ': ');
-                elementInnerHtml(payout_amount, formatMoney(currency.value || currency.getAttribute('value'), data.payout));
-                $('.payout_wrapper:hidden').show();
-            } else {
-                $('.payout_wrapper:visible').hide();
+            if (!data.payout) {
+                amount.classList.remove('price_moved_up', 'price_moved_down');
             }
+            elementTextContent(payout, localize('Payout') + ': ');
+            elementInnerHtml(payout_amount, data.payout ? formatMoney(currency.value || currency.getAttribute('value'), data.payout) : '-');
 
             if (data.longcode && window.innerWidth > 500) {
                 description.setAttribute('data-balloon', data.longcode);
@@ -7559,8 +8019,12 @@ var Price = function () {
             }
         };
 
+        var setPurchaseStatus = function setPurchaseStatus(enable) {
+            purchase.parentNode.classList[enable ? 'remove' : 'add']('button-disabled');
+        };
+
         if (details.error) {
-            purchase.hide();
+            setPurchaseStatus(0);
             comment.hide();
             setData();
             error.show();
@@ -7568,9 +8032,9 @@ var Price = function () {
         } else {
             setData(proposal);
             if ($('#websocket_form').find('.error-field:visible').length > 0) {
-                purchase.hide();
+                setPurchaseStatus(0);
             } else {
-                purchase.show();
+                setPurchaseStatus(1);
             }
             comment.show();
             error.hide();
@@ -7685,8 +8149,8 @@ module.exports = Price;
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var getHighestZIndex = __webpack_require__(4).getHighestZIndex;
+var BinarySocket = __webpack_require__(3);
+var getHighestZIndex = __webpack_require__(2).getHighestZIndex;
 var setViewPopupTimer = __webpack_require__(23).setViewPopupTimer;
 
 var ViewPopupUI = function () {
@@ -7904,14 +8368,14 @@ module.exports = ViewPopupUI;
 
 var Cookies = __webpack_require__(42);
 var generateBirthDate = __webpack_require__(150);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var urlFor = __webpack_require__(10).urlFor;
+var urlFor = __webpack_require__(9).urlFor;
 var makeOption = __webpack_require__(5).makeOption;
-var FormManager = __webpack_require__(21);
-var BinarySocket = __webpack_require__(2);
+var FormManager = __webpack_require__(19);
+var BinarySocket = __webpack_require__(3);
 __webpack_require__(203);
 
 var AccountOpening = function () {
@@ -8042,7 +8506,9 @@ var AccountOpening = function () {
     };
 
     var commonValidations = function commonValidations() {
-        var req = [{ selector: '#salutation', validations: ['req'] }, { selector: '#first_name', validations: ['req', 'letter_symbol', ['length', { min: 2, max: 30 }]] }, { selector: '#last_name', validations: ['req', 'letter_symbol', ['length', { min: 2, max: 30 }]] }, { selector: '#date_of_birth', validations: ['req'] }, { selector: '#address_line_1', validations: ['req', 'address', ['length', { min: 1, max: 70 }]] }, { selector: '#address_line_2', validations: ['address', ['length', { min: 0, max: 70 }]] }, { selector: '#address_city', validations: ['req', 'letter_symbol', ['length', { min: 1, max: 35 }]] }, { selector: '#address_state', validations: $('#address_state').prop('nodeName') === 'SELECT' ? '' : ['general', ['length', { min: 0, max: 35 }]] }, { selector: '#address_postcode', validations: [Client.get('residence') === 'gb' ? 'req' : '', 'postcode', ['length', { min: 0, max: 20 }]] }, { selector: '#phone', validations: ['req', 'phone', ['length', { min: 6, max: 35 }]] }, { selector: '#secret_question', validations: ['req'] }, { selector: '#secret_answer', validations: ['req', 'general', ['length', { min: 4, max: 50 }]] }, { selector: '#tnc', validations: [['req', { message: 'Please accept the terms and conditions.' }]], exclude_request: 1 }, { request_field: 'residence', value: Client.get('residence') }];
+        var req = [{ selector: '#salutation', validations: ['req'] }, { selector: '#first_name', validations: ['req', 'letter_symbol', ['length', { min: 2, max: 30 }]] }, { selector: '#last_name', validations: ['req', 'letter_symbol', ['length', { min: 2, max: 30 }]] }, { selector: '#date_of_birth', validations: ['req'] }, { selector: '#address_line_1', validations: ['req', 'address', ['length', { min: 1, max: 70 }]] }, { selector: '#address_line_2', validations: ['address', ['length', { min: 0, max: 70 }]] }, { selector: '#address_city', validations: ['req', 'letter_symbol', ['length', { min: 1, max: 35 }]] }, { selector: '#address_state', validations: $('#address_state').prop('nodeName') === 'SELECT' ? '' : ['general', ['length', { min: 0, max: 35 }]] }, { selector: '#address_postcode', validations: [Client.get('residence') === 'gb' ? 'req' : '', 'postcode', ['length', { min: 0, max: 20 }]] }, { selector: '#phone', validations: ['req', 'phone', ['length', { min: 6, max: 35, value: function value() {
+                    return $('#phone').val().replace(/^\+/, '');
+                } }]] }, { selector: '#secret_question', validations: ['req'] }, { selector: '#secret_answer', validations: ['req', 'general', ['length', { min: 4, max: 50 }]] }, { selector: '#tnc', validations: [['req', { message: 'Please accept the terms and conditions.' }]], exclude_request: 1 }, { request_field: 'residence', value: Client.get('residence') }];
 
         if (Cookies.get('affiliate_tracking')) {
             req.push({ request_field: 'affiliate_token', value: Cookies.getJSON('affiliate_tracking').t });
@@ -8061,6 +8527,7 @@ var AccountOpening = function () {
                 validation = { selector: '#' + id, validations: ['req'] };
                 if (id === 'not_pep') {
                     validation.exclude_request = 1;
+                    validation.validations = [['req', { message: localize('Please confirm that you are not a politically exposed person.') }]];
                 }
                 validations.push(validation);
             }
@@ -8163,7 +8630,7 @@ module.exports = FlexTableUI;
 
 var moment = __webpack_require__(8);
 var localize = __webpack_require__(1).localize;
-var clearable = __webpack_require__(4).clearable;
+var clearable = __webpack_require__(2).clearable;
 var checkInput = __webpack_require__(5).checkInput;
 var padLeft = __webpack_require__(18).padLeft;
 
@@ -8319,15 +8786,15 @@ module.exports = TimePicker;
 var MBContract = __webpack_require__(73);
 var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(91);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var TradingAnalysis = __webpack_require__(84);
 var ViewPopup = __webpack_require__(58);
 var redrawChart = __webpack_require__(55).redrawChart;
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var GTM = __webpack_require__(50);
 var localize = __webpack_require__(1).localize;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var jpClient = __webpack_require__(9).jpClient;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var jpClient = __webpack_require__(10).jpClient;
 var formatMoney = __webpack_require__(7).formatMoney;
 
 /*
@@ -8677,8 +9144,8 @@ module.exports = MBPrice;
 
 var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(91);
-var BinarySocket = __webpack_require__(2);
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var BinarySocket = __webpack_require__(3);
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 
 /*
  * MBTick object handles all the process/display related to tick streaming
@@ -8798,14 +9265,14 @@ module.exports = MBTick;
 "use strict";
 
 
-var AssetIndex = __webpack_require__(244);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var AssetIndex = __webpack_require__(245);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var State = __webpack_require__(6).State;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
 var Table = __webpack_require__(70);
 var jqueryuiTabsToDropdown = __webpack_require__(5).jqueryuiTabsToDropdown;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 
 var AssetIndexUI = function () {
     var $container = void 0,
@@ -8828,7 +9295,7 @@ var AssetIndexUI = function () {
 
         if ($container.contents().length) return;
 
-        showLoadingImage($container);
+        showLoadingImage($container[0]);
 
         is_framed = config && config.framed;
         if (!asset_index) {
@@ -8955,15 +9422,15 @@ module.exports = AssetIndexUI;
 
 
 var moment = __webpack_require__(8);
-var TradingTimes = __webpack_require__(245);
-var BinarySocket = __webpack_require__(2);
+var TradingTimes = __webpack_require__(246);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
 var Table = __webpack_require__(70);
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
 var jqueryuiTabsToDropdown = __webpack_require__(5).jqueryuiTabsToDropdown;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var toReadableFormat = __webpack_require__(18).toReadableFormat;
 var DatePicker = __webpack_require__(72);
@@ -8984,7 +9451,7 @@ var TradingTimesUI = function () {
 
         if ($container.contents().length) return;
 
-        showLoadingImage($container);
+        showLoadingImage($container[0]);
 
         is_framed = config && config.framed;
         if (!trading_times) {
@@ -9003,7 +9470,7 @@ var TradingTimesUI = function () {
                 return false;
             }
             $container.empty();
-            showLoadingImage($container);
+            showLoadingImage($container[0]);
             trading_times = null;
             sendRequest($date.attr('data-value'), !active_symbols);
             return true;
@@ -9353,10 +9820,10 @@ var MBDefaults = __webpack_require__(34);
 var AssetIndexUI = __webpack_require__(112);
 var TradingTimesUI = __webpack_require__(113);
 var PortfolioInit = __webpack_require__(86);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
 
 /*
  * This file contains the code related to loading of trading page bottom analysis
@@ -9722,10 +10189,11 @@ var Price_Beta = __webpack_require__(92);
 var commonTrading = __webpack_require__(24);
 var processTradingTimesAnswer = __webpack_require__(25).processTradingTimesAnswer;
 var Defaults = __webpack_require__(22);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var createElement = __webpack_require__(2).createElement;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var isVisible = __webpack_require__(5).isVisible;
 var toISOFormat = __webpack_require__(18).toISOFormat;
@@ -9847,10 +10315,7 @@ var Durations_Beta = function () {
     };
 
     var makeDurationOption = function makeDurationOption(map_min, map_max, is_selected) {
-        var option = document.createElement('option');
-        var content = document.createTextNode(map_min.text);
-        option.setAttribute('value', map_min.unit);
-        option.setAttribute('data-minimum', map_min.value);
+        var option = createElement('option', { value: map_min.unit, 'data-minimum': map_min.value, text: map_min.text });
         if (map_max.value && map_max.unit) {
             var max = convertDurationUnit(map_max.value, map_max.unit, map_min.unit);
             if (max) {
@@ -9860,7 +10325,6 @@ var Durations_Beta = function () {
         if (is_selected) {
             option.setAttribute('selected', 'selected');
         }
-        option.appendChild(content);
         return option;
     };
 
@@ -10014,24 +10478,18 @@ var Durations_Beta = function () {
             target.removeChild(target.firstChild);
         }
 
-        var option = document.createElement('option');
-        var content = document.createTextNode(localize('Duration'));
+        var option = createElement('option', { value: 'duration', text: localize('Duration') });
 
-        option.setAttribute('value', 'duration');
         if (current_selected === 'duration') {
             option.setAttribute('selected', 'selected');
         }
-        option.appendChild(content);
         fragment.appendChild(option);
 
         if (has_end_date) {
-            option = document.createElement('option');
-            content = document.createTextNode(localize('End Time'));
-            option.setAttribute('value', 'endtime');
+            option = createElement('option', { value: 'endtime', text: localize('End Time') });
             if (current_selected === 'endtime') {
                 option.setAttribute('selected', 'selected');
             }
-            option.appendChild(content);
             fragment.appendChild(option);
         }
         target.appendChild(fragment);
@@ -10156,10 +10614,11 @@ var commonIndependent = __webpack_require__(25);
 var Contract = __webpack_require__(75);
 var Defaults = __webpack_require__(22);
 var Price = __webpack_require__(94);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var createElement = __webpack_require__(2).createElement;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
 var isVisible = __webpack_require__(5).isVisible;
@@ -10287,10 +10746,7 @@ var Durations = function () {
     };
 
     var makeDurationOption = function makeDurationOption(map_min, map_max, is_selected) {
-        var option = document.createElement('option');
-        var content = document.createTextNode(map_min.text);
-        option.setAttribute('value', map_min.unit);
-        option.setAttribute('data-minimum', map_min.value);
+        var option = createElement('option', { value: map_min.unit, 'data-minimum': map_min.value, text: map_min.text });
         if (map_max.value && map_max.unit) {
             var max = convertDurationUnit(map_max.value, map_max.unit, map_min.unit);
             if (max) {
@@ -10300,7 +10756,6 @@ var Durations = function () {
         if (is_selected) {
             option.setAttribute('selected', 'selected');
         }
-        option.appendChild(content);
         return option;
     };
 
@@ -10369,6 +10824,14 @@ var Durations = function () {
         return obj;
     };
 
+    var duration_map = {
+        t: 'tick',
+        s: 'second',
+        m: 'minute',
+        h: 'hour',
+        d: 'day'
+    };
+
     var durationPopulate = function durationPopulate() {
         var unit = document.getElementById('duration_units');
         if (!unit.options[unit.selectedIndex]) return;
@@ -10377,6 +10840,7 @@ var Durations = function () {
         var unit_value = Defaults.get('duration_amount') || unit_min_value;
         unit.value = Defaults.get('duration_units') && document.querySelectorAll('select[id="duration_units"] [value="' + Defaults.get('duration_units') + '"]').length ? Defaults.get('duration_units') : unit.value;
         elementTextContent(document.getElementById('duration_minimum'), unit_min_value);
+        elementTextContent(document.getElementById('duration_unit'), localize(duration_map[unit.value] + (+unit_min_value > 1 ? 's' : '')));
         elementTextContent(document.getElementById('duration_maximum'), unit_max_value);
         if (selected_duration.amount && selected_duration.unit > unit_value) {
             unit_value = selected_duration.amount;
@@ -10522,24 +10986,18 @@ var Durations = function () {
             target.removeChild(target.firstChild);
         }
 
-        var option = document.createElement('option');
-        var content = document.createTextNode(localize('Duration'));
+        var option = createElement('option', { value: 'duration', text: localize('Duration') });
 
-        option.setAttribute('value', 'duration');
         if (current_selected === 'duration') {
             option.setAttribute('selected', 'selected');
         }
-        option.appendChild(content);
         fragment.appendChild(option);
 
         if (has_end_date) {
-            option = document.createElement('option');
-            content = document.createTextNode(localize('End Time'));
-            option.setAttribute('value', 'endtime');
+            option = createElement('option', { value: 'endtime', text: localize('End Time') });
             if (current_selected === 'endtime') {
                 option.setAttribute('selected', 'selected');
             }
-            option.appendChild(content);
             fragment.appendChild(option);
         }
         target.appendChild(fragment);
@@ -10646,11 +11104,21 @@ var Durations = function () {
         var duration_amount_element = document.getElementById('duration_amount');
         var duration_min_element = document.getElementById('duration_minimum');
         var duration_max_element = document.getElementById('duration_maximum');
-        if (!isVisible(duration_amount_element) || !isVisible(duration_min_element)) return;
-        if (+duration_amount_element.value < +duration_min_element.textContent || +duration_max_element.textContent && +duration_amount_element.value > +duration_max_element.textContent) {
+        var duration_wrapper_element = document.getElementById('duration_wrapper');
+        if (!isVisible(duration_amount_element)) {
+            duration_wrapper_element.setVisibility(0);
+            return;
+        }
+        duration_wrapper_element.setVisibility(1);
+        if (+duration_amount_element.value < +duration_min_element.textContent) {
             duration_amount_element.classList.add('error-field');
+            duration_wrapper_element.classList.add('error-msg');
+        } else if (+duration_max_element.textContent && +duration_amount_element.value > +duration_max_element.textContent) {
+            duration_amount_element.classList.add('error-field');
+            duration_wrapper_element.classList.remove('error-msg');
         } else {
             duration_amount_element.classList.remove('error-field');
+            duration_wrapper_element.classList.remove('error-msg');
         }
     };
 
@@ -10739,7 +11207,7 @@ module.exports = Durations;
 var moment = __webpack_require__(8);
 var Tick = __webpack_require__(35);
 var updatePurchaseStatus = __webpack_require__(120).updatePurchaseStatus;
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var ViewPopupUI = __webpack_require__(95);
 var localize = __webpack_require__(1).localize;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
@@ -11166,7 +11634,7 @@ module.exports = TickDisplay;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var formatMoney = __webpack_require__(7).formatMoney;
 
@@ -11317,6 +11785,7 @@ module.exports = RealityCheckData;
 
 
 var urlLang = __webpack_require__(17).urlLang;
+var createElement = __webpack_require__(2).createElement;
 
 var Crowdin = function () {
     /**
@@ -11333,15 +11802,12 @@ var Crowdin = function () {
      */
     var init = function init() {
         if (isInContextEnvironment()) {
-            $('#topbar ul[id$="_language"]').setVisibility(0);
+            document.querySelector('#topbar ul[id$="_language"]').setVisibility(0);
             /* eslint-disable no-underscore-dangle */
             window._jipt = [];
             window._jipt.push(['project', 'binary-static']);
             /* eslint-enable no-underscore-dangle */
-            $('body').append($('<script/>', {
-                type: 'text/javascript',
-                src: document.location.protocol + '//cdn.crowdin.com/jipt/jipt.js'
-            }));
+            document.body.appendChild(createElement('script', { type: 'text/javascript', src: document.location.protocol + '//cdn.crowdin.com/jipt/jipt.js' }));
         }
     };
 
@@ -11360,7 +11826,7 @@ module.exports = Crowdin;
 "use strict";
 
 
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 
 var ActiveSymbols = function () {
     var groupBy = function groupBy(xs, key) {
@@ -11705,10 +12171,11 @@ module.exports = Guide;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var CookieStorage = __webpack_require__(6).CookieStorage;
 var LocalStore = __webpack_require__(6).LocalStore;
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
+var AffiliatePopup = __webpack_require__(169);
 
 /*
  * Handles utm parameters/referrer to use on signup
@@ -11770,6 +12237,7 @@ var TrafficSource = function () {
         // Store gclid
         if (params.gclid && !Client.isLoggedIn()) {
             LocalStore.set('gclid', params.gclid);
+            AffiliatePopup.show();
         }
 
         var doc_ref = document.referrer;
@@ -11805,7 +12273,7 @@ module.exports = TrafficSource;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 
 var GetStarted = function () {
     var selectNavElement = function selectNavElement() {
@@ -11875,8 +12343,8 @@ module.exports = GetStarted;
 
 
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(21);
-var BinarySocket = __webpack_require__(2);
+var FormManager = __webpack_require__(19);
+var BinarySocket = __webpack_require__(3);
 
 var Home = function () {
     var clients_country = void 0;
@@ -11930,18 +12398,18 @@ var MBContract = __webpack_require__(73);
 var MBDefaults = __webpack_require__(34);
 var MBNotifications = __webpack_require__(91);
 var MBPrice = __webpack_require__(110);
-var MBSymbols = __webpack_require__(242);
+var MBSymbols = __webpack_require__(243);
 var MBTick = __webpack_require__(111);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var commonTrading = __webpack_require__(24);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var urlForStatic = __webpack_require__(10).urlForStatic;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
-var jpClient = __webpack_require__(9).jpClient;
+var urlForStatic = __webpack_require__(9).urlForStatic;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var jpClient = __webpack_require__(10).jpClient;
 var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
 
 var MBProcess = function () {
@@ -12324,19 +12792,19 @@ var TradingAnalysis_Beta = __webpack_require__(115);
 var Contract_Beta = __webpack_require__(74);
 var Durations_Beta = __webpack_require__(117);
 var Price_Beta = __webpack_require__(92);
-var StartDates_Beta = __webpack_require__(249);
+var StartDates_Beta = __webpack_require__(250);
 var commonTrading = __webpack_require__(24);
 var Defaults = __webpack_require__(22);
 var GetTicks = __webpack_require__(56);
 var Notifications = __webpack_require__(85);
 var Symbols = __webpack_require__(57);
 var Tick = __webpack_require__(35);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var AssetIndexUI = __webpack_require__(112);
 var TradingTimesUI = __webpack_require__(113);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 
 var Process_Beta = function () {
@@ -12605,8 +13073,9 @@ var TickDisplay_Beta = __webpack_require__(158);
 var commonTrading = __webpack_require__(24);
 var Symbols = __webpack_require__(57);
 var Tick = __webpack_require__(35);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
+var createElement = __webpack_require__(2).createElement;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var isVisible = __webpack_require__(5).isVisible;
@@ -12778,17 +13247,13 @@ var Purchase_Beta = function () {
             tick_elem.innerHTML = spot_elem.innerHTML = list_elem.innerHTML = '&nbsp;';
         }
         for (var i = 1; i <= duration; i++) {
-            var fragment = document.createElement('div');
-            fragment.classList.add('gr-grow');
+            var fragment = createElement('div', { class: 'gr-row' });
 
-            var digit_elem = document.createElement('div');
-            digit_elem.classList.add('digit');
-            digit_elem.id = 'tick_digit_' + i;
+            var digit_elem = createElement('div', { class: 'digit', id: 'tick_digit_' + i });
             elementInnerHtml(digit_elem, '&nbsp;');
             fragment.appendChild(digit_elem);
 
-            var number_elem = document.createElement('div');
-            number_elem.classList.add('number');
+            var number_elem = createElement('div', { class: 'number' });
             elementInnerHtml(number_elem, i);
             fragment.appendChild(number_elem);
 
@@ -12871,7 +13336,7 @@ module.exports = Purchase_Beta;
 var moment = __webpack_require__(8);
 var commonTrading = __webpack_require__(24);
 var Tick = __webpack_require__(35);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var ViewPopupUI = __webpack_require__(95);
 var localize = __webpack_require__(1).localize;
 var isVisible = __webpack_require__(5).isVisible;
@@ -13475,13 +13940,13 @@ var Durations = __webpack_require__(118);
 var GetTicks = __webpack_require__(56);
 var Notifications = __webpack_require__(85);
 var Price = __webpack_require__(94);
-var StartDates = __webpack_require__(255).StartDates;
+var StartDates = __webpack_require__(256).StartDates;
 var Symbols = __webpack_require__(57);
 var Tick = __webpack_require__(35);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
 var getMinPayout = __webpack_require__(7).getMinPayout;
@@ -13764,9 +14229,10 @@ var Symbols = __webpack_require__(57);
 var Tick = __webpack_require__(35);
 var TickDisplay = __webpack_require__(119);
 var updateValues = __webpack_require__(120);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var urlFor = __webpack_require__(10).urlFor;
+var urlFor = __webpack_require__(9).urlFor;
+var createElement = __webpack_require__(2).createElement;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var isVisible = __webpack_require__(5).isVisible;
@@ -13949,16 +14415,11 @@ var Purchase = function () {
             };
 
             if (isVisible(spots) && tick_d.epoch && tick_d.epoch > purchase_data.buy.start_time) {
-                var fragment = document.createElement('div');
-                fragment.classList.add('row');
-
-                var el1 = document.createElement('div');
-                el1.classList.add('col');
-                elementTextContent(el1, localize('Tick') + ' ' + (spots.getElementsByClassName('row').length + 1));
+                var fragment = createElement('div', { class: 'row' });
+                var el1 = createElement('div', { class: 'col', text: localize('Tick') + ' ' + (spots.getElementsByClassName('row').length + 1) });
                 fragment.appendChild(el1);
 
-                var el2 = document.createElement('div');
-                el2.classList.add('col');
+                var el2 = createElement('div', { class: 'col' });
                 var date = new Date(tick_d.epoch * 1000);
                 var hours = padLeft(date.getUTCHours(), 2, '0');
                 var minutes = padLeft(date.getUTCMinutes(), 2, '0');
@@ -13967,8 +14428,7 @@ var Purchase = function () {
                 fragment.appendChild(el2);
 
                 var tick = tick_d.quote.replace(/\d$/, replace);
-                var el3 = document.createElement('div');
-                el3.classList.add('col');
+                var el3 = createElement('div', { class: 'col' });
                 elementInnerHtml(el3, tick);
                 fragment.appendChild(el3);
 
@@ -14022,7 +14482,7 @@ module.exports = Purchase;
 
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
 var formatMoney = __webpack_require__(7).formatMoney;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 
 var Portfolio = function () {
     var getBalance = function getBalance(balance, currency) {
@@ -14091,37 +14551,10 @@ module.exports = {
 "use strict";
 
 
-var moment = __webpack_require__(8);
-
-var ApplicationsData = function () {
-    var parse = function parse(app) {
-        var last = app.last_used ? moment.utc(app.last_used) : null;
-        return {
-            name: app.name,
-            scopes: app.scopes,
-            last_used: last,
-            id: app.app_id
-        };
-    };
-
-    return {
-        parse: parse
-    };
-}();
-
-module.exports = ApplicationsData;
-
-/***/ }),
-/* 164 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var CashierPassword = function () {
     var form_id = '#frm_cashier_password';
@@ -14208,15 +14641,15 @@ var CashierPassword = function () {
 module.exports = CashierPassword;
 
 /***/ }),
-/* 165 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
@@ -14224,7 +14657,7 @@ var detectHedging = __webpack_require__(5).detectHedging;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var makeOption = __webpack_require__(5).makeOption;
 var formatMoney = __webpack_require__(7).formatMoney;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 var moment = __webpack_require__(8);
 __webpack_require__(203);
 
@@ -14381,7 +14814,9 @@ var PersonalDetails = function () {
         } else if (is_virtual) {
             validations = [{ selector: '#residence', validations: ['req'] }];
         } else {
-            validations = [{ selector: '#address_line_1', validations: ['req', 'address'] }, { selector: '#address_line_2', validations: ['address'] }, { selector: '#address_city', validations: ['req', 'letter_symbol'] }, { selector: '#address_state', validations: $('#address_state').prop('nodeName') === 'SELECT' ? '' : ['letter_symbol'] }, { selector: '#address_postcode', validations: [Client.get('residence') === 'gb' ? 'req' : '', 'postcode', ['length', { min: 0, max: 20 }]] }, { selector: '#phone', validations: ['req', 'phone', ['length', { min: 6, max: 35 }]] }, { selector: '#account_opening_reason', validations: ['req'] }, { selector: '#place_of_birth', validations: Client.isAccountOfType('financial') ? ['req'] : '' }, { selector: '#tax_residence', validations: Client.isAccountOfType('financial') ? ['req'] : '' }];
+            validations = [{ selector: '#address_line_1', validations: ['req', 'address'] }, { selector: '#address_line_2', validations: ['address'] }, { selector: '#address_city', validations: ['req', 'letter_symbol'] }, { selector: '#address_state', validations: $('#address_state').prop('nodeName') === 'SELECT' ? '' : ['letter_symbol'] }, { selector: '#address_postcode', validations: [Client.get('residence') === 'gb' ? 'req' : '', 'postcode', ['length', { min: 0, max: 20 }]] }, { selector: '#phone', validations: ['req', 'phone', ['length', { min: 6, max: 35, value: function value() {
+                        return $('#phone').val().replace(/^\+/, '');
+                    } }]] }, { selector: '#account_opening_reason', validations: ['req'] }, { selector: '#place_of_birth', validations: Client.isAccountOfType('financial') ? ['req'] : '' }, { selector: '#tax_residence', validations: Client.isAccountOfType('financial') ? ['req'] : '' }];
             var tax_id_validation = { selector: '#tax_identification_number', validations: ['postcode', ['length', { min: 0, max: 20 }]] };
             if (Client.isAccountOfType('financial')) {
                 tax_id_validation.validations[1][1].min = 1;
@@ -14540,13 +14975,13 @@ var PersonalDetails = function () {
 module.exports = PersonalDetails;
 
 /***/ }),
-/* 166 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var Currency = __webpack_require__(7);
 
 var GetCurrency = function () {
@@ -14622,18 +15057,18 @@ var GetCurrency = function () {
 module.exports = GetCurrency;
 
 /***/ }),
-/* 167 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var GTM = __webpack_require__(50);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var urlFor = __webpack_require__(10).urlFor;
+var urlFor = __webpack_require__(9).urlFor;
 var formatMoney = __webpack_require__(7).formatMoney;
 
 var MetaTraderConfig = function () {
@@ -14842,18 +15277,18 @@ var MetaTraderConfig = function () {
 module.exports = MetaTraderConfig;
 
 /***/ }),
-/* 168 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var MetaTraderConfig = __webpack_require__(167);
-var MetaTraderUI = __webpack_require__(286);
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var MetaTraderConfig = __webpack_require__(166);
+var MetaTraderUI = __webpack_require__(285);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var Validation = __webpack_require__(71);
 
 var MetaTrader = function () {
@@ -15011,19 +15446,19 @@ var MetaTrader = function () {
 module.exports = MetaTrader;
 
 /***/ }),
-/* 169 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
 var State = __webpack_require__(6).State;
-var urlFor = __webpack_require__(10).urlFor;
-var template = __webpack_require__(4).template;
+var urlFor = __webpack_require__(9).urlFor;
+var template = __webpack_require__(2).template;
 
 var TNCApproval = function () {
     var onLoad = function onLoad() {
@@ -15087,20 +15522,64 @@ var TNCApproval = function () {
 module.exports = TNCApproval;
 
 /***/ }),
+/* 169 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var urlFor = __webpack_require__(9).urlFor;
+var Client = __webpack_require__(4);
+var jpClient = __webpack_require__(10).jpClient;
+var BinarySocket = __webpack_require__(3);
+
+var AffiliatePopup = function () {
+    var container_id = 'affiliate_disclaimer_popup';
+
+    var show = function show() {
+        if (Client.isLoggedIn() || $('#' + container_id).length) return;
+        BinarySocket.wait('website_status').then(function (response) {
+            if (jpClient() || response.website_status.clients_country === 'jp') {
+                $.ajax({
+                    url: urlFor('affiliate_disclaimer'),
+                    dataType: 'html',
+                    method: 'GET',
+                    success: function success(contents) {
+                        if ($('#' + container_id).length) return;
+                        $('body').append($('<div/>', { id: container_id, class: 'lightbox' }).append($('<div/>').append($(contents))));
+                        $('#btn_affiliate_proceed').off('click').on('click', close);
+                    }
+                });
+            }
+        });
+    };
+
+    var close = function close() {
+        $('#' + container_id).remove();
+    };
+
+    return {
+        show: show
+    };
+}();
+
+module.exports = AffiliatePopup;
+
+/***/ }),
 /* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var template = __webpack_require__(4).template;
-var jpClient = __webpack_require__(9).jpClient;
-var jpResidence = __webpack_require__(9).jpResidence;
-var BinarySocket = __webpack_require__(2);
+var template = __webpack_require__(2).template;
+var jpClient = __webpack_require__(10).jpClient;
+var jpResidence = __webpack_require__(10).jpResidence;
+var BinarySocket = __webpack_require__(3);
 
 var CashierJP = function () {
     var _onLoad = function _onLoad(action) {
@@ -15157,7 +15636,7 @@ module.exports = CashierJP;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var State = __webpack_require__(6).State;
 var PortfolioInit = __webpack_require__(86);
 
@@ -15299,18 +15778,19 @@ if (!('includes' in String.prototype)) {
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
+var BinaryPjax = __webpack_require__(12);
 var pages_config = __webpack_require__(215);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var GTM = __webpack_require__(50);
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
 var Login = __webpack_require__(69);
 var Page = __webpack_require__(219);
-var defaultRedirectUrl = __webpack_require__(10).defaultRedirectUrl;
 var isStorageSupported = __webpack_require__(6).isStorageSupported;
-var BinarySocket = __webpack_require__(2);
-var BinarySocketGeneral = __webpack_require__(246);
+var defaultRedirectUrl = __webpack_require__(9).defaultRedirectUrl;
+var createElement = __webpack_require__(2).createElement;
+var BinarySocket = __webpack_require__(3);
+var BinarySocketGeneral = __webpack_require__(247);
 
 var BinaryLoader = function () {
     var container = void 0;
@@ -15324,15 +15804,15 @@ var BinaryLoader = function () {
 
         if (!isStorageSupported(localStorage) || !isStorageSupported(sessionStorage)) {
             Header.displayNotification(localize('[_1] requires your browser\'s web storage to be enabled in order to function properly. Please enable it or exit private browsing mode.', ['Binary.com']), true, 'STORAGE_NOT_SUPPORTED');
-            $('#btn_login').addClass('button-disabled');
+            document.getElementById('btn_login').classList.add('button-disabled');
         }
 
         Client.init();
         BinarySocket.init(BinarySocketGeneral.initOptions());
 
-        container = $('#content-holder');
-        container.on('binarypjax:before', beforeContentChange);
-        container.on('binarypjax:after', afterContentChange);
+        container = document.getElementById('content-holder');
+        container.addEventListener('binarypjax:before', beforeContentChange);
+        container.addEventListener('binarypjax:after', afterContentChange);
         BinaryPjax.init(container, '#content');
     };
 
@@ -15347,10 +15827,10 @@ var BinaryLoader = function () {
         }
     };
 
-    var afterContentChange = function afterContentChange(e, content) {
+    var afterContentChange = function afterContentChange(e) {
         Page.onLoad();
         GTM.pushDataLayer();
-        var this_page = content.getAttribute('data-page');
+        var this_page = e.detail.getAttribute('data-page');
         if (this_page in pages_config) {
             loadHandler(pages_config[this_page]);
         } else if (/\/get-started\//i.test(window.location.pathname)) {
@@ -15406,11 +15886,20 @@ var BinaryLoader = function () {
     };
 
     var displayMessage = function displayMessage(message) {
-        var $content = container.find('#content .container');
-        $content.html($('<div/>', { class: 'logged_out_title_container', html: $content.find('h1')[0] })).append($('<p/>', { class: 'center-text notice-msg', html: localize(message) }));
-        $content.find('a').on('click', function () {
-            Login.redirectToLogin();
-        });
+        var content = container.querySelector('#content .container');
+        var div_container = createElement('div', { class: 'logged_out_title_container', html: content.getElementsByTagName('h1')[0] });
+        var div_notice = createElement('p', { class: 'center-text notice-msg', html: localize(message) });
+
+        div_container.appendChild(div_notice);
+
+        content.html(div_container);
+
+        var link = content.getElementsByTagName('a')[0];
+        if (link) {
+            link.addEventListener('click', function () {
+                Login.redirectToLogin();
+            });
+        }
     };
 
     return {
@@ -15452,7 +15941,7 @@ module.exports = {
 
 
 var moment = __webpack_require__(8);
-var urlForStatic = __webpack_require__(10).urlForStatic;
+var urlForStatic = __webpack_require__(9).urlForStatic;
 
 // only reload if it's more than 10 minutes since the last reload
 var shouldForceReload = function shouldForceReload(last_reload) {
@@ -18600,12 +19089,16 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 Element.prototype.hide = function () {
     this.style.display = 'none';
+    return this;
 };
 
 Element.prototype.show = function () {
     this.style.display = '';
+    return this;
 };
 
 if (!('remove' in Element.prototype)) {
@@ -18613,16 +19106,44 @@ if (!('remove' in Element.prototype)) {
         if (this.parentNode) {
             this.parentNode.removeChild(this);
         }
+        return this;
     };
 }
 
+Element.prototype.toggleClass = function (class_name, should_add) {
+    if (typeof should_add === 'undefined') {
+        // toggle
+        should_add = !this.classList.contains(class_name);
+    }
+    this.classList[should_add ? 'add' : 'remove'](class_name);
+    return this;
+};
+
+Element.prototype.setVisibility = function (make_visible) {
+    this.toggleClass('invisible', !make_visible);
+    return this;
+};
+
+Element.prototype.insertAfter = function (referenceNode) {
+    if (referenceNode && referenceNode.parentNode) {
+        referenceNode.parentNode.insertBefore(this, referenceNode.nextSibling);
+    }
+    return this;
+};
+
+Element.prototype.html = function (content) {
+    if ((typeof content === 'undefined' ? 'undefined' : _typeof(content)) === 'object') {
+        this.innerHTML = '';
+        this.appendChild(content);
+    } else {
+        this.innerHTML = content;
+    }
+    return this;
+};
+
 (function ($) {
     $.fn.setVisibility = function (make_visible) {
-        if (make_visible) {
-            this.removeClass('invisible');
-        } else {
-            this.addClass('invisible');
-        }
+        this[(make_visible ? 'remove' : 'add') + 'Class']('invisible');
         return this;
     };
 })(jQuery);
@@ -18658,66 +19179,66 @@ if (window.NodeList && !NodeList.prototype.forEach) {
 var LoggedInHandler = __webpack_require__(217);
 var Redirect = __webpack_require__(220);
 
-var Charity = __webpack_require__(223);
-var Contact = __webpack_require__(224);
-var Endpoint = __webpack_require__(225);
+var Charity = __webpack_require__(224);
+var Contact = __webpack_require__(225);
+var Endpoint = __webpack_require__(226);
 var GetStarted = __webpack_require__(153);
-var GetStartedJP = __webpack_require__(226);
+var GetStartedJP = __webpack_require__(227);
 var Home = __webpack_require__(154);
-var HomeJP = __webpack_require__(227);
-var JobDetails = __webpack_require__(228);
-var Platforms = __webpack_require__(229);
-var Regulation = __webpack_require__(230);
-var StaticPages = __webpack_require__(231);
-var TermsAndConditions = __webpack_require__(232);
-var VideoFacility = __webpack_require__(233);
-var WhyUs = __webpack_require__(234);
+var HomeJP = __webpack_require__(228);
+var JobDetails = __webpack_require__(229);
+var Platforms = __webpack_require__(230);
+var Regulation = __webpack_require__(231);
+var StaticPages = __webpack_require__(232);
+var TermsAndConditions = __webpack_require__(233);
+var VideoFacility = __webpack_require__(234);
+var WhyUs = __webpack_require__(235);
 
-var AccountTransfer = __webpack_require__(235);
-var Cashier = __webpack_require__(236);
-var DepositWithdraw = __webpack_require__(237);
-var PaymentAgentList = __webpack_require__(238);
-var PaymentAgentWithdraw = __webpack_require__(239);
-var MBTradePage = __webpack_require__(243);
+var AccountTransfer = __webpack_require__(236);
+var Cashier = __webpack_require__(237);
+var DepositWithdraw = __webpack_require__(238);
+var PaymentAgentList = __webpack_require__(239);
+var PaymentAgentWithdraw = __webpack_require__(240);
+var MBTradePage = __webpack_require__(244);
 var AssetIndexUI = __webpack_require__(112);
 var TradingTimesUI = __webpack_require__(113);
-var TradePage_Beta = __webpack_require__(250);
-var TradePage = __webpack_require__(256);
-var Authenticate = __webpack_require__(257);
-var ChangePassword = __webpack_require__(258);
-var PaymentAgentTransfer = __webpack_require__(259);
+var TradePage_Beta = __webpack_require__(251);
+var TradePage = __webpack_require__(257);
+var Authenticate = __webpack_require__(258);
+var ChangePassword = __webpack_require__(259);
+var PaymentAgentTransfer = __webpack_require__(260);
 var Portfolio = __webpack_require__(86);
-var ProfitTable = __webpack_require__(262);
-var APIToken = __webpack_require__(265);
-var AuthorisedApps = __webpack_require__(266);
-var CashierPassword = __webpack_require__(164);
-var FinancialAssessment = __webpack_require__(269);
-var IPHistory = __webpack_require__(270);
-var Limits = __webpack_require__(274);
-var Settings = __webpack_require__(264);
-var SelfExclusion = __webpack_require__(277);
-var PersonalDetails = __webpack_require__(165);
-var Statement = __webpack_require__(279);
-var TopUpVirtual = __webpack_require__(281);
-var Accounts = __webpack_require__(282);
-var ICOSubscribe = __webpack_require__(284);
-var LostPassword = __webpack_require__(285);
-var MetaTrader = __webpack_require__(168);
-var FinancialAccOpening = __webpack_require__(287);
-var JapanAccOpening = __webpack_require__(288);
-var RealAccOpening = __webpack_require__(289);
-var VirtualAccOpening = __webpack_require__(290);
-var ResetPassword = __webpack_require__(293);
-var SetCurrency = __webpack_require__(294);
-var TNCApproval = __webpack_require__(169);
-var TelegramBot = __webpack_require__(295);
+var ProfitTable = __webpack_require__(263);
+var APIToken = __webpack_require__(266);
+var AuthorisedApps = __webpack_require__(267);
+var CashierPassword = __webpack_require__(163);
+var FinancialAssessment = __webpack_require__(268);
+var IPHistory = __webpack_require__(269);
+var Limits = __webpack_require__(273);
+var Settings = __webpack_require__(265);
+var SelfExclusion = __webpack_require__(276);
+var PersonalDetails = __webpack_require__(164);
+var Statement = __webpack_require__(278);
+var TopUpVirtual = __webpack_require__(280);
+var Accounts = __webpack_require__(281);
+var ICOSubscribe = __webpack_require__(283);
+var LostPassword = __webpack_require__(284);
+var MetaTrader = __webpack_require__(167);
+var FinancialAccOpening = __webpack_require__(286);
+var JapanAccOpening = __webpack_require__(287);
+var RealAccOpening = __webpack_require__(288);
+var VirtualAccOpening = __webpack_require__(289);
+var ResetPassword = __webpack_require__(292);
+var SetCurrency = __webpack_require__(293);
+var TNCApproval = __webpack_require__(168);
+var TelegramBot = __webpack_require__(294);
 
 var CashierJP = __webpack_require__(170);
-var KnowledgeTest = __webpack_require__(298);
+var KnowledgeTest = __webpack_require__(296);
 
 /* eslint-disable max-len */
 var pages_config = {
-    account_transfer: { module: AccountTransfer, is_authenticated: true, only_real: true },
+    account_transfer: { module: AccountTransfer, is_authenticated: true, only_real: true, needs_currency: true },
     accounts: { module: Accounts, is_authenticated: true, needs_currency: true },
     api_tokenws: { module: APIToken, is_authenticated: true },
     assessmentws: { module: FinancialAssessment, is_authenticated: true, only_real: true },
@@ -18796,13 +19317,22 @@ module.exports = pages_config;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 
 var Contents = function () {
     var onLoad = function onLoad() {
-        Client.activateByClientType('#header');
+        Client.activateByClientType('header');
+        var content = document.getElementById('content');
+        if (!content) {
+            return;
+        }
+        var new_class = '';
+        var content_class = document.getElementById('content_class');
+        if (content_class) {
+            new_class = content_class.textContent;
+        }
         // This is required for our css to work.
-        $('#content').removeClass().addClass($('#content_class').text());
+        content.className = new_class;
     };
 
     return {
@@ -18820,14 +19350,14 @@ module.exports = Contents;
 
 
 var Cookies = __webpack_require__(42);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var GTM = __webpack_require__(50);
 var getLanguage = __webpack_require__(17).get;
 var urlLang = __webpack_require__(17).urlLang;
 var isStorageSupported = __webpack_require__(6).isStorageSupported;
-var defaultRedirectUrl = __webpack_require__(10).defaultRedirectUrl;
-var urlFor = __webpack_require__(10).urlFor;
-var paramsHash = __webpack_require__(10).paramsHash;
+var defaultRedirectUrl = __webpack_require__(9).defaultRedirectUrl;
+var urlFor = __webpack_require__(9).urlFor;
+var paramsHash = __webpack_require__(9).paramsHash;
 
 var LoggedInHandler = function () {
     var onLoad = function onLoad() {
@@ -18923,20 +19453,31 @@ module.exports = LoggedInHandler;
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
+var applyToAllElements = __webpack_require__(2).applyToAllElements;
 __webpack_require__(302);
 
 var Menu = function () {
-    var $main_menu = void 0;
+    var main_menu = void 0,
+        menu_top = void 0,
+        items = void 0;
 
     var init = function init() {
-        $main_menu = $('#main-menu');
+        main_menu = document.getElementById('main-menu');
+        menu_top = document.getElementById('menu-top');
+        if (!main_menu || !menu_top) {
+            return;
+        }
 
-        $('#menu-top').find('li').removeClass('active');
+        items = main_menu.getElementsByClassName('item');
+
+        applyToAllElements('li', function (el) {
+            el.classList.remove('active');
+        }, '', menu_top);
         hideMainMenu();
 
         var active = activeMenuTop();
-        if (active) active.addClass('active');
+        if (active) active.classList.add('active');
 
         if (Client.isLoggedIn() || /\/(cashier|resources|trading|trading_beta|multi_barriers_trading)/i.test(window.location.pathname)) {
             showMainMenu();
@@ -18944,82 +19485,105 @@ var Menu = function () {
     };
 
     var showMainMenu = function showMainMenu() {
-        $main_menu.setVisibility(1);
+        main_menu.setVisibility(1);
         activateMainMenu();
     };
 
     var hideMainMenu = function hideMainMenu() {
-        $main_menu.setVisibility(0);
+        main_menu.setVisibility(0);
     };
 
     var activateMainMenu = function activateMainMenu() {
         // First unset everything.
-        $main_menu.find('li.item').removeClass('active hover').end().find('li.sub_item a').removeClass('a-active');
+        applyToAllElements(items, function (el) {
+            el.classList.remove('active', 'hover');
+        });
+        applyToAllElements('.sub_item a', function (el) {
+            el.classList.remove('a-active');
+        }, '', main_menu);
 
         var active = activeMainMenu();
         var active_item = active.item;
         var active_subitem = active.subitem;
         if (active_subitem) {
-            active_subitem.addClass('a-active');
+            active_subitem.classList.add('a-active');
         }
 
         if (active_item) {
-            active_item.addClass('active hover');
+            active_item.classList.add('active', 'hover');
             onMouseHover(active_item);
         }
     };
 
     var onUnload = function onUnload() {
-        $main_menu.unbind().find('.item').unbind();
+        main_menu.removeEventListener('mouseleave', onMouseLeave);
+        applyToAllElements(items, function (el) {
+            el.removeEventListener('mouseenter', onMouseEnter);
+        });
     };
 
     var removeHover = function removeHover() {
-        $main_menu.find('li.item').removeClass('hover');
+        applyToAllElements(items, function (el) {
+            el.classList.remove('hover');
+        });
     };
 
     var onMouseHover = function onMouseHover(active_item) {
-        $main_menu.on('mouseleave', function () {
-            removeHover();
-            if (active_item) active_item.addClass('hover');
-        }).find('.item').on('mouseenter', function () {
-            removeHover();
-            $(this).addClass('hover');
+        main_menu.addEventListener('mouseleave', function () {
+            onMouseLeave(active_item);
         });
+        applyToAllElements(items, function (el) {
+            el.addEventListener('mouseenter', onMouseEnter);
+        });
+    };
+
+    var onMouseLeave = function onMouseLeave(active_item) {
+        removeHover();
+        if (active_item) active_item.classList.add('hover');
+    };
+
+    var onMouseEnter = function onMouseEnter(e) {
+        removeHover();
+        e.target.classList.add('hover');
     };
 
     var activeMenuTop = function activeMenuTop() {
         var active = '';
         var path = window.location.pathname;
-        $('#menu-top').find('li a').each(function () {
-            if (path.indexOf(this.pathname.replace(/\.html/i, '')) >= 0) {
-                active = $(this).closest('li');
+        var link_menu_top = menu_top.getElementsByTagName('a');
+        for (var i = 0; i < link_menu_top.length; i++) {
+            if (path.indexOf(link_menu_top[i].pathname.replace(/\.html/i, '')) >= 0) {
+                active = link_menu_top[i].closest('li');
             }
-        });
+        }
         return active;
     };
 
     var activeMainMenu = function activeMainMenu() {
         var pathname = window.location.pathname;
         if (/cashier/i.test(pathname) && !/cashier_password|payment_methods/.test(pathname)) {
-            pathname = $('#topMenuCashier').find('a').attr('href');
+            pathname = document.getElementById('topMenuCashier').getElementsByTagName('a')[0].getAttribute('href');
         }
-        var $subitem = void 0;
-        var $item = $main_menu.find('a[href*="' + pathname + '"]');
+        var subitem = void 0;
+        var item = main_menu.querySelector('a[href*="' + pathname + '"]');
 
-        var $parent = $item.closest('li');
-        // Is something selected in main items list
-        if ($parent.hasClass('sub_item')) {
-            $subitem = $item;
-            $item = $subitem.closest('.item');
-        } else {
-            $item = $parent;
+        if (item) {
+            var parent = item.closest('li');
+            // Is something selected in main items list
+            if (parent.classList.contains('sub_item')) {
+                subitem = item;
+                item = subitem.closest('.item');
+            } else {
+                item = parent;
+            }
         }
 
-        return { item: $item, subitem: $subitem };
+        return { item: item, subitem: subitem };
     };
 
     var makeMobileMenu = function makeMobileMenu() {
-        if ($('#mobile-menu-container').is(':visible')) {
+        var mobile_menu = document.getElementById('mobile-menu-container');
+        if (mobile_menu && mobile_menu.offsetParent) {
             $('#mobile-menu').mmenu({
                 position: 'right',
                 zposition: 'front',
@@ -19047,7 +19611,7 @@ module.exports = Menu;
 
 
 var Cookies = __webpack_require__(42);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var Contents = __webpack_require__(216);
 var Crowdin = __webpack_require__(148);
 var Header = __webpack_require__(38);
@@ -19057,13 +19621,15 @@ var localize = __webpack_require__(1).localize;
 var Login = __webpack_require__(69);
 var Menu = __webpack_require__(218);
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
-var checkLanguage = __webpack_require__(9).checkLanguage;
+var Url = __webpack_require__(9);
+var createElement = __webpack_require__(2).createElement;
+var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
+var checkLanguage = __webpack_require__(10).checkLanguage;
 var scrollToTop = __webpack_require__(83).scrollToTop;
 var TrafficSource = __webpack_require__(152);
-var BinarySocket = __webpack_require__(2);
-var RealityCheck = __webpack_require__(291);
-var AffiliatePopup = __webpack_require__(297);
+var BinarySocket = __webpack_require__(3);
+var RealityCheck = __webpack_require__(290);
+var AffiliatePopup = __webpack_require__(169);
 var PushNotification = __webpack_require__(303);
 __webpack_require__(172);
 __webpack_require__(173);
@@ -19090,19 +19656,16 @@ var Page = function () {
         $(document).ready(function () {
             // Cookies is not always available.
             // So, fall back to a more basic solution.
-            $(window).on('storage', function (jq_event) {
-                switch (jq_event.originalEvent.key) {
+            window.addEventListener('storage', function (evt) {
+                switch (evt.key) {
                     case 'active_loginid':
-                        if (jq_event.originalEvent.newValue === '') {
-                            // logged out
-                            reload();
-                        } else if (!window.is_logging_in) {
-                            // loginid switch
+                        // not the active tab and logged out or loginid switch
+                        if (document.hidden && (evt.newValue === '' || !window.is_logging_in)) {
                             reload();
                         }
                         break;
                     case 'new_release_reload_time':
-                        if (jq_event.originalEvent.newValue !== jq_event.originalEvent.oldValue) {
+                        if (evt.newValue !== evt.oldValue) {
                             reload(true);
                         }
                         break;
@@ -19110,6 +19673,7 @@ var Page = function () {
                 }
             });
             scrollToTop();
+            showNotificationOutdatedBrowser();
         });
     };
 
@@ -19127,7 +19691,6 @@ var Page = function () {
             Menu.makeMobileMenu();
             recordAffiliateExposure();
             endpointNotification();
-            showNotificationOutdatedBrowser();
         }
         Menu.init();
         Contents.onLoad();
@@ -19195,16 +19758,19 @@ var Page = function () {
         if (server && server.length > 0) {
             var message = (/www\.binary\.com/i.test(window.location.hostname) ? '' : localize('This is a staging server - For testing purposes only') + ' - ') + '\n                ' + localize('The server <a href="[_1]">endpoint</a> is: [_2]', [Url.urlFor('endpoint'), server]);
 
-            var $end_note = $('#end-note');
+            var end_note = document.getElementById('end-note');
 
-            $end_note.html(message).setVisibility(1);
-            $('#footer').css('padding-bottom', $end_note.height());
+            elementInnerHtml(end_note, message);
+            if (end_note) end_note.setVisibility(1);
+
+            var footer = document.getElementById('footer');
+            if (footer) footer.style['padding-bottom'] = end_note.offsetHeight;
         }
     };
 
     var showNotificationOutdatedBrowser = function showNotificationOutdatedBrowser() {
         var src = '//browser-update.org/update.min.js';
-        if ($('script[src*="' + src + '"]').length) return;
+        if (document.querySelector('script[src*="' + src + '"]')) return;
         window.$buoop = {
             vs: { i: 11, f: -4, o: -4, s: 9, c: -4 },
             api: 4,
@@ -19214,9 +19780,7 @@ var Page = function () {
             text: localize('Your web browser ([_1]) is out of date and may affect your trading experience. Proceed at your own risk. [_2]Update browser[_3]', ['{brow_name}', '<a href="https://www.whatbrowser.org/" target="_blank">', '</a>']),
             reminder: 0 // show all the time
         };
-        $(document).ready(function () {
-            $('body').append($('<script/>', { src: src }));
-        });
+        document.body.appendChild(createElement('script', { src: src }));
     };
 
     return {
@@ -19234,7 +19798,7 @@ module.exports = Page;
 "use strict";
 
 
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
 
 var Redirect = function () {
     var onLoad = function onLoad() {
@@ -19300,10 +19864,59 @@ module.exports = createLanguageDropDown;
 "use strict";
 
 
-var moment = __webpack_require__(8);
-var Client = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var Mellt = __webpack_require__(299);
+
+var checkPassword = function checkPassword(password_selector) {
+    var el_password = document.querySelector(password_selector);
+    if (!el_password) {
+        return;
+    }
+
+    var div = el_password.parentNode.querySelector('.days_to_crack') || document.createElement('div');
+
+    var daysToCrack = Mellt.checkPassword(el_password.value.trim());
+    if (daysToCrack < 0) {
+        div.textContent = localize('The password you entered is one of the world\'s most commonly used passwords. You should not be using this password.');
+    } else {
+        var years = void 0;
+        if (daysToCrack > 365) {
+            years = Math.round(daysToCrack / 365 * 10) / 10;
+            if (years > 1000000) {
+                years = Math.round(years / 1000000 * 10) / 10 + ' ' + localize('million');
+            } else if (years > 1000) {
+                years = Math.round(years / 1000) + ' ' + localize('thousand');
+            }
+        }
+        div.textContent = localize('Hint: it would take approximately [_1][_2] to crack this password.', [daysToCrack === 1000000000 ? '>' : '', years ? years + ' ' + localize('years') : daysToCrack + ' ' + localize('days')]);
+    }
+    div.classList = 'days_to_crack fill-bg-color hint ' + (daysToCrack < 30 ? 'red' : 'green');
+    el_password.parentNode.appendChild(div);
+};
+
+var removeCheck = function removeCheck(password_selector) {
+    var el_message = document.querySelector(password_selector).parentNode.querySelector('.days_to_crack');
+    if (el_message) {
+        el_message.remove();
+    }
+};
+
+module.exports = {
+    removeCheck: removeCheck,
+    checkPassword: checkPassword
+};
+
+/***/ }),
+/* 223 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var moment = __webpack_require__(8);
+var Client = __webpack_require__(4);
+var localize = __webpack_require__(1).localize;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 
 var SessionDurationLimit = function () {
     var warning = void 0,
@@ -19369,7 +19982,7 @@ var SessionDurationLimit = function () {
 module.exports = SessionDurationLimit;
 
 /***/ }),
-/* 223 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19408,7 +20021,7 @@ var Charity = function () {
 module.exports = Charity;
 
 /***/ }),
-/* 224 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19430,7 +20043,7 @@ var Contact = function () {
 module.exports = Contact;
 
 /***/ }),
-/* 225 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19470,13 +20083,13 @@ var Endpoint = function () {
 module.exports = Endpoint;
 
 /***/ }),
-/* 226 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 
 var GetStartedJP = function () {
     var $contents = void 0,
@@ -19534,7 +20147,7 @@ var GetStartedJP = function () {
 module.exports = GetStartedJP;
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19645,14 +20258,14 @@ var HomeJP = function () {
 module.exports = HomeJP;
 
 /***/ }),
-/* 228 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var urlParam = __webpack_require__(10).param;
-var urlFor = __webpack_require__(10).urlFor;
+var urlParam = __webpack_require__(9).param;
+var urlFor = __webpack_require__(9).urlFor;
 
 var JobDetails = function () {
     var dept = void 0,
@@ -19716,7 +20329,7 @@ var JobDetails = function () {
 module.exports = JobDetails;
 
 /***/ }),
-/* 229 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19802,11 +20415,16 @@ var Platforms = function () {
 module.exports = Platforms;
 
 /***/ }),
-/* 230 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
+var urlFor = __webpack_require__(9).urlFor;
+var BinarySocket = __webpack_require__(3);
 
 var Regulation = function () {
     var onLoad = function onLoad() {
@@ -19836,6 +20454,15 @@ var Regulation = function () {
         };
         $(document).ready(relocateLinks);
         $(window).resize(relocateLinks);
+
+        document.getElementById('visit_japan').addEventListener('click', function () {
+            var redirect_to = urlFor('home-jp');
+            if (Client.isLoggedIn()) {
+                BinarySocket.send({ logout: '1', passthrough: { redirect_to: redirect_to } });
+            } else {
+                BinaryPjax.load(redirect_to);
+            }
+        });
     };
 
     return {
@@ -19846,17 +20473,17 @@ var Regulation = function () {
 module.exports = Regulation;
 
 /***/ }),
-/* 231 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var GetStarted = __webpack_require__(153);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
-var handleHash = __webpack_require__(4).handleHash;
+var handleHash = __webpack_require__(2).handleHash;
 var Scroll = __webpack_require__(83);
 
 module.exports = {
@@ -19906,16 +20533,16 @@ module.exports = {
 };
 
 /***/ }),
-/* 232 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var localize = __webpack_require__(1).localize;
-var urlParam = __webpack_require__(10).param;
+var urlParam = __webpack_require__(9).param;
 var Scroll = __webpack_require__(83);
-var TNCApproval = __webpack_require__(169);
+var TNCApproval = __webpack_require__(168);
 
 var TermsAndConditions = function () {
     var onLoad = function onLoad() {
@@ -19959,7 +20586,7 @@ var TermsAndConditions = function () {
         if (section) {
             var $section = $content.find('a#' + section);
             if ($section.length) setTimeout(function () {
-                $.scrollTo($section, 0, { offset: -10 });
+                $.scrollTo($section, 0, { offset: -5 });
             }, 500);
         } else if (window.location.hash) {
             setTimeout(function () {
@@ -19981,16 +20608,16 @@ var TermsAndConditions = function () {
 module.exports = TermsAndConditions;
 
 /***/ }),
-/* 233 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 
 var VideoFacility = function () {
     var onLoad = function onLoad() {
@@ -20026,13 +20653,13 @@ var VideoFacility = function () {
 module.exports = VideoFacility;
 
 /***/ }),
-/* 234 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var Scroll = __webpack_require__(83);
 
 var WhyUs = function () {
@@ -20054,128 +20681,194 @@ var WhyUs = function () {
 module.exports = WhyUs;
 
 /***/ }),
-/* 235 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(21);
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
+var createElement = __webpack_require__(2).createElement;
+var elementTextContent = __webpack_require__(5).elementTextContent;
+var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
+var FormManager = __webpack_require__(19);
 
 var AccountTransfer = function () {
-    var form_id = '#frm_account_transfer';
+    var form_id = 'frm_account_transfer';
+    var form_id_hash = '#' + form_id;
 
-    var accounts = void 0,
-        $transfer = void 0;
+    var messages = {
+        parent: 'client_message',
+        error: 'no_account',
+        balance: 'not_enough_balance',
+        deposit: 'no_balance',
+        limit: 'limit_reached'
+    };
 
-    var populateAccounts = function populateAccounts(response_transfer, response_limits) {
-        if (response_transfer.error || response_limits.error) {
-            $('#error_message').find('p').text((response_transfer.error || response_limits.error).message).end().setVisibility(1);
-            return;
-        }
-        accounts = response_transfer.accounts;
-        var client_loginid = Client.get('loginid');
-        var $form = $(form_id);
-        $transfer = $form.find('#transfer');
-        var text = void 0,
-            from_loginid = void 0,
-            to_loginid = void 0,
-            max_balance = void 0;
+    var el_transfer_from = void 0,
+        el_transfer_to = void 0,
+        client_loginid = void 0,
+        client_currency = void 0,
+        client_balance = void 0,
+        withdrawal_limit = void 0;
+
+    var populateAccounts = function populateAccounts(accounts) {
+        client_loginid = Client.get('loginid');
+        el_transfer_from = document.getElementById('lbl_transfer_from');
+        el_transfer_to = document.getElementById('transfer_to');
+
+        var currency_text = client_currency ? '(' + client_currency + ')' : '';
+
+        elementTextContent(el_transfer_from, client_loginid + ' ' + currency_text);
+
+        var fragment_transfer_to = document.createElement('div');
 
         accounts.forEach(function (account, idx) {
-            if (+account.balance) {
-                from_loginid = accounts[idx].loginid;
-                to_loginid = accounts[1 - idx].loginid;
-                text = localize('from [_1] to [_2]', [from_loginid, to_loginid]);
-                if (client_loginid === from_loginid) {
-                    max_balance = Math.min(+accounts[idx].balance, +response_limits.get_limits.remainder);
-                } else {
-                    max_balance = +accounts[idx].balance;
-                }
-                $transfer.append($('<option/>', {
-                    text: text,
-                    'data-from': from_loginid,
-                    'data-to': to_loginid,
-                    'data-currency': accounts[idx].currency,
-                    'data-balance': max_balance
-                }));
+            if (accounts[idx].loginid !== client_loginid) {
+                var option = document.createElement('option');
+                var currency = accounts[idx].currency;
+                currency_text = currency ? '(' + currency + ')' : '';
+                option.appendChild(document.createTextNode(accounts[idx].loginid + ' ' + currency_text));
+                fragment_transfer_to.appendChild(option);
             }
         });
 
-        // show client's login id on top
-        var $client_option = $transfer.find('option[data-from="' + client_loginid + '"]');
-        if ($client_option.length !== 0) {
-            $client_option.insertBefore($transfer.find('option:eq(0)')).attr('selected', 'selected');
+        if (!fragment_transfer_to.childElementCount) {
+            showError();
+            return;
+        }
+        if (fragment_transfer_to.childElementCount > 1) {
+            el_transfer_to.innerHTML = fragment_transfer_to.innerHTML;
+        } else {
+            var label = createElement('label', { 'data-value': fragment_transfer_to.innerText });
+            label.appendChild(document.createTextNode(fragment_transfer_to.innerText));
+            label.id = 'transfer_to';
+
+            el_transfer_to.parentNode.replaceChild(label, el_transfer_to);
+            el_transfer_to = document.getElementById('transfer_to');
         }
 
-        if (from_loginid) {
-            showForm($form);
-        } else {
-            $('#client_message').setVisibility(1);
+        showForm();
+
+        if (Client.hasCurrencyType('crypto') && Client.hasCurrencyType('fiat')) {
+            document.getElementById('transfer_fee').setVisibility(1);
         }
     };
 
-    var showForm = function showForm($form) {
-        var $currency = $form.find('#currency');
-        $transfer.on('change', function () {
-            updateCurrency($currency, $(this));
-            bindValidation();
-        });
-        updateCurrency($currency);
-        $form.setVisibility(1);
-        bindValidation();
+    var hasError = function hasError(response) {
+        var error = response.error;
+        if (error) {
+            var el_error = document.getElementById('error_message').getElementsByTagName('p')[0];
+            elementTextContent(el_error, error.message);
+            el_error.parentNode.setVisibility(1);
+            return true;
+        }
+        return false;
+    };
+
+    var showError = function showError() {
+        document.getElementById(messages.parent).setVisibility(1);
+        document.getElementById(messages.error).setVisibility(1);
+    };
+
+    // TODO: change values when back-end updates logic
+    var getMinAmount = function getMinAmount() {
+        return isCryptocurrency(client_currency) ? 0.002 : 1;
+    };
+
+    var getDecimals = function getDecimals() {
+        return isCryptocurrency(client_currency) ? '1, 8' : '1, 2';
+    };
+
+    var showForm = function showForm() {
+        elementTextContent(document.querySelector(form_id_hash + ' #currency'), client_currency);
+
+        document.getElementById(form_id).setVisibility(1);
+
+        FormManager.init(form_id_hash, [{ selector: '#amount', validations: [['req', { hide_asterisk: true }], ['number', { type: 'float', decimals: getDecimals(), min: getMinAmount(), max: Math.min(+withdrawal_limit, +client_balance), format_money: true }]] }, { request_field: 'transfer_between_accounts', value: 1 }, { request_field: 'account_from', value: client_loginid }, { request_field: 'account_to', value: function value() {
+                return (el_transfer_to.value || el_transfer_to.getAttribute('data-value') || '').split(' (')[0];
+            } }, { request_field: 'currency', value: client_currency }]);
+
         FormManager.handleSubmit({
-            form_selector: form_id,
+            form_selector: form_id_hash,
             fnc_response_handler: responseHandler
         });
     };
 
-    var updateCurrency = function updateCurrency($currency) {
-        $currency.text(getTransferAttr('data-currency'));
-    };
-
-    var getTransferAttr = function getTransferAttr(attribute) {
-        return $transfer.find('option:selected').attr(attribute);
-    };
-
-    var bindValidation = function bindValidation() {
-        FormManager.init(form_id, [{ selector: '#amount', validations: ['req', ['number', { type: 'float', decimals: '1, 2', min: 0.1, max: getTransferAttr('data-balance'), custom_message: 'This amount exceeds your withdrawal limit.' }]] }, { request_field: 'transfer_between_accounts', value: 1 }, { request_field: 'account_from', value: function value() {
-                return getTransferAttr('data-from');
-            } }, { request_field: 'account_to', value: function value() {
-                return getTransferAttr('data-to');
-            } }, { request_field: 'currency', value: function value() {
-                return getTransferAttr('data-currency');
-            } }]);
-    };
-
     var responseHandler = function responseHandler(response) {
         if (response.error) {
-            $('#form_error').text(response.error.message).setVisibility(1);
+            var el_error = document.getElementById('form_error');
+            elementTextContent(el_error, response.error.message);
+            el_error.setVisibility(1);
         } else {
             BinarySocket.send({ transfer_between_accounts: 1 }).then(function (data) {
-                return populateReceipt(data);
+                return populateReceipt(response, data);
             });
         }
     };
 
-    var populateReceipt = function populateReceipt(response) {
-        $(form_id).setVisibility(0);
-        accounts = response.accounts;
-        accounts.forEach(function (account, idx) {
-            $('#loginid_' + (idx + 1)).text(account.loginid);
-            $('#balance_' + (idx + 1)).text(account.currency + ' ' + account.balance);
+    var populateReceipt = function populateReceipt(response_submit_success, response) {
+        document.getElementById(form_id).setVisibility(0);
+
+        elementTextContent(document.getElementById('from_loginid'), client_loginid);
+        elementTextContent(document.getElementById('to_loginid'), response_submit_success.client_to_loginid);
+
+        response.accounts.forEach(function (account) {
+            if (account.loginid === client_loginid) {
+                elementTextContent(document.getElementById('from_balance'), account.balance);
+            } else if (account.loginid === response_submit_success.client_to_loginid) {
+                elementTextContent(document.getElementById('to_balance'), account.balance);
+            }
         });
-        $('#success_form').setVisibility(1);
+
+        document.getElementById('transfer_fee').setVisibility(0);
+        document.getElementById('success_form').setVisibility(1);
     };
 
     var onLoad = function onLoad() {
-        BinarySocket.send({ transfer_between_accounts: 1 }).then(function (response_transfer) {
-            BinarySocket.send({ get_limits: 1 }).then(function (response_limits) {
-                return populateAccounts(response_transfer, response_limits);
-            });
+        if (!Client.canTransferFunds()) {
+            BinaryPjax.loadPreviousUrl();
+        }
+        BinarySocket.wait('balance').then(function (response) {
+            client_balance = getPropertyValue(response, ['balance', 'balance']);
+            client_currency = Client.get('currency');
+            var min_amount = getMinAmount();
+            if (!client_balance || +client_balance < min_amount) {
+                document.getElementById(messages.parent).setVisibility(1);
+                if (client_currency) {
+                    document.getElementById('min_required_amount').textContent = client_currency + ' ' + min_amount;
+                    document.getElementById(messages.balance).setVisibility(1);
+                }
+                document.getElementById(messages.deposit).setVisibility(1);
+            } else {
+                BinarySocket.send({ transfer_between_accounts: 1 }).then(function (response_transfer) {
+                    if (hasError(response_transfer)) {
+                        return;
+                    }
+                    var accounts = response_transfer.accounts;
+                    if (!accounts || !accounts.length) {
+                        showError();
+                        return;
+                    }
+                    BinarySocket.send({ get_limits: 1 }).then(function (response_limits) {
+                        if (hasError(response_limits)) {
+                            return;
+                        }
+                        if (+response_limits.get_limits.remainder < min_amount) {
+                            document.getElementById(messages.limit).setVisibility(1);
+                            document.getElementById(messages.parent).setVisibility(1);
+                            return;
+                        }
+                        withdrawal_limit = response_limits.get_limits.remainder;
+                        document.getElementById('range_hint').textContent = localize('Min') + ': ' + min_amount + ' ' + localize('Max') + ': ' + localize(+client_balance <= +withdrawal_limit ? 'Current balance' : 'Withdrawal limit');
+                        populateAccounts(accounts);
+                    });
+                });
+            }
         });
     };
 
@@ -20187,19 +20880,19 @@ var AccountTransfer = function () {
 module.exports = AccountTransfer;
 
 /***/ }),
-/* 236 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
-var urlFor = __webpack_require__(10).urlFor;
-var jpClient = __webpack_require__(9).jpClient;
-var jpResidence = __webpack_require__(9).jpResidence;
+var urlFor = __webpack_require__(9).urlFor;
+var jpClient = __webpack_require__(10).jpClient;
+var jpResidence = __webpack_require__(10).jpResidence;
 var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
 
 var Cashier = function () {
@@ -20243,9 +20936,6 @@ var Cashier = function () {
                     $('#payment-agent-section').setVisibility(1);
                 }
                 $(is_crypto ? '.crypto_currency' : '.normal_currency').setVisibility(1);
-                if (Client.hasAccountType('financial', true) && Client.hasAccountType('gaming', true)) {
-                    $('#account-transfer-section').setVisibility(1);
-                }
             });
         }
         showContent();
@@ -20262,20 +20952,20 @@ var Cashier = function () {
 module.exports = Cashier;
 
 /***/ }),
-/* 237 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var setShouldRedirect = __webpack_require__(164).setShouldRedirect;
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var setShouldRedirect = __webpack_require__(163).setShouldRedirect;
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var Url = __webpack_require__(10);
-var template = __webpack_require__(4).template;
-var FormManager = __webpack_require__(21);
+var Url = __webpack_require__(9);
+var template = __webpack_require__(2).template;
+var FormManager = __webpack_require__(19);
 var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
 var validEmailToken = __webpack_require__(71).validEmailToken;
 
@@ -20480,15 +21170,15 @@ var DepositWithdraw = function () {
 module.exports = DepositWithdraw;
 
 /***/ }),
-/* 238 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var urlForStatic = __webpack_require__(10).urlForStatic;
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var urlForStatic = __webpack_require__(9).urlForStatic;
+var Client = __webpack_require__(4);
 
 var PaymentAgentList = function () {
     var $pa_list_container = void 0,
@@ -20617,17 +21307,19 @@ var PaymentAgentList = function () {
 module.exports = PaymentAgentList;
 
 /***/ }),
-/* 239 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var urlParam = __webpack_require__(10).param;
-var FormManager = __webpack_require__(21);
+var urlParam = __webpack_require__(9).param;
+var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
+var FormManager = __webpack_require__(19);
 var validEmailToken = __webpack_require__(71).validEmailToken;
 
 var PaymentAgentWithdraw = function () {
@@ -20760,6 +21452,10 @@ var PaymentAgentWithdraw = function () {
     };
 
     var onLoad = function onLoad() {
+        if (isCryptocurrency(Client.get('currency'))) {
+            BinaryPjax.loadPreviousUrl();
+            return;
+        }
         BinarySocket.wait('get_account_status').then(function (data) {
             $views = $('#paymentagent_withdrawal').find('.viewItem');
             $views.setVisibility(0);
@@ -20787,7 +21483,7 @@ var PaymentAgentWithdraw = function () {
 module.exports = PaymentAgentWithdraw;
 
 /***/ }),
-/* 240 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20797,7 +21493,7 @@ var MBContract = __webpack_require__(73);
 var MBDefaults = __webpack_require__(34);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var formatCurrency = __webpack_require__(7).formatCurrency;
 
 /*
@@ -20845,7 +21541,7 @@ var MBDisplayCurrencies = function MBDisplayCurrencies() {
 module.exports = MBDisplayCurrencies;
 
 /***/ }),
-/* 241 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20859,9 +21555,9 @@ var MBProcess = __webpack_require__(155);
 var MBTick = __webpack_require__(111);
 var TradingAnalysis = __webpack_require__(84);
 var debounce = __webpack_require__(24).debounce;
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var Currency = __webpack_require__(7);
 var onlyNumericOnKeypress = __webpack_require__(90);
 
@@ -21095,7 +21791,7 @@ var MBTradingEvents = function () {
 module.exports = MBTradingEvents;
 
 /***/ }),
-/* 242 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21159,23 +21855,23 @@ var MBSymbols = function () {
 module.exports = MBSymbols;
 
 /***/ }),
-/* 243 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var MBContract = __webpack_require__(73);
-var MBDisplayCurrencies = __webpack_require__(240);
+var MBDisplayCurrencies = __webpack_require__(241);
 var MBDefaults = __webpack_require__(34);
-var MBTradingEvents = __webpack_require__(241);
+var MBTradingEvents = __webpack_require__(242);
 var MBPrice = __webpack_require__(110);
 var MBProcess = __webpack_require__(155);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var cleanupChart = __webpack_require__(55).cleanupChart;
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var JapanPortfolio = __webpack_require__(171);
 
 var MBTradePage = function () {
@@ -21255,7 +21951,7 @@ var MBTradePage = function () {
 module.exports = MBTradePage;
 
 /***/ }),
-/* 244 */
+/* 245 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21345,7 +22041,7 @@ var AssetIndex = function () {
 module.exports = AssetIndex;
 
 /***/ }),
-/* 245 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21373,22 +22069,22 @@ var TradingTimes = function () {
 module.exports = TradingTimes;
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var updateBalance = __webpack_require__(296);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var updateBalance = __webpack_require__(295);
+var Client = __webpack_require__(4);
 var Clock = __webpack_require__(23);
 var GTM = __webpack_require__(50);
 var Header = __webpack_require__(38);
 var Login = __webpack_require__(69);
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var setCurrencies = __webpack_require__(7).setCurrencies;
-var SessionDurationLimit = __webpack_require__(222);
+var SessionDurationLimit = __webpack_require__(223);
 
 var BinarySocketGeneral = function () {
     var onOpen = function onOpen(is_ready) {
@@ -21498,7 +22194,7 @@ var BinarySocketGeneral = function () {
 module.exports = BinarySocketGeneral;
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21507,9 +22203,9 @@ module.exports = BinarySocketGeneral;
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var Symbols = __webpack_require__(57);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var template = __webpack_require__(4).template;
+var template = __webpack_require__(2).template;
 var getHighstock = __webpack_require__(5).requireHighstock;
 
 var DigitInfo_Beta = function () {
@@ -21773,7 +22469,7 @@ var DigitInfo_Beta = function () {
 module.exports = DigitInfo_Beta;
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21793,8 +22489,8 @@ var Tick = __webpack_require__(35);
 var commonTrading = __webpack_require__(24);
 var getStartDateNode = __webpack_require__(25).getStartDateNode;
 var Notifications = __webpack_require__(85);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var GTM = __webpack_require__(50);
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
 var isVisible = __webpack_require__(5).isVisible;
@@ -22207,7 +22903,7 @@ var TradingEvents_Beta = function () {
 module.exports = TradingEvents_Beta;
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22220,6 +22916,7 @@ var getStartDateNode = __webpack_require__(25).getStartDateNode;
 var Defaults = __webpack_require__(22);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
+var createElement = __webpack_require__(2).createElement;
 
 /*
  * Handles start time display
@@ -22249,7 +22946,6 @@ var StartDates_Beta = function () {
             var fragment = document.createDocumentFragment();
             var row = document.getElementById('date_start_row');
             var option = void 0,
-                content = void 0,
                 first = void 0;
 
             row.style.display = 'flex';
@@ -22259,10 +22955,7 @@ var StartDates_Beta = function () {
             }
 
             if (start_dates.has_spot) {
-                option = document.createElement('option');
-                content = document.createTextNode(localize('Now'));
-                option.setAttribute('value', 'now');
-                option.appendChild(content);
+                option = createElement('option', { value: 'now', text: localize('Now') });
                 fragment.appendChild(option);
                 has_now = 1;
             } else {
@@ -22286,16 +22979,13 @@ var StartDates_Beta = function () {
 
                 while (a.isBefore(b)) {
                     if (a.unix() - start.unix() > 5 * 60) {
-                        option = document.createElement('option');
-                        option.setAttribute('value', a.utc().unix());
+                        option = createElement('option', { value: a.utc().unix(), text: a.format('HH:mm ddd').replace(' ', ' GMT, ') });
                         if (typeof first === 'undefined' && !has_now) {
                             first = a.utc().unix();
                         }
-                        content = document.createTextNode(a.format('HH:mm ddd').replace(' ', ' GMT, '));
                         if (option.value === Defaults.get('date_start')) {
                             option.setAttribute('selected', 'selected');
                         }
-                        option.appendChild(content);
                         fragment.appendChild(option);
                     }
                     a.add(5, 'minutes');
@@ -22328,26 +23018,26 @@ var StartDates_Beta = function () {
 module.exports = StartDates_Beta;
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var TradingAnalysis_Beta = __webpack_require__(115);
-var TradingEvents_Beta = __webpack_require__(248);
+var TradingEvents_Beta = __webpack_require__(249);
 var Price_Beta = __webpack_require__(92);
 var Process_Beta = __webpack_require__(156);
 var commonTrading = __webpack_require__(24);
 var cleanupChart = __webpack_require__(55).cleanupChart;
 var displayCurrencies = __webpack_require__(159);
 var Defaults = __webpack_require__(22);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var PortfolioInit = __webpack_require__(86);
 var ViewPopup = __webpack_require__(58);
-var BinaryPjax = __webpack_require__(13);
+var BinaryPjax = __webpack_require__(12);
 var State = __webpack_require__(6).State;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var Guide = __webpack_require__(151);
 var ResizeSensor = __webpack_require__(304);
 
@@ -22534,7 +23224,7 @@ var TradePage_Beta = function () {
 module.exports = TradePage_Beta;
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22543,7 +23233,7 @@ module.exports = TradePage_Beta;
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var Symbols = __webpack_require__(57);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var getHighstock = __webpack_require__(5).requireHighstock;
 
@@ -22807,23 +23497,23 @@ var DigitInfo = function () {
 module.exports = DigitInfo;
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var HighchartUI = __webpack_require__(253);
+var HighchartUI = __webpack_require__(254);
 var MBContract = __webpack_require__(73);
 var MBDefaults = __webpack_require__(34);
 var Defaults = __webpack_require__(22);
 var GetTicks = __webpack_require__(56);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var ViewPopupUI = __webpack_require__(95);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
 var getHighstock = __webpack_require__(5).requireHighstock;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var addComma = __webpack_require__(7).addComma;
 
 var Highchart = function () {
@@ -23408,7 +24098,7 @@ var Highchart = function () {
 module.exports = Highchart;
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23593,7 +24283,7 @@ var HighchartUI = function () {
 module.exports = HighchartUI;
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23613,8 +24303,8 @@ var Purchase = __webpack_require__(161);
 var getMinMaxTime = __webpack_require__(25).getMinMaxTime;
 var getStartDateNode = __webpack_require__(25).getStartDateNode;
 var Tick = __webpack_require__(35);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var GTM = __webpack_require__(50);
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
 var isVisible = __webpack_require__(5).isVisible;
@@ -23953,30 +24643,31 @@ var TradingEvents = function () {
          * attach event to purchase buttons to buy the current contract
          */
         $('.purchase_button').on('click dblclick', function () {
-            if (!isVisible(document.getElementById('confirmation_message_container'))) {
-                var id = this.getAttribute('data-purchase-id');
-                var ask_price = this.getAttribute('data-ask-price');
+            if (isVisible(document.getElementById('confirmation_message_container')) || /disabled/.test(this.parentNode.classList)) {
+                return;
+            }
+            var id = this.getAttribute('data-purchase-id');
+            var ask_price = this.getAttribute('data-ask-price');
 
-                var params = { buy: id, price: ask_price, passthrough: {} };
-                Object.keys(this.attributes).forEach(function (attr) {
-                    if (attr && this.attributes[attr] && this.attributes[attr].name && !/data-balloon/.test(this.attributes[attr].name)) {
-                        // do not send tooltip data
-                        var m = this.attributes[attr].name.match(/data-(.+)/);
+            var params = { buy: id, price: ask_price, passthrough: {} };
+            Object.keys(this.attributes).forEach(function (attr) {
+                if (attr && this.attributes[attr] && this.attributes[attr].name && !/data-balloon/.test(this.attributes[attr].name)) {
+                    // do not send tooltip data
+                    var m = this.attributes[attr].name.match(/data-(.+)/);
 
-                        if (m && m[1] && m[1] !== 'purchase-id' && m[1] !== 'passthrough') {
-                            params.passthrough[m[1]] = this.attributes[attr].value;
-                        }
+                    if (m && m[1] && m[1] !== 'purchase-id' && m[1] !== 'passthrough') {
+                        params.passthrough[m[1]] = this.attributes[attr].value;
                     }
-                }, this);
-                if (id && ask_price) {
-                    $('.purchase_button').css('visibility', 'hidden');
-                    BinarySocket.send(params).then(function (response) {
-                        Purchase.display(response);
-                        GTM.pushPurchaseData(response);
-                    });
-                    Price.incrFormId();
-                    Price.processForgetProposals();
                 }
+            }, this);
+            if (id && ask_price) {
+                $('.purchase_button').css('visibility', 'hidden');
+                BinarySocket.send(params).then(function (response) {
+                    Purchase.display(response);
+                    GTM.pushPurchaseData(response);
+                });
+                Price.incrFormId();
+                Price.processForgetProposals();
             }
         });
 
@@ -24076,7 +24767,7 @@ var TradingEvents = function () {
 module.exports = TradingEvents;
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24089,6 +24780,7 @@ var Defaults = __webpack_require__(22);
 var Durations = __webpack_require__(118);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
+var createElement = __webpack_require__(2).createElement;
 
 /*
  * Handles start time display
@@ -24118,7 +24810,6 @@ var StartDates = function () {
             var fragment = document.createDocumentFragment();
             var row = document.getElementById('date_start_row');
             var option = void 0,
-                content = void 0,
                 first = void 0,
                 selected = void 0,
                 day = void 0,
@@ -24132,10 +24823,7 @@ var StartDates = function () {
             }
 
             if (start_dates.has_spot) {
-                option = document.createElement('option');
-                content = document.createTextNode(localize('Now'));
-                option.setAttribute('value', 'now');
-                option.appendChild(content);
+                option = createElement('option', { value: 'now', text: localize('Now') });
                 fragment.appendChild(option);
                 has_now = 1;
             } else {
@@ -24167,10 +24855,7 @@ var StartDates = function () {
                         $($duplicated_option[0]).text($duplicated_option.text() + ' - ' + localize('Session') + ' ' + duplicated_length);
                     }
 
-                    option = document.createElement('option');
-                    option.setAttribute('value', a.utc().unix());
-                    option.setAttribute('data-end', b.unix());
-                    content = document.createTextNode(day + ($duplicated_option.length ? ' - ' + localize('Session') + ' ' + (duplicated_length + 1) : ''));
+                    option = createElement('option', { value: a.utc().unix(), 'data-end': b.unix(), text: day + ($duplicated_option.length ? ' - ' + localize('Session') + ' ' + (duplicated_length + 1) : '') });
                     if (option.value >= default_start && !selected) {
                         selected = true;
                         option.setAttribute('selected', 'selected');
@@ -24178,7 +24863,6 @@ var StartDates = function () {
                     if (typeof first === 'undefined' && !has_now) {
                         first = a.utc().unix();
                     }
-                    option.appendChild(content);
                     fragment.appendChild(option);
                 }
             });
@@ -24211,7 +24895,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24222,15 +24906,15 @@ var commonTrading = __webpack_require__(24);
 var cleanupChart = __webpack_require__(55).cleanupChart;
 var displayCurrencies = __webpack_require__(159);
 var Defaults = __webpack_require__(22);
-var TradingEvents = __webpack_require__(254);
+var TradingEvents = __webpack_require__(255);
 var Price = __webpack_require__(94);
 var Process = __webpack_require__(160);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var ViewPopup = __webpack_require__(58);
-var BinaryPjax = __webpack_require__(13);
+var BinaryPjax = __webpack_require__(12);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var Guide = __webpack_require__(151);
 
 var TradePage = function () {
@@ -24313,14 +24997,14 @@ var TradePage = function () {
 module.exports = TradePage;
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Client = __webpack_require__(3);
-var BinarySocket = __webpack_require__(2);
+var Client = __webpack_require__(4);
+var BinarySocket = __webpack_require__(3);
 
 var Authenticate = function () {
     var onLoad = function onLoad() {
@@ -24352,17 +25036,17 @@ var Authenticate = function () {
 module.exports = Authenticate;
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var ChangePassword = function () {
     var form_id = '#frm_change_password';
@@ -24405,18 +25089,18 @@ var ChangePassword = function () {
 module.exports = ChangePassword;
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var PaymentAgentTransferUI = __webpack_require__(260);
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var PaymentAgentTransferUI = __webpack_require__(261);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var PaymentAgentTransfer = function () {
     var balance = void 0,
@@ -24553,7 +25237,7 @@ var PaymentAgentTransfer = function () {
 module.exports = PaymentAgentTransfer;
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24651,15 +25335,15 @@ var PaymentAgentTransferUI = function () {
 module.exports = PaymentAgentTransferUI;
 
 /***/ }),
-/* 261 */
+/* 262 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var Client = __webpack_require__(3);
-var jpClient = __webpack_require__(9).jpClient;
+var Client = __webpack_require__(4);
+var jpClient = __webpack_require__(10).jpClient;
 var formatMoney = __webpack_require__(7).formatMoney;
 
 var ProfitTable = function () {
@@ -24694,15 +25378,15 @@ var ProfitTable = function () {
 module.exports = ProfitTable;
 
 /***/ }),
-/* 262 */
+/* 263 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ProfitTableUI = __webpack_require__(263);
+var ProfitTableUI = __webpack_require__(264);
 var ViewPopup = __webpack_require__(58);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
 var addTooltip = __webpack_require__(54).addTooltip;
@@ -24837,17 +25521,17 @@ var ProfitTableInit = function () {
 module.exports = ProfitTableInit;
 
 /***/ }),
-/* 263 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ProfitTable = __webpack_require__(261);
-var Client = __webpack_require__(3);
+var ProfitTable = __webpack_require__(262);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var formatMoney = __webpack_require__(7).formatMoney;
 var showTooltip = __webpack_require__(54).showTooltip;
 var Table = __webpack_require__(70);
@@ -24956,15 +25640,15 @@ var ProfitTableUI = function () {
 module.exports = ProfitTableUI;
 
 /***/ }),
-/* 264 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
-var jpClient = __webpack_require__(9).jpClient;
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
+var jpClient = __webpack_require__(10).jpClient;
 
 var Settings = function () {
     var onLoad = function onLoad() {
@@ -24994,19 +25678,19 @@ var Settings = function () {
 module.exports = Settings;
 
 /***/ }),
-/* 265 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
 var localize = __webpack_require__(1).localize;
 var FlexTableUI = __webpack_require__(108);
-var jpClient = __webpack_require__(9).jpClient;
-var FormManager = __webpack_require__(21);
+var jpClient = __webpack_require__(10).jpClient;
+var FormManager = __webpack_require__(19);
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
 var APIToken = function () {
@@ -25156,95 +25840,78 @@ var APIToken = function () {
 module.exports = APIToken;
 
 /***/ }),
-/* 266 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ApplicationsInit = __webpack_require__(267);
-var BinaryPjax = __webpack_require__(13);
-var jpClient = __webpack_require__(9).jpClient;
-
-var AuthorisedApps = function () {
-    var onLoad = function onLoad() {
-        if (jpClient()) {
-            BinaryPjax.loadPreviousUrl();
-        }
-        ApplicationsInit.init();
-    };
-
-    var onUnload = function onUnload() {
-        ApplicationsInit.clean();
-    };
-
-    return {
-        onLoad: onLoad,
-        onUnload: onUnload
-    };
-}();
-
-module.exports = AuthorisedApps;
-
-/***/ }),
 /* 267 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ApplicationsData = __webpack_require__(163);
-var ApplicationsUI = __webpack_require__(268);
-var BinarySocket = __webpack_require__(2);
-
-var ApplicationsInit = function () {
-    var init = function init() {
-        ApplicationsUI.init();
-        BinarySocket.send({ oauth_apps: 1 }).then(function (response) {
-            if (response.error) {
-                ApplicationsUI.displayError(response.error.message);
-            } else {
-                ApplicationsUI.update(response.oauth_apps.map(ApplicationsData.parse));
-            }
-        });
-    };
-
-    var clean = function clean() {
-        ApplicationsUI.clean();
-    };
-
-    return {
-        init: init,
-        clean: clean
-    };
-}();
-
-module.exports = ApplicationsInit;
-
-/***/ }),
-/* 268 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ApplicationsData = __webpack_require__(163);
-var BinarySocket = __webpack_require__(2);
+var moment = __webpack_require__(8);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
 var localize = __webpack_require__(1).localize;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
 var State = __webpack_require__(6).State;
 var FlexTableUI = __webpack_require__(108);
+var elementTextContent = __webpack_require__(5).elementTextContent;
+var jpClient = __webpack_require__(10).jpClient;
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
-var ApplicationsUI = function () {
+var AuthorisedApps = function () {
     var can_revoke = false;
 
-    var container_selector = '#applications-container';
     var messages = {
         no_apps: 'You have not granted access to any applications.',
         revoke_confirm: 'Are you sure that you want to permanently revoke access to application',
         revoke_access: 'Revoke access'
+    };
+
+    var element_ids = {
+        container: 'applications-container',
+        table: 'applications-table',
+        loading: 'applications_loading',
+        error: 'applications_error'
+    };
+
+    var elements = {};
+
+    var onLoad = function onLoad() {
+        if (jpClient()) {
+            BinaryPjax.loadPreviousUrl();
+            return;
+        }
+        Object.keys(element_ids).forEach(function (id) {
+            elements[id] = document.getElementById(element_ids[id]);
+        });
+        updateApps();
+    };
+
+    var updateApps = function updateApps() {
+        BinarySocket.send({ oauth_apps: 1 }).then(function (response) {
+            if (response.error) {
+                if (/InvalidToken/.test(response.error.code)) {
+                    // if application revoked is current application, log client out
+                    Client.sendLogoutRequest(true);
+                } else {
+                    displayError(response.error.message);
+                }
+            } else {
+                var apps = response.oauth_apps.map(function (app) {
+                    return {
+                        name: app.name,
+                        scopes: app.scopes,
+                        last_used: app.last_used ? moment.utc(app.last_used) : null,
+                        id: app.app_id
+                    };
+                });
+                if (elements.loading) elements.loading.remove();
+                createTable(apps);
+                if (!apps.length) {
+                    FlexTableUI.displayError(localize(messages.no_apps), 7);
+                }
+            }
+        });
     };
 
     var formatApp = function formatApp(app) {
@@ -25267,11 +25934,7 @@ var ApplicationsUI = function () {
                     if (response.error) {
                         displayError(response.error.message);
                     } else {
-                        BinarySocket.send({ oauth_apps: 1 }).then(function (res) {
-                            if (res.oauth_apps) {
-                                update(res.oauth_apps.map(ApplicationsData.parse));
-                            }
-                        });
+                        updateApps();
                     }
                 });
                 container.css({ opacity: 0.5 });
@@ -25281,7 +25944,7 @@ var ApplicationsUI = function () {
     };
 
     var createTable = function createTable(data) {
-        if ($('#applications-table').length) {
+        if (elements.table) {
             return FlexTableUI.replace(data);
         }
         var headers = ['Name', 'Permissions', 'Last Used'];
@@ -25291,9 +25954,9 @@ var ApplicationsUI = function () {
         }
         FlexTableUI.init({
             data: data,
-            container: container_selector,
+            container: '#' + element_ids.container,
             header: headers.map(localize),
-            id: 'applications-table',
+            id: element_ids.table,
             cols: headers.map(function (title) {
                 return title.toLowerCase().replace(/\s/g, '-');
             }),
@@ -25304,55 +25967,42 @@ var ApplicationsUI = function () {
             },
             formatter: formatApp
         });
+        elements.table = document.getElementById(element_ids.table);
         return showLocalTimeOnHover('td.last_used');
     };
 
-    var update = function update(apps) {
-        $('#loading').remove();
-        createTable(apps);
-        if (!apps.length) {
-            FlexTableUI.displayError(localize(messages.no_apps), 7);
-        }
-    };
-
     var displayError = function displayError(message) {
-        $(container_selector).find('.error-msg').text(message);
+        elementTextContent(elements.error, message);
     };
 
-    var init = function init() {
-        showLoadingImage($('<div/>', { id: 'loading' }).insertAfter('#applications-title'));
-    };
-
-    var clean = function clean() {
-        $(container_selector).find('.error-msg').text('');
+    var onUnload = function onUnload() {
+        elementTextContent(elements.error, '');
         FlexTableUI.clear();
     };
 
     return {
-        init: init,
-        clean: clean,
-        update: update,
-        displayError: displayError
+        onLoad: onLoad,
+        onUnload: onUnload
     };
 }();
 
-module.exports = ApplicationsUI;
+module.exports = AuthorisedApps;
 
 /***/ }),
-/* 269 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
-var jpClient = __webpack_require__(9).jpClient;
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
+var jpClient = __webpack_require__(10).jpClient;
 var Validation = __webpack_require__(71);
 
 var FinancialAssessment = function () {
@@ -25430,7 +26080,7 @@ var FinancialAssessment = function () {
             }
 
             var data = { set_financial_assessment: 1 };
-            showLoadingImage($('#msg_form'));
+            showLoadingImage(document.getElementById('msg_form'));
             $(form_selector).find('select').each(function () {
                 financial_assessment[$(this).attr('id')] = data[$(this).attr('id')] = $(this).val();
             });
@@ -25485,15 +26135,15 @@ var FinancialAssessment = function () {
 module.exports = FinancialAssessment;
 
 /***/ }),
-/* 270 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var IPHistoryInit = __webpack_require__(272);
-var BinaryPjax = __webpack_require__(13);
-var jpClient = __webpack_require__(9).jpClient;
+var IPHistoryInit = __webpack_require__(271);
+var BinaryPjax = __webpack_require__(12);
+var jpClient = __webpack_require__(10).jpClient;
 
 var IPHistory = function () {
     var onLoad = function onLoad() {
@@ -25516,7 +26166,7 @@ var IPHistory = function () {
 module.exports = IPHistory;
 
 /***/ }),
-/* 271 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25561,15 +26211,15 @@ var IPHistoryData = function () {
 module.exports = IPHistoryData;
 
 /***/ }),
-/* 272 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var IPHistoryData = __webpack_require__(271);
-var IPHistoryUI = __webpack_require__(273);
-var BinarySocket = __webpack_require__(2);
+var IPHistoryData = __webpack_require__(270);
+var IPHistoryUI = __webpack_require__(272);
+var BinarySocket = __webpack_require__(3);
 
 var IPHistoryInit = function () {
     var responseHandler = function responseHandler(response) {
@@ -25604,7 +26254,7 @@ var IPHistoryInit = function () {
 module.exports = IPHistoryInit;
 
 /***/ }),
-/* 273 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25679,14 +26329,14 @@ var IPHistoryUI = function () {
 module.exports = IPHistoryUI;
 
 /***/ }),
-/* 274 */
+/* 273 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var LimitsInit = __webpack_require__(275);
+var BinarySocket = __webpack_require__(3);
+var LimitsInit = __webpack_require__(274);
 
 var Limits = function () {
     var onLoad = function onLoad() {
@@ -25712,14 +26362,14 @@ var Limits = function () {
 module.exports = Limits;
 
 /***/ }),
-/* 275 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var LimitsUI = __webpack_require__(276);
-var Client = __webpack_require__(3);
+var LimitsUI = __webpack_require__(275);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var elementTextContent = __webpack_require__(5).elementTextContent;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
@@ -25788,23 +26438,48 @@ var LimitsInit = function () {
 module.exports = LimitsInit;
 
 /***/ }),
-/* 276 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var Table = __webpack_require__(70);
 var localize = __webpack_require__(1).localize;
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
+var urlForStatic = __webpack_require__(9).urlForStatic;
 var elementInnerHtml = __webpack_require__(5).elementInnerHtml;
 var formatMoney = __webpack_require__(7).formatMoney;
 
 var LimitsUI = function () {
-    var client_limits = '';
+    var map = {
+        atm: 'ATM',
+        non_atm: 'Non-ATM',
+        less_than_seven_days: 'Duration up to 7 days',
+        more_than_seven_days: 'Duration above 7 days'
+    };
 
-    var appendRowTable = function appendRowTable(name, turnover_limit, padding, font_weight) {
-        client_limits.append($('<tr/>', { class: 'flex-tr' }).append($('<td/>', { class: 'flex-tr-child', style: 'padding-left: ' + padding + '; font-weight: ' + font_weight + ';', text: localize(name) })).append($('<td/>', { html: turnover_limit })));
+    var $client_limits = void 0,
+        $gap_parent = void 0;
+
+    var appendRowTable = function appendRowTable(name, turnover_limit, padding, font_weight, insert_before) {
+        var $new_row = $('<tr/>', { class: 'flex-tr' }).append($('<td/>', { class: 'flex-tr-child', style: 'padding-left: ' + padding + '; font-weight: ' + font_weight + ';', text: localize(map[name] || name) })).append($('<td/>', { html: turnover_limit }));
+        if (insert_before) {
+            $new_row.insertBefore($gap_parent);
+        } else {
+            $client_limits.append($new_row);
+        }
+        if (name === 'atm') {
+            addTooltip($new_row.find('td:first-child'), localize('Contracts where the barrier is the same as entry spot.'));
+        } else if (name === 'non_atm') {
+            addTooltip($new_row.find('td:first-child'), localize('Contracts where the barrier is different from the entry spot.'));
+        }
+    };
+
+    var addTooltip = function addTooltip($el, text) {
+        $el.append($('<a/>', { class: 'no-underline', href: 'java' + 'script:;', 'data-balloon-length': 'xlarge', 'data-balloon': text }).append($('<img/>', { src: urlForStatic('images/common/question_1.png') })));
     };
 
     var fillLimitsTable = function fillLimitsTable(limits) {
@@ -25817,17 +26492,29 @@ var LimitsUI = function () {
         var open_position = document.getElementById('open-positions');
         var account_balance = document.getElementById('account-balance');
         var payout = document.getElementById('payout');
-        var payout_per = document.getElementById('payout-per-symbol-and-contract-type');
+        var payout_per_contract = document.getElementById('payout-per-symbol-and-contract-type');
+
+        $client_limits = $('#client-limits');
+        $gap_parent = $('#gap').parent();
 
         elementInnerHtml(open_position, limits.open_positions);
         elementInnerHtml(account_balance, formatMoney(currency, limits.account_balance, 1));
         elementInnerHtml(payout, formatMoney(currency, limits.payout, 1));
-        elementInnerHtml(payout_per, formatMoney(currency, limits.payout_per_symbol_and_contract_type, 1));
+        elementInnerHtml(payout_per_contract, formatMoney(currency, limits.payout_per_symbol_and_contract_type, 1));
 
-        var market_specific = limits.market_specific;
-        client_limits = $('#client-limits');
-        Object.keys(market_specific).forEach(function (key) {
-            var object = market_specific[key];
+        Object.keys(limits.payout_per_symbol).sort().forEach(function (key) {
+            if (_typeof(limits.payout_per_symbol[key]) === 'object') {
+                appendRowTable(key, '', '25px', 'bold', true);
+                Object.keys(limits.payout_per_symbol[key]).sort().forEach(function (sub_key) {
+                    appendRowTable(sub_key, formatMoney(currency, limits.payout_per_symbol[key][sub_key], 1), '50px', 'normal', true);
+                });
+            } else {
+                appendRowTable(key, formatMoney(currency, limits.payout_per_symbol[key], 1), '25px', 'bold', true);
+            }
+        });
+
+        Object.keys(limits.market_specific).forEach(function (key) {
+            var object = limits.market_specific[key];
             if (object.length && object.length > 0) {
                 appendRowTable(localize(key.charAt(0).toUpperCase() + key.slice(1)), '', 'auto', 'bold');
                 Object.keys(object).forEach(function (c) {
@@ -25860,22 +26547,22 @@ var LimitsUI = function () {
 module.exports = LimitsUI;
 
 /***/ }),
-/* 277 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var Currency = __webpack_require__(7);
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 var scrollToHashSection = __webpack_require__(83).scrollToHashSection;
 var DatePicker = __webpack_require__(72);
 var TimePicker = __webpack_require__(109);
@@ -26114,14 +26801,14 @@ var SelfExclusion = function () {
 module.exports = SelfExclusion;
 
 /***/ }),
-/* 278 */
+/* 277 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
 var formatCurrency = __webpack_require__(7).formatCurrency;
@@ -26186,24 +26873,24 @@ var Statement = function () {
 module.exports = Statement;
 
 /***/ }),
-/* 279 */
+/* 278 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var StatementUI = __webpack_require__(280);
+var StatementUI = __webpack_require__(279);
 var ViewPopup = __webpack_require__(58);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var getLanguage = __webpack_require__(17).get;
 var localize = __webpack_require__(1).localize;
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
 var addTooltip = __webpack_require__(54).addTooltip;
 var buildOauthApps = __webpack_require__(54).buildOauthApps;
 var dateValueChanged = __webpack_require__(5).dateValueChanged;
-var jpClient = __webpack_require__(9).jpClient;
-var jpResidence = __webpack_require__(9).jpResidence;
+var jpClient = __webpack_require__(10).jpClient;
+var jpResidence = __webpack_require__(10).jpResidence;
 var toISOFormat = __webpack_require__(18).toISOFormat;
 var DatePicker = __webpack_require__(72);
 
@@ -26375,18 +27062,18 @@ var StatementInit = function () {
 module.exports = StatementInit;
 
 /***/ }),
-/* 280 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Statement = __webpack_require__(278);
-var Client = __webpack_require__(3);
-var downloadCSV = __webpack_require__(4).downloadCSV;
+var Statement = __webpack_require__(277);
+var Client = __webpack_require__(4);
+var downloadCSV = __webpack_require__(2).downloadCSV;
 var localize = __webpack_require__(1).localize;
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var showTooltip = __webpack_require__(54).showTooltip;
 var Table = __webpack_require__(70);
 
@@ -26475,14 +27162,14 @@ var StatementUI = function () {
 module.exports = StatementUI;
 
 /***/ }),
-/* 281 */
+/* 280 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 
 var TopUpVirtual = function () {
@@ -26526,27 +27213,29 @@ var TopUpVirtual = function () {
 module.exports = TopUpVirtual;
 
 /***/ }),
-/* 282 */
+/* 281 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var setIsForNewAccount = __webpack_require__(165).setIsForNewAccount;
-var getCurrencies = __webpack_require__(166).getCurrencies;
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var setIsForNewAccount = __webpack_require__(164).setIsForNewAccount;
+var getCurrencies = __webpack_require__(165).getCurrencies;
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var urlFor = __webpack_require__(10).urlFor;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var urlFor = __webpack_require__(9).urlFor;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var getCurrencyList = __webpack_require__(7).getCurrencyList;
+var FormManager = __webpack_require__(19);
 var toTitleCase = __webpack_require__(18).toTitleCase;
 
 var Accounts = function () {
     var landing_company = void 0;
+    var form_id = '#new_accounts';
 
     var onLoad = function onLoad() {
         if (!Client.get('residence')) {
@@ -26592,7 +27281,7 @@ var Accounts = function () {
             financial: new_account.type === 'financial'
         };
 
-        $('#new_accounts').find('tbody').append($('<tr/>').append($('<td/>').html($('<span/>', { text: localize(toTitleCase(new_account.type) + ' Account'), 'data-balloon': getCompanyName(account) }))).append($('<td/>', { text: getAvailableMarkets(account) })).append($('<td/>', { text: Client.getLandingCompanyValue(account, landing_company, 'legal_allowed_currencies').join(', ') })).append($('<td/>').html($('<a/>', { class: 'button', href: urlFor(new_account.upgrade_link) }).html($('<span/>', { text: localize('Create') })))));
+        $(form_id).find('tbody').append($('<tr/>').append($('<td/>').html($('<span/>', { text: localize(toTitleCase(new_account.type) + ' Account'), 'data-balloon': localize('Counterparty') + ': ' + getCompanyName(account) }))).append($('<td/>', { text: getAvailableMarkets(account) })).append($('<td/>', { text: Client.getLandingCompanyValue(account, landing_company, 'legal_allowed_currencies').join(', ') })).append($('<td/>').html($('<a/>', { class: 'button', href: urlFor(new_account.upgrade_link) }).html($('<span/>', { text: localize('Create') })))));
     };
 
     var populateExistingAccounts = function populateExistingAccounts() {
@@ -26600,9 +27289,14 @@ var Accounts = function () {
             return a > b;
         }).forEach(function (loginid) {
             var account_currency = Client.get('currency', loginid);
-            var company_name = Client.isAccountOfType('virtual', loginid) ? toTitleCase(getPropertyValue(landing_company, 'virtual_company')) : getCompanyName(loginid);
+            var account_type_prop = { text: localize(Client.getAccountTitle(loginid)) };
 
-            $('#existing_accounts').find('tbody').append($('<tr/>', { id: loginid }).append($('<td/>', { text: loginid })).append($('<td/>').html($('<span/>', { text: localize(Client.getAccountTitle(loginid)), 'data-balloon': company_name }))).append($('<td/>', { text: getAvailableMarkets(loginid) })).append($('<td/>').html(!account_currency && loginid === Client.get('loginid') ? $('<a/>', { class: 'button', href: urlFor('user/set-currency') }).html($('<span/>', { text: localize('Set Currency') })) : account_currency || '-')));
+            if (!Client.isAccountOfType('virtual', loginid)) {
+                var company_name = getCompanyName(loginid);
+                account_type_prop['data-balloon'] = localize('Counterparty') + ': ' + company_name;
+            }
+
+            $('#existing_accounts').find('tbody').append($('<tr/>', { id: loginid }).append($('<td/>', { text: loginid })).append($('<td/>').html($('<span/>', account_type_prop))).append($('<td/>', { text: getAvailableMarkets(loginid) })).append($('<td/>').html(!account_currency && loginid === Client.get('loginid') ? $('<a/>', { class: 'button', href: urlFor('user/set-currency') }).html($('<span/>', { text: localize('Set Currency') })) : account_currency || '-')));
         });
     };
 
@@ -26631,7 +27325,7 @@ var Accounts = function () {
     };
 
     var populateMultiAccount = function populateMultiAccount(currencies) {
-        $('#new_accounts').find('tbody').append($('<tr/>', { id: 'new_account_opening' }).append($('<td/>').html($('<span/>', { text: localize('Real Account'), 'data-balloon': getCompanyName({ real: 1 }) }))).append($('<td/>', { text: getAvailableMarkets({ real: 1 }) })).append($('<td/>', { class: 'account-currency' })).append($('<td/>').html($('<button/>', { text: localize('Create') }))));
+        $(form_id).find('tbody').append($('<tr/>', { id: 'new_account_opening' }).append($('<td/>').html($('<span/>', { text: localize('Real Account'), 'data-balloon': localize('Counterparty') + ': ' + getCompanyName({ real: 1 }) }))).append($('<td/>', { text: getAvailableMarkets({ real: 1 }) })).append($('<td/>', { class: 'account-currency' })).append($('<td/>').html($('<button/>', { text: localize('Create'), type: 'submit' }))));
 
         $('#note').setVisibility(1);
 
@@ -26641,44 +27335,41 @@ var Accounts = function () {
             $currencies.append(getCurrencyList(currencies).html());
             $new_account_opening.find('.account-currency').html($('<select/>', { id: 'new_account_currency' }).html($currencies.html()));
         } else {
-            $new_account_opening.find('.account-currency').html($('<span/>', { id: 'new_account_currency', value: currencies, text: currencies }));
+            $new_account_opening.find('.account-currency').html($('<label/>', { id: 'new_account_currency', 'data-value': currencies, text: currencies }));
         }
 
-        $new_account_opening.find('button').on('click', function () {
-            if (!getSelectedCurrency()) {
-                showError('Please choose a currency');
-            } else {
-                var req = populateReq();
-                BinarySocket.send(req).then(function (response) {
-                    if (response.error) {
-                        var account_opening_reason = State.getResponse('get_settings.account_opening_reason');
-                        if (!account_opening_reason && getPropertyValue(response, ['error', 'details', 'account_opening_reason']) && /InsufficientAccountDetails|InputValidationFailed/.test(response.error.code)) {
-                            setIsForNewAccount(true);
-                            // ask client to set account opening reason
-                            BinaryPjax.load(urlFor('user/settings/detailsws'));
-                        } else {
-                            showError(response.error.message);
-                        }
-                    } else {
-                        var new_account = response.new_account_real;
-                        localStorage.setItem('is_new_account', 1);
-                        Client.processNewAccount({
-                            email: Client.get('email'),
-                            loginid: new_account.client_id,
-                            token: new_account.oauth_token,
-                            redirect_url: urlFor('user/set-currency')
-                        });
-                    }
-                });
-            }
-        });
-
+        // need to make it visible before adding the form manager event on it
         doneLoading('#new_accounts_wrapper');
+
+        var el_select_currency = /select/i.test(document.getElementById('new_account_currency').nodeName);
+        FormManager.init(form_id, [{ selector: '#new_account_currency', request_field: 'currency', validations: [el_select_currency ? 'req' : ''], hide_asterisk: true }].concat(populateReq()));
+
+        FormManager.handleSubmit({
+            form_selector: form_id,
+            fnc_response_handler: newAccountResponse
+        });
     };
 
-    var getSelectedCurrency = function getSelectedCurrency() {
-        var new_account_currency = document.getElementById('new_account_currency');
-        return new_account_currency.value || new_account_currency.getAttribute('value');
+    var newAccountResponse = function newAccountResponse(response) {
+        if (response.error) {
+            var account_opening_reason = State.getResponse('get_settings.account_opening_reason');
+            if (!account_opening_reason && getPropertyValue(response, ['error', 'details', 'account_opening_reason']) && /InsufficientAccountDetails|InputValidationFailed/.test(response.error.code)) {
+                setIsForNewAccount(true);
+                // ask client to set account opening reason
+                BinaryPjax.load(urlFor('user/settings/detailsws'));
+            } else {
+                showError(response.error.message);
+            }
+        } else {
+            var new_account = response.new_account_real;
+            localStorage.setItem('is_new_account', 1);
+            Client.processNewAccount({
+                email: Client.get('email'),
+                loginid: new_account.client_id,
+                token: new_account.oauth_token,
+                redirect_url: urlFor('user/set-currency')
+            });
+        }
     };
 
     var showError = function showError(message) {
@@ -26689,27 +27380,12 @@ var Accounts = function () {
     var populateReq = function populateReq() {
         var get_settings = State.getResponse('get_settings');
         var dob = moment(+get_settings.date_of_birth * 1000).format('YYYY-MM-DD');
-        var req = {
-            new_account_real: 1,
-            date_of_birth: dob,
-            salutation: get_settings.salutation,
-            first_name: get_settings.first_name,
-            last_name: get_settings.last_name,
-            address_line_1: get_settings.address_line_1,
-            address_line_2: get_settings.address_line_2,
-            address_city: get_settings.address_city,
-            address_state: get_settings.address_state,
-            address_postcode: get_settings.address_postcode,
-            phone: get_settings.phone,
-            account_opening_reason: get_settings.account_opening_reason,
-            residence: Client.get('residence'),
-            currency: getSelectedCurrency()
-        };
+        var req = [{ request_field: 'new_account_real', value: 1 }, { request_field: 'date_of_birth', value: dob }, { request_field: 'salutation', value: get_settings.salutation }, { request_field: 'first_name', value: get_settings.first_name }, { request_field: 'last_name', value: get_settings.last_name }, { request_field: 'address_line_1', value: get_settings.address_line_1 }, { request_field: 'address_line_2', value: get_settings.address_line_2 }, { request_field: 'address_city', value: get_settings.address_city }, { request_field: 'address_state', value: get_settings.address_state }, { request_field: 'address_postcode', value: get_settings.address_postcode }, { request_field: 'phone', value: get_settings.phone }, { request_field: 'account_opening_reason', value: get_settings.account_opening_reason }, { request_field: 'residence', value: Client.get('residence') }];
         if (get_settings.tax_identification_number) {
-            req.tax_identification_number = get_settings.tax_identification_number;
+            req.push({ request_field: 'tax_identification_number', value: get_settings.tax_identification_number });
         }
         if (get_settings.tax_residence) {
-            req.tax_residence = get_settings.tax_residence;
+            req.push({ request_field: 'tax_residence', value: get_settings.tax_residence });
         }
         return req;
     };
@@ -26722,7 +27398,7 @@ var Accounts = function () {
 module.exports = Accounts;
 
 /***/ }),
-/* 283 */
+/* 282 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26730,10 +27406,10 @@ module.exports = Accounts;
 
 var Portfolio = __webpack_require__(162).Portfolio;
 var ViewPopup = __webpack_require__(58);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var localize = __webpack_require__(1).localize;
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var formatMoney = __webpack_require__(7).formatMoney;
 
 var ICOPortfolio = function () {
@@ -26747,7 +27423,7 @@ var ICOPortfolio = function () {
         values = {};
         var $portfolio_loading = $('#portfolio-loading');
         $portfolio_loading.show();
-        showLoadingImage($portfolio_loading);
+        showLoadingImage($portfolio_loading[0]);
         is_first_response = true;
         BinarySocket.send({ portfolio: 1 }).then(function (response) {
             updatePortfolio(response);
@@ -26876,22 +27552,22 @@ var ICOPortfolio = function () {
 module.exports = ICOPortfolio;
 
 /***/ }),
-/* 284 */
+/* 283 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var ICOPortfolio = __webpack_require__(283);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var ICOPortfolio = __webpack_require__(282);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
-var jpClient = __webpack_require__(9).jpClient;
+var jpClient = __webpack_require__(10).jpClient;
 var getDecimalPlaces = __webpack_require__(7).getDecimalPlaces;
 var formatMoney = __webpack_require__(7).formatMoney;
 var onlyNumericOnKeypress = __webpack_require__(90);
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var ICOSubscribe = function () {
     var form_id = '#frm_ico_bid';
@@ -26989,21 +27665,21 @@ var ICOSubscribe = function () {
 module.exports = ICOSubscribe;
 
 /***/ }),
-/* 285 */
+/* 284 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var localize = __webpack_require__(1).localize;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var LostPassword = function () {
     var form_id = '#frm_lost_password';
 
     var responseHandler = function responseHandler(response) {
         if (response.verify_email) {
-            $(form_id).html($('<div/>', { class: 'notice-msg', text: localize('Please check your email to complete the process.') }));
+            $(form_id).html($('<div/>', { class: 'notice-msg', text: localize('Please check your email for the password reset link.') }));
         } else if (response.error) {
             $('#form_error').setVisibility(1).text(localize(response.error.message));
         }
@@ -27025,17 +27701,17 @@ var LostPassword = function () {
 module.exports = LostPassword;
 
 /***/ }),
-/* 286 */
+/* 285 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Client = __webpack_require__(3);
-var showLoadingImage = __webpack_require__(4).showLoadingImage;
+var Client = __webpack_require__(4);
+var showLoadingImage = __webpack_require__(2).showLoadingImage;
 var formatMoney = __webpack_require__(7).formatMoney;
 var Validation = __webpack_require__(71);
-var MetaTraderConfig = __webpack_require__(167);
+var MetaTraderConfig = __webpack_require__(166);
 
 var MetaTraderUI = function () {
     var $container = void 0,
@@ -27262,7 +27938,7 @@ var MetaTraderUI = function () {
         if ($btn.length && !$btn.find('.barspinner').length) {
             $btn.attr('disabled', 'disabled');
             var $btn_text = $('<span/>', { text: $btn.text(), class: 'invisible' });
-            showLoadingImage($btn, 'white');
+            showLoadingImage($btn[0], 'white');
             $btn.append($btn_text);
         }
     };
@@ -27295,19 +27971,19 @@ var MetaTraderUI = function () {
 module.exports = MetaTraderUI;
 
 /***/ }),
-/* 287 */
+/* 286 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var moment = __webpack_require__(8);
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
-var isEmptyObject = __webpack_require__(4).isEmptyObject;
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
+var isEmptyObject = __webpack_require__(2).isEmptyObject;
 var AccountOpening = __webpack_require__(107);
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 var toISOFormat = __webpack_require__(18).toISOFormat;
 
 var FinancialAccOpening = function () {
@@ -27392,17 +28068,17 @@ var FinancialAccOpening = function () {
 module.exports = FinancialAccOpening;
 
 /***/ }),
-/* 288 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var AccountOpening = __webpack_require__(107);
 var detectHedging = __webpack_require__(5).detectHedging;
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var JapanAccOpening = function () {
     var onLoad = function onLoad() {
@@ -27437,16 +28113,16 @@ var JapanAccOpening = function () {
 module.exports = JapanAccOpening;
 
 /***/ }),
-/* 289 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var AccountOpening = __webpack_require__(107);
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var RealAccOpening = function () {
 
@@ -27480,22 +28156,22 @@ var RealAccOpening = function () {
 module.exports = RealAccOpening;
 
 /***/ }),
-/* 290 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Cookies = __webpack_require__(42);
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var localize = __webpack_require__(1).localize;
 var LocalStore = __webpack_require__(6).LocalStore;
-var urlFor = __webpack_require__(10).urlFor;
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var urlFor = __webpack_require__(9).urlFor;
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var makeOption = __webpack_require__(5).makeOption;
-var jpClient = __webpack_require__(9).jpClient;
-var FormManager = __webpack_require__(21);
+var jpClient = __webpack_require__(10).jpClient;
+var FormManager = __webpack_require__(19);
 var TrafficSource = __webpack_require__(152);
 
 var VirtualAccOpening = function () {
@@ -27587,15 +28263,19 @@ var VirtualAccOpening = function () {
         var error = response.error;
         if (!error) {
             var new_account = response.new_account_virtual;
-            Client.set('residence', response.echo_req.residence, new_account.client_id);
+            var residence = response.echo_req.residence;
+            Client.set('residence', residence, new_account.client_id);
             LocalStore.remove('gclid');
-            return Client.processNewAccount({
-                email: new_account.email,
-                loginid: new_account.client_id,
-                token: new_account.oauth_token,
-                is_virtual: true,
-                redirect_url: jp_client ? urlFor('new_account/landing_page') : ''
+            BinarySocket.send({ landing_company: residence }).then(function (response_lc) {
+                Client.processNewAccount({
+                    email: new_account.email,
+                    loginid: new_account.client_id,
+                    token: new_account.oauth_token,
+                    is_virtual: true,
+                    redirect_url: jp_client ? urlFor('new_account/landing_page') : urlFor(Client.getUpgradeInfo(response_lc).upgrade_link)
+                });
             });
+            return true;
         }
 
         var showInvalidTokenMessage = function showInvalidTokenMessage() {
@@ -27644,16 +28324,16 @@ var VirtualAccOpening = function () {
 module.exports = VirtualAccOpening;
 
 /***/ }),
-/* 291 */
+/* 290 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var RealityCheckData = __webpack_require__(121);
-var RealityCheckUI = __webpack_require__(292);
-var BinarySocket = __webpack_require__(2);
-var Client = __webpack_require__(3);
+var RealityCheckUI = __webpack_require__(291);
+var BinarySocket = __webpack_require__(3);
+var Client = __webpack_require__(4);
 
 var RealityCheck = function () {
     var storageHandler = function storageHandler(ev) {
@@ -27694,17 +28374,17 @@ var RealityCheck = function () {
 module.exports = RealityCheck;
 
 /***/ }),
-/* 292 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var RealityCheckData = __webpack_require__(121);
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 var showLocalTimeOnHover = __webpack_require__(23).showLocalTimeOnHover;
-var urlFor = __webpack_require__(10).urlFor;
-var FormManager = __webpack_require__(21);
+var urlFor = __webpack_require__(9).urlFor;
+var FormManager = __webpack_require__(19);
 __webpack_require__(172);
 __webpack_require__(173);
 
@@ -27843,7 +28523,7 @@ var RealityCheckUI = function () {
 module.exports = RealityCheckUI;
 
 /***/ }),
-/* 293 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27852,7 +28532,7 @@ module.exports = RealityCheckUI;
 var localize = __webpack_require__(1).localize;
 var Login = __webpack_require__(69);
 var generateBirthDate = __webpack_require__(150);
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var ResetPassword = function () {
     var responseHandler = function responseHandler(response) {
@@ -27911,19 +28591,19 @@ var ResetPassword = function () {
 module.exports = ResetPassword;
 
 /***/ }),
-/* 294 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BinarySocket = __webpack_require__(2);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var BinarySocket = __webpack_require__(3);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
 var State = __webpack_require__(6).State;
-var Url = __webpack_require__(10);
+var Url = __webpack_require__(9);
 var isCryptocurrency = __webpack_require__(7).isCryptocurrency;
 var getCurrencyName = __webpack_require__(7).getCurrencyName;
 
@@ -27997,6 +28677,10 @@ var SetCurrency = function () {
                                         redirect_url = Url.urlFor('user/authenticate');
                                     }
                                 }
+                                // Do not redirect MX clients to cashier, because they need to set max limit before making deposit
+                                if (!redirect_url && !/^(iom)$/i.test(Client.get('landing_company_shortcode'))) {
+                                    redirect_url = Url.urlFor('cashier');
+                                }
                             } else {
                                 redirect_url = BinaryPjax.getPreviousUrl();
                             }
@@ -28024,13 +28708,13 @@ var SetCurrency = function () {
 module.exports = SetCurrency;
 
 /***/ }),
-/* 295 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var FormManager = __webpack_require__(21);
+var FormManager = __webpack_require__(19);
 
 var TelegramBot = function () {
     var form = '#frm_telegram_bot';
@@ -28063,7 +28747,7 @@ var TelegramBot = function () {
 module.exports = TelegramBot;
 
 /***/ }),
-/* 296 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28071,10 +28755,10 @@ module.exports = TelegramBot;
 
 var PortfolioInit = __webpack_require__(86);
 var updateContractBalance = __webpack_require__(120).updateContractBalance;
-var Client = __webpack_require__(3);
-var getPropertyValue = __webpack_require__(4).getPropertyValue;
+var Client = __webpack_require__(4);
+var getPropertyValue = __webpack_require__(2).getPropertyValue;
 var formatMoney = __webpack_require__(7).formatMoney;
-var BinarySocket = __webpack_require__(2);
+var BinarySocket = __webpack_require__(3);
 
 var updateBalance = function updateBalance(response) {
     if (getPropertyValue(response, 'error')) {
@@ -28097,64 +28781,21 @@ var updateBalance = function updateBalance(response) {
 module.exports = updateBalance;
 
 /***/ }),
-/* 297 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var urlFor = __webpack_require__(10).urlFor;
-var Client = __webpack_require__(3);
-var jpClient = __webpack_require__(9).jpClient;
-var BinarySocket = __webpack_require__(2);
-
-var AffiliatePopup = function () {
-    var container_id = 'affiliate_disclaimer_popup';
-
-    var show = function show() {
-        if (Client.isLoggedIn()) return;
-        BinarySocket.wait('website_status').then(function (response) {
-            if (jpClient() || response.website_status.clients_country === 'jp') {
-                $.ajax({
-                    url: urlFor('affiliate_disclaimer'),
-                    dataType: 'html',
-                    method: 'GET',
-                    success: function success(contents) {
-                        $('body').append($('<div/>', { id: container_id, class: 'lightbox' }).append($('<div/>').append($(contents))));
-                        $('#btn_affiliate_proceed').off('click').on('click', close);
-                    }
-                });
-            }
-        });
-    };
-
-    var close = function close() {
-        $('#' + container_id).remove();
-    };
-
-    return {
-        show: show
-    };
-}();
-
-module.exports = AffiliatePopup;
-
-/***/ }),
-/* 298 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Cookies = __webpack_require__(42);
-var KnowledgeTestUI = __webpack_require__(299);
-var BinaryPjax = __webpack_require__(13);
-var Client = __webpack_require__(3);
+var KnowledgeTestUI = __webpack_require__(297);
+var BinaryPjax = __webpack_require__(12);
+var Client = __webpack_require__(4);
 var toJapanTimeIfNeeded = __webpack_require__(23).toJapanTimeIfNeeded;
 var Header = __webpack_require__(38);
 var localize = __webpack_require__(1).localize;
-var Url = __webpack_require__(10);
-var BinarySocket = __webpack_require__(2);
+var Url = __webpack_require__(9);
+var BinarySocket = __webpack_require__(3);
 
 var KnowledgeTest = function () {
     var submitted = {};
@@ -28389,7 +29030,7 @@ var KnowledgeTest = function () {
 module.exports = KnowledgeTest;
 
 /***/ }),
-/* 299 */
+/* 297 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28397,7 +29038,7 @@ module.exports = KnowledgeTest;
 
 var moment = __webpack_require__(8);
 var localize = __webpack_require__(1).localize;
-var urlForStatic = __webpack_require__(10).urlForStatic;
+var urlForStatic = __webpack_require__(9).urlForStatic;
 
 var KnowledgeTestUI = function () {
     var createTrueFalseBox = function createTrueFalseBox(question, show_answer) {
@@ -28495,7 +29136,7 @@ var KnowledgeTestUI = function () {
 module.exports = KnowledgeTestUI;
 
 /***/ }),
-/* 300 */
+/* 298 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28532,6 +29173,195 @@ $(window).on('pageshow', function (e) {
         BinaryLoader.init();
     }
 });
+
+/***/ }),
+/* 299 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var CommonPasswords = __webpack_require__(300);
+
+/**
+ * Mellt
+ *
+ * Tests the strength of a password by calculating how long it would take to
+ * brute force it.
+ *
+ * @version 0.1.0
+ * @link http://mel.lt/ The homepage for this script.
+ * @link http://www.hammerofgod.com/passwordcheck.aspx Much of this is based
+ * on the description of Thor's Godly Privacy password strength checker,
+ * however the actual code below is all my own.
+ * @link http://xato.net/passwords/more-top-worst-passwords/ The included
+ * common passwords list is from Mark Burnett's password collection (which
+ * is excellent). You can of course use your own password file instead.
+ */
+var Mellt = function () {
+
+    // We're making some guesses here about human nature (again much of this is
+    // based on the TGP password strength checker, and Timothy "Thor" Mullen
+    // deserves the credit for the thinking behind this). Basically we're combining
+    // what we know about users (SHIFT+numbers are more common than other
+    // punctuation for example) combined with how an attacker will attack a
+    // password (most common letters first, expanding outwards).
+    //
+    // If you want to support passwords that use non-english characters, and
+    // your attacker knows this (for example, a Russian site would be expected
+    // to contain passwords in Russian characters) add your characters to one of
+    // the sets below, or create new sets and insert them in the right places.
+    var character_sets = ["0123456789", "abcdefghijklmnopqrstuvwxyz", "abcdefghijklmnopqrstuvwxyz0123456789", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-=_+[]\"{}|;':,./<>?`~"];
+
+    /**
+     * Tests password strength by simulating how long it would take a cracker to
+     * brute force your password.
+     *
+     * Also optionally tests against a list of common passwords (contained in an
+     * external file) to weed out things like "password", which from a pure brute
+     * force perspective would be harder to break if it wasn't so common.
+     *
+     * The character sets being used in this checker assume English (ASCII)
+     * characters (no umlauts for example). If you run a non-english site, and you
+     * suspect the crackers will realize this, you may want to modify the
+     * character set to include the characters in your language.
+     *
+     * @param password string, The password to test the strength of
+     * @return number Returns a number specifying how many days it would take
+     * to brute force the password (at 1 billion checks a second) or -1 to
+     * indicate the password was found in the common passwords file. Obviously if
+     * they don't have direct access to the hashed passwords this time would be
+     * longer, and even then most computers (at the time of this writing) won't be
+     * able to test 1 billion hashes a second, but this function measures worst
+     * case scenario, so... I would recommend you require at least 30 days to brute
+     * force a password, obviously more if you're a bank or other secure system.
+     * @throws Exception If an error is encountered.
+     */
+    var checkPassword = function checkPassword(password) {
+
+        // First check passwords in the common password file if available.
+        // We do this because "password" takes 129 seconds, but is the first
+        // thing an attacker will try.
+        if (CommonPasswords.find(function (pass) {
+            return pass === password.toLowerCase();
+        })) {
+            // If their password exists in the common file, then it's
+            // zero time to crack this terrible password.
+            return -1;
+        }
+
+        // Figure out which character set the password is using (based on the most "complex" character in it).
+        var base = '';
+        var base_key = null;
+        var found_char = void 0;
+
+        var _loop = function _loop(i) {
+            found_char = false;
+            character_sets.some(function (character_set, idx) {
+                if (base_key <= idx && character_set.indexOf(password[i]) > -1) {
+                    base_key = idx;
+                    base = character_set;
+                    found_char = true;
+                    return true;
+                }
+                return false;
+            });
+            // If the character we were looking for wasn't anywhere in any of the
+            // character sets, assign the largest (last) character set as default.
+            if (!found_char) {
+                base = character_sets[character_sets.length - 1];
+                return "break";
+            }
+        };
+
+        for (var i = 0; i < password.length; i++) {
+            var _ret = _loop(i);
+
+            if (_ret === "break") break;
+        }
+
+        // Starting at the first character, figure out it's position in the character set
+        // and how many attempts will take to get there. For example, say your password
+        // was an integer (a bank card PIN number for example):
+        // 0 (or 0000 if you prefer) would be the very first password they attempted by the attacker.
+        // 9999 would be the last password they attempted (assuming 4 characters).
+        // Thus a password/PIN of 6529 would take 6529 attempts until the attacker found
+        // the proper combination. The same logic words for alphanumeric passwords, just
+        // with a larger number of possibilities for each position in the password. The
+        // key thing to note is the attacker doesn't need to test the entire range (every
+        // possible combination of all characters) they just need to get to the point in
+        // the list of possibilities that is your password. They can (in this example)
+        // ignore anything between 6530 and 9999. Using this logic, 'aaa' would be a worse
+        // password than 'zzz', because the attacker would encounter 'aaa' first.
+        var attempts = 0;
+        for (var i = 0; i < password.length; i++) {
+            // We power up to the reverse position in the string. For example, if we're trying
+            // to hack the 4 character PING code in the example above:
+            // First number * (number of characters possible in the charset ^ length of password)
+            // ie: 6 * (10^4) = 6000
+            // then add that same equation for the second number:
+            // 5 * (10^3) = 500
+            // then the third numbers
+            // 2 * (10^2) = 20
+            // and add on the last number
+            // 9
+            // Totals: 6000 + 500 + 20 + 9 = 6529 attempts before we encounter the correct password.
+            var power_of = password.length - i - 1;
+            // Character position within the base set. We add one on because strpos is base
+            // 0, we want base 1.
+            var char_at_position = base.indexOf(password[i]) + 1;
+            // If we're at the last character, simply add it's position in the character set
+            // this would be the "9" in the pin code example above.
+            if (power_of === 0) {
+                attempts += char_at_position;
+            }
+            // Otherwise we need to iterate through all the other characters positions to
+            // get here. For example, to find the 5 in 25 we can't just guess 2 and then 5
+            // (even though Hollywood seems to insist this is possible), we need to try 0,1,
+            // 2,3...15,16,17...23,24,25 (got it).
+            else {
+                    // This means we have to try every combination of values up to this point for
+                    // all previous characters. Which means we need to iterate through the entire
+                    // character set, X times, where X is our position -1. Then we need to multiply
+                    // that by this character's position.
+
+                    // Multiplier is the (10^4) or (10^3), etc in the pin code example above.
+                    // New attempts is the number of attempts we're adding for this position.
+                    // Add that on to our existing number of attempts.
+                    attempts += char_at_position * Math.pow(base.length, power_of);
+                }
+        }
+
+        // We can (worst case) try a billion passwords a second. Calculate how many days it
+        // will take us to get to the password.
+        // This allows us to calculate a number of days to crack. We use days because anything
+        // that can be cracked in less than a day is basically useless, so there's no point in
+        // having a smaller granularity (hours for example).
+        var days = attempts / (1000000000 * 60 * 60 * 24);
+
+        // If it's going to take more than a billion days to crack, just return a billion. This
+        // helps when code outside this function isn't using bcmath. Besides, if the password
+        // can survive 2.7 million years it's probably ok.
+        return days > 1000000000 ? 1000000000 : Math.round(days);
+    };
+
+    return {
+        checkPassword: checkPassword
+    };
+}();
+
+module.exports = Mellt;
+
+/***/ }),
+/* 300 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var CommonPasswords = ["password", "123456", "12345678", "1234", "qwerty", "12345", "dragon", "pussy", "baseball", "football", "letmein", "monkey", "696969", "abc123", "mustang", "michael", "shadow", "master", "jennifer", "111111", "2000", "jordan", "superman", "harley", "1234567", "fuckme", "hunter", "fuckyou", "trustno1", "ranger", "buster", "thomas", "tigger", "robert", "soccer", "fuck", "batman", "test", "pass", "killer", "hockey", "george", "charlie", "andrew", "michelle", "love", "sunshine", "jessica", "asshole", "6969", "pepper", "daniel", "access", "123456789", "654321", "joshua", "maggie", "starwars", "silver", "william", "dallas", "yankees", "123123", "ashley", "666666", "hello", "amanda", "orange", "biteme", "freedom", "computer", "sexy", "thunder", "nicole", "ginger", "heather", "hammer", "summer", "corvette", "taylor", "fucker", "austin", "1111", "merlin", "matthew", "121212", "golfer", "cheese", "princess", "martin", "chelsea", "patrick", "richard", "diamond", "yellow", "bigdog", "secret", "asdfgh", "sparky", "cowboy", "camaro", "anthony", "matrix", "falcon", "iloveyou", "bailey", "guitar", "jackson", "purple", "scooter", "phoenix", "aaaaaa", "morgan", "tigers", "porsche", "mickey", "maverick", "cookie", "nascar", "peanut", "justin", "131313", "money", "horny", "samantha", "panties", "steelers", "joseph", "snoopy", "boomer", "whatever", "iceman", "smokey", "gateway", "dakota", "cowboys", "eagles", "chicken", "dick", "black", "zxcvbn", "please", "andrea", "ferrari", "knight", "hardcore", "melissa", "compaq", "coffee", "booboo", "bitch", "johnny", "bulldog", "xxxxxx", "welcome", "james", "player", "ncc1701", "wizard", "scooby", "charles", "junior", "internet", "bigdick", "mike", "brandy", "tennis", "blowjob", "banana", "monster", "spider", "lakers", "miller", "rabbit", "enter", "mercedes", "brandon", "steven", "fender", "john", "yamaha", "diablo", "chris", "boston", "tiger", "marine", "chicago", "rangers", "gandalf", "winter", "bigtits", "barney", "edward", "raiders", "porn", "badboy", "blowme", "spanky", "bigdaddy", "johnson", "chester", "london", "midnight", "blue", "fishing", "000000", "hannah", "slayer", "11111111", "rachel", "sexsex", "redsox", "thx1138", "asdf", "marlboro", "panther", "zxcvbnm", "arsenal", "oliver", "qazwsx", "mother", "victoria", "7777777", "jasper", "angel", "david", "winner", "crystal", "golden", "butthead", "viking", "jack", "iwantu", "shannon", "murphy", "angels", "prince", "cameron", "girls", "madison", "wilson", "carlos", "hooters", "willie", "startrek", "captain", "maddog", "jasmine", "butter", "booger", "angela", "golf", "lauren", "rocket", "tiffany", "theman", "dennis", "liverpoo", "flower", "forever", "green", "jackie", "muffin", "turtle", "sophie", "danielle", "redskins", "toyota", "jason", "sierra", "winston", "debbie", "giants", "packers", "newyork", "jeremy", "casper", "bubba", "112233", "sandra", "lovers", "mountain", "united", "cooper", "driver", "tucker", "helpme", "fucking", "pookie", "lucky", "maxwell", "8675309", "bear", "suckit", "gators", "5150", "222222", "shithead", "fuckoff", "jaguar", "monica", "fred", "happy", "hotdog", "tits", "gemini", "lover", "xxxxxxxx", "777777", "canada", "nathan", "victor", "florida", "88888888", "nicholas", "rosebud", "metallic", "doctor", "trouble", "success", "stupid", "tomcat", "warrior", "peaches", "apples", "fish", "qwertyui", "magic", "buddy", "dolphins", "rainbow", "gunner", "987654", "freddy", "alexis", "braves", "cock", "2112", "1212", "cocacola", "xavier", "dolphin", "testing", "bond007", "member", "calvin", "voodoo", "7777", "samson", "alex", "apollo", "fire", "tester", "walter", "beavis", "voyager", "peter", "porno", "bonnie", "rush2112", "beer", "apple", "scorpio", "jonathan", "skippy", "sydney", "scott", "red123", "power", "gordon", "travis", "beaver", "star", "jackass", "flyers", "boobs", "232323", "zzzzzz", "steve", "rebecca", "scorpion", "doggie", "legend", "ou812", "yankee", "blazer", "bill", "runner", "birdie", "bitches", "555555", "parker", "topgun", "asdfasdf", "heaven", "viper", "animal", "2222", "bigboy", "4444", "arthur", "baby", "private", "godzilla", "donald", "williams", "lifehack", "phantom", "dave", "rock", "august", "sammy", "cool", "brian", "platinum", "jake", "bronco", "paul", "mark", "frank", "heka6w2", "copper", "billy", "cumshot", "garfield", "willow", "cunt", "little", "carter", "slut", "albert", "69696969", "kitten", "super", "jordan23", "eagle1", "shelby", "america", "11111", "jessie", "house", "free", "123321", "chevy", "bullshit", "white", "broncos", "horney", "surfer", "nissan", "999999", "saturn", "airborne", "elephant", "marvin", "shit", "action", "adidas", "qwert", "kevin", "1313", "explorer", "walker", "police", "christin", "december", "benjamin", "wolf", "sweet", "therock", "king", "online", "dickhead", "brooklyn", "teresa", "cricket", "sharon", "dexter", "racing", "penis", "gregory", "0000", "teens", "redwings", "dreams", "michigan", "hentai", "magnum", "87654321", "nothing", "donkey", "trinity", "digital", "333333", "stella", "cartman", "guinness", "123abc", "speedy", "buffalo", "kitty", "pimpin", "eagle", "einstein", "kelly", "nelson", "nirvana", "vampire", "xxxx", "playboy", "louise", "pumpkin", "snowball", "test123", "girl", "sucker", "mexico", "beatles", "fantasy", "ford", "gibson", "celtic", "marcus", "cherry", "cassie", "888888", "natasha", "sniper", "chance", "genesis", "hotrod", "reddog", "alexande", "college", "jester", "passw0rd", "bigcock", "smith", "lasvegas", "carmen", "slipknot", "3333", "death", "kimberly", "1q2w3e", "eclipse", "1q2w3e4r", "stanley", "samuel", "drummer", "homer", "montana", "music", "aaaa", "spencer", "jimmy", "carolina", "colorado", "creative", "hello1", "rocky", "goober", "friday", "bollocks", "scotty", "abcdef", "bubbles", "hawaii", "fluffy", "mine", "stephen", "horses", "thumper", "5555", "pussies", "darkness", "asdfghjk", "pamela", "boobies", "buddha", "vanessa", "sandman", "naughty", "douglas", "honda", "matt", "azerty", "6666", "shorty", "money1", "beach", "loveme", "4321", "simple", "poohbear", "444444", "badass", "destiny", "sarah", "denise", "vikings", "lizard", "melanie", "assman", "sabrina", "nintendo", "water", "good", "howard", "time", "123qwe", "november", "xxxxx", "october", "leather", "bastard", "young", "101010", "extreme", "hard", "password1", "vincent", "pussy1", "lacrosse", "hotmail", "spooky", "amateur", "alaska", "badger", "paradise", "maryjane", "poop", "crazy", "mozart", "video", "russell", "vagina", "spitfire", "anderson", "norman", "eric", "cherokee", "cougar", "barbara", "long", "420420", "family", "horse", "enigma", "allison", "raider", "brazil", "blonde", "jones", "55555", "dude", "drowssap", "jeff", "school", "marshall", "lovely", "1qaz2wsx", "jeffrey", "caroline", "franklin", "booty", "molly", "snickers", "leslie", "nipples", "courtney", "diesel", "rocks", "eminem", "westside", "suzuki", "daddy", "passion", "hummer", "ladies", "zachary", "frankie", "elvis", "reggie", "alpha", "suckme", "simpson", "patricia", "147147", "pirate", "tommy", "semperfi", "jupiter", "redrum", "freeuser", "wanker", "stinky", "ducati", "paris", "natalie", "babygirl", "bishop", "windows", "spirit", "pantera", "monday", "patches", "brutus", "houston", "smooth", "penguin", "marley", "forest", "cream", "212121", "flash", "maximus", "nipple", "bobby", "bradley", "vision", "pokemon", "champion", "fireman", "indian", "softball", "picard", "system", "clinton", "cobra", "enjoy", "lucky1", "claire", "claudia", "boogie", "timothy", "marines", "security", "dirty", "admin", "wildcats", "pimp", "dancer", "hardon", "veronica", "fucked", "abcd1234", "abcdefg", "ironman", "wolverin", "remember", "great", "freepass", "bigred", "squirt", "justice", "francis", "hobbes", "kermit", "pearljam", "mercury", "domino", "9999", "denver", "brooke", "rascal", "hitman", "mistress", "simon", "tony", "bbbbbb", "friend", "peekaboo", "naked", "budlight", "electric", "sluts", "stargate", "saints", "bondage", "brittany", "bigman", "zombie", "swimming", "duke", "qwerty1", "babes", "scotland", "disney", "rooster", "brenda", "mookie", "swordfis", "candy", "duncan", "olivia", "hunting", "blink182", "alicia", "8888", "samsung", "bubba1", "whore", "virginia", "general", "passport", "aaaaaaaa", "erotic", "liberty", "arizona", "jesus", "abcd", "newport", "skipper", "rolltide", "balls", "happy1", "galore", "christ", "weasel", "242424", "wombat", "digger", "classic", "bulldogs", "poopoo", "accord", "popcorn", "turkey", "jenny", "amber", "bunny", "mouse", "007007", "titanic", "liverpool", "dreamer", "everton", "friends", "chevelle", "carrie", "gabriel", "psycho", "nemesis", "burton", "pontiac", "connor", "eatme", "lickme", "roland", "cumming", "mitchell", "ireland", "lincoln", "arnold", "spiderma", "patriots", "goblue", "devils", "eugene", "empire", "asdfg", "cardinal", "brown", "shaggy", "froggy", "qwer", "kawasaki", "kodiak", "people", "phpbb", "light", "54321", "kramer", "chopper", "hooker", "honey", "whynot", "lesbian", "lisa", "baxter", "adam", "snake", "teen", "ncc1701d", "qqqqqq", "airplane", "britney", "avalon", "sandy", "sugar", "sublime", "stewart", "wildcat", "raven", "scarface", "elizabet", "123654", "trucks", "wolfpack", "pervert", "lawrence", "raymond", "redhead", "american", "alyssa", "bambam", "movie", "woody", "shaved", "snowman", "tiger1", "chicks", "raptor", "1969", "stingray", "shooter", "france", "stars", "madmax", "kristen", "sports", "jerry", "789456", "garcia", "simpsons", "lights", "ryan", "looking", "chronic", "alison", "hahaha", "packard", "hendrix", "perfect", "service", "spring", "srinivas", "spike", "katie", "252525", "oscar", "brother", "bigmac", "suck", "single", "cannon", "georgia", "popeye", "tattoo", "texas", "party", "bullet", "taurus", "sailor", "wolves", "panthers", "japan", "strike", "flowers", "pussycat", "chris1", "loverboy", "berlin", "sticky", "marina", "tarheels", "fisher", "russia", "connie", "wolfgang", "testtest", "mature", "bass", "catch22", "juice", "michael1", "nigger", "159753", "women", "alpha1", "trooper", "hawkeye", "head", "freaky", "dodgers", "pakistan", "machine", "pyramid", "vegeta", "katana", "moose", "tinker", "coyote", "infinity", "inside", "pepsi", "letmein1", "bang", "control", "hercules", "morris", "james1", "tickle", "outlaw", "browns", "billybob", "pickle", "test1", "michele", "antonio", "sucks", "pavilion", "changeme", "caesar", "prelude", "tanner", "adrian", "darkside", "bowling", "wutang", "sunset", "robbie", "alabama", "danger", "zeppelin", "juan", "rusty", "pppppp", "nick", "2001", "ping", "darkstar", "madonna", "qwe123", "bigone", "casino", "cheryl", "charlie1", "mmmmmm", "integra", "wrangler", "apache", "tweety", "qwerty12", "bobafett", "simone", "none", "business", "sterling", "trevor", "transam", "dustin", "harvey", "england", "2323", "seattle", "ssssss", "rose", "harry", "openup", "pandora", "pussys", "trucker", "wallace", "indigo", "storm", "malibu", "weed", "review", "babydoll", "doggy", "dilbert", "pegasus", "joker", "catfish", "flipper", "valerie", "herman", "fuckit", "detroit", "kenneth", "cheyenne", "bruins", "stacey", "smoke", "joey", "seven", "marino", "fetish", "xfiles", "wonder", "stinger", "pizza", "babe", "pretty", "stealth", "manutd", "gracie", "gundam", "cessna", "longhorn", "presario", "mnbvcxz", "wicked", "mustang1", "victory", "21122112", "shelly", "awesome", "athena", "q1w2e3r4", "help", "holiday", "knicks", "street", "redneck", "12341234", "casey", "gizmo", "scully", "dragon1", "devildog", "triumph", "eddie", "bluebird", "shotgun", "peewee", "ronnie", "angel1", "daisy", "special", "metallica", "madman", "country", "impala", "lennon", "roscoe", "omega", "access14", "enterpri", "miranda", "search", "smitty", "blizzard", "unicorn", "tight", "rick", "ronald", "asdf1234", "harrison", "trigger", "truck", "danny", "home", "winnie", "beauty", "thailand", "1234567890", "cadillac", "castle", "tyler", "bobcat", "buddy1", "sunny", "stones", "asian", "freddie", "chuck", "butt", "loveyou", "norton", "hellfire", "hotsex", "indiana", "short", "panzer", "lonewolf", "trumpet", "colors", "blaster", "12121212", "fireball", "logan", "precious", "aaron", "elaine", "jungle", "atlanta", "gold", "corona", "curtis", "nikki", "polaris", "timber", "theone", "baller", "chipper", "orlando", "island", "skyline", "dragons", "dogs", "benson", "licker", "goldie", "engineer", "kong", "pencil", "basketba", "open", "hornet", "world", "linda", "barbie", "chan", "farmer", "valentin", "wetpussy", "indians", "larry", "redman", "foobar", "travel", "morpheus", "bernie", "target", "141414", "hotstuff", "photos", "laura", "savage", "holly", "rocky1", "fuck_inside", "dollar", "turbo", "design", "newton", "hottie", "moon", "202020", "blondes", "4128", "lestat", "avatar", "future", "goforit", "random", "abgrtyu", "jjjjjj", "cancer", "q1w2e3", "smiley", "goldberg", "express", "virgin", "zipper", "wrinkle1", "stone", "andy", "babylon", "dong", "powers", "consumer", "dudley", "monkey1", "serenity", "samurai", "99999999", "bigboobs", "skeeter", "lindsay", "joejoe", "master1", "aaaaa", "chocolat", "christia", "birthday", "stephani", "tang", "1234qwer", "alfred", "ball", "98765432", "maria", "sexual", "maxima", "77777777", "sampson", "buckeye", "highland", "kristin", "seminole", "reaper", "bassman", "nugget", "lucifer", "airforce", "nasty", "watson", "warlock", "2121", "philip", "always", "dodge", "chrissy", "burger", "bird", "snatch", "missy", "pink", "gang", "maddie", "holmes", "huskers", "piglet", "photo", "joanne", "hamilton", "dodger", "paladin", "christy", "chubby", "buckeyes", "hamlet", "abcdefgh", "bigfoot", "sunday", "manson", "goldfish", "garden", "deftones", "icecream", "blondie", "spartan", "julie", "harold", "charger", "brandi", "stormy", "sherry", "pleasure", "juventus", "rodney", "galaxy", "holland", "escort", "zxcvb", "planet", "jerome", "wesley", "blues", "song", "peace", "david1", "ncc1701e", "1966", "51505150", "cavalier", "gambit", "karen", "sidney", "ripper", "oicu812", "jamie", "sister", "marie", "martha", "nylons", "aardvark", "nadine", "minnie", "whiskey", "bing", "plastic", "anal", "babylon5", "chang", "savannah", "loser", "racecar", "insane", "yankees1", "mememe", "hansolo", "chiefs", "fredfred", "freak", "frog", "salmon", "concrete", "yvonne", "zxcv", "shamrock", "atlantis", "warren", "wordpass", "julian", "mariah", "rommel", "1010", "harris", "predator", "sylvia", "massive", "cats", "sammy1", "mister", "stud", "marathon", "rubber", "ding", "trunks", "desire", "montreal", "justme", "faster", "kathleen", "irish", "1999", "bertha", "jessica1", "alpine", "sammie", "diamonds", "tristan", "00000", "swinger", "shan", "stallion", "pitbull", "letmein2", "roberto", "ready", "april", "palmer", "ming", "shadow1", "audrey", "chong", "clitoris", "wang", "shirley", "fuckers", "jackoff", "bluesky", "sundance", "renegade", "hollywoo", "151515", "bernard", "wolfman", "soldier", "picture", "pierre", "ling", "goddess", "manager", "nikita", "sweety", "titans", "hang", "fang", "ficken", "niners", "bottom", "bubble", "hello123", "ibanez", "webster", "sweetpea", "stocking", "323232", "tornado", "lindsey", "content", "bruce", "buck", "aragorn", "griffin", "chen", "campbell", "trojan", "christop", "newman", "wayne", "tina", "rockstar", "father", "geronimo", "pascal", "crimson", "brooks", "hector", "penny", "anna", "google", "camera", "chandler", "fatcat", "lovelove", "cody", "cunts", "waters", "stimpy", "finger", "cindy", "wheels", "viper1", "latin", "robin", "greenday", "987654321", "creampie", "brendan", "hiphop", "willy", "snapper", "funtime", "duck", "trombone", "adult", "cotton", "cookies", "kaiser", "mulder", "westham", "latino", "jeep", "ravens", "aurora", "drizzt", "madness", "energy", "kinky", "314159", "sophia", "stefan", "slick", "rocker", "55555555", "freeman", "french", "mongoose", "speed", "dddddd", "hong", "henry", "hungry", "yang", "catdog", "cheng", "ghost", "gogogo", "randy", "tottenha", "curious", "butterfl", "mission", "january", "singer", "sherman", "shark", "techno", "lancer", "lalala", "autumn", "chichi", "orion", "trixie", "clifford", "delta", "bobbob", "bomber", "holden", "kang", "kiss", "1968", "spunky", "liquid", "mary", "beagle", "granny", "network", "bond", "kkkkkk", "millie", "1973", "biggie", "beetle", "teacher", "susan", "toronto", "anakin", "genius", "dream", "cocks", "dang", "bush", "karate", "snakes", "bangkok", "callie", "fuckyou2", "pacific", "daytona", "kelsey", "infantry", "skywalke", "foster", "felix", "sailing", "raistlin", "vanhalen", "huang", "herbert", "jacob", "blackie", "tarzan", "strider", "sherlock", "lang", "gong", "sang", "dietcoke", "ultimate", "tree", "shai", "sprite", "ting", "artist", "chai", "chao", "devil", "python", "ninja", "misty", "ytrewq", "sweetie", "superfly", "456789", "tian", "jing", "jesus1", "freedom1", "dian", "drpepper", "potter", "chou", "darren", "hobbit", "violet", "yong", "shen", "phillip", "maurice", "gloria", "nolimit", "mylove", "biscuit", "yahoo", "shasta", "sex4me", "smoker", "smile", "pebbles", "pics", "philly", "tong", "tintin", "lesbians", "marlin", "cactus", "frank1", "tttttt", "chun", "danni", "emerald", "showme", "pirates", "lian", "dogg", "colleen", "xiao", "xian", "tazman", "tanker", "patton", "toshiba", "richie", "alberto", "gotcha", "graham", "dillon", "rang", "emily", "keng", "jazz", "bigguy", "yuan", "woman", "tomtom", "marion", "greg", "chaos", "fossil", "flight", "racerx", "tuan", "creamy", "boss", "bobo", "musicman", "warcraft", "window", "blade", "shuang", "sheila", "shun", "lick", "jian", "microsoft", "rong", "allen", "feng", "getsome", "sally", "quality", "kennedy", "morrison", "1977", "beng", "wwwwww", "yoyoyo", "zhang", "seng", "teddy", "joanna", "andreas", "harder", "luke", "qazxsw", "qian", "cong", "chuan", "deng", "nang", "boeing", "keeper", "western", "isabelle", "1963", "subaru", "sheng", "thuglife", "teng", "jiong", "miao", "martina", "mang", "maniac", "pussie", "tracey", "a1b2c3", "clayton", "zhou", "zhuang", "xing", "stonecol", "snow", "spyder", "liang", "jiang", "memphis", "regina", "ceng", "magic1", "logitech", "chuang", "dark", "million", "blow", "sesame", "shao", "poison", "titty", "terry", "kuan", "kuai", "kyle", "mian", "guan", "hamster", "guai", "ferret", "florence", "geng", "duan", "pang", "maiden", "quan", "velvet", "nong", "neng", "nookie", "buttons", "bian", "bingo", "biao", "zhong", "zeng", "xiong", "zhun", "ying", "zong", "xuan", "zang", "0.0.000", "suan", "shei", "shui", "sharks", "shang", "shua", "small", "peng", "pian", "piao", "liao", "meng", "miami", "reng", "guang", "cang", "change", "ruan", "diao", "luan", "lucas", "qing", "chui", "chuo", "cuan", "nuan", "ning", "heng", "huan", "kansas", "muscle", "monroe", "weng", "whitney", "1passwor", "bluemoon", "zhui", "zhua", "xiang", "zheng", "zhen", "zhei", "zhao", "zhan", "yomama", "zhai", "zhuo", "zuan", "tarheel", "shou", "shuo", "tiao", "lady", "leonard", "leng", "kuang", "jiao", "13579", "basket", "qiao", "qiong", "qiang", "chuai", "nian", "niao", "niang", "huai", "22222222", "bianca", "zhuan", "zhuai", "shuan", "shuai", "stardust", "jumper", "margaret", "archie", "66666666", "charlott", "forget", "qwertz", "bones", "history", "milton", "waterloo", "2002", "stuff", "11223344", "office", "oldman", "preston", "trains", "murray", "vertigo", "246810", "black1", "swallow", "smiles", "standard", "alexandr", "parrot", "luther", "user", "nicolas", "1976", "surfing", "pioneer", "pete", "masters", "apple1", "asdasd", "auburn", "hannibal", "frontier", "panama", "lucy", "buffy", "brianna", "welcome1", "vette", "blue22", "shemale", "111222", "baggins", "groovy", "global", "turner", "181818", "1979", "blades", "spanking", "life", "byteme", "lobster", "collins", "dawg", "hilton", "japanese", "1970", "1964", "2424", "polo", "markus", "coco", "deedee", "mikey", "1972", "171717", "1701", "strip", "jersey", "green1", "capital", "sasha", "sadie", "putter", "vader", "seven7", "lester", "marcel", "banshee", "grendel", "gilbert", "dicks", "dead", "hidden", "iloveu", "1980", "sound", "ledzep", "michel", "147258", "female", "bugger", "buffett", "bryan", "hell", "kristina", "molson", "2020", "wookie", "sprint", "thanks", "jericho", "102030", "grace", "fuckin", "mandy", "ranger1", "trebor", "deepthroat", "bonehead", "molly1", "mirage", "models", "1984", "2468", "stuart", "showtime", "squirrel", "pentium", "mario", "anime", "gator", "powder", "twister", "connect", "neptune", "bruno", "butts", "engine", "eatshit", "mustangs", "woody1", "shogun", "septembe", "pooh", "jimbo", "roger", "annie", "bacon", "center", "russian", "sabine", "damien", "mollie", "voyeur", "2525", "363636", "leonardo", "camel", "chair", "germany", "giant", "qqqq", "nudist", "bone", "sleepy", "tequila", "megan", "fighter", "garrett", "dominic", "obiwan", "makaveli", "vacation", "walnut", "1974", "ladybug", "cantona", "ccbill", "satan", "rusty1", "passwor1", "columbia", "napoleon", "dusty", "kissme", "motorola", "william1", "1967", "zzzz", "skater", "smut", "play", "matthew1", "robinson", "valley", "coolio", "dagger", "boner", "bull", "horndog", "jason1", "blake", "penguins", "rescue", "griffey", "8j4ye3uz", "californ", "champs", "qwertyuiop", "portland", "queen", "colt45", "boat", "xxxxxxx", "xanadu", "tacoma", "mason", "carpet", "gggggg", "safety", "palace", "italia", "stevie", "picturs", "picasso", "thongs", "tempest", "ricardo", "roberts", "asd123", "hairy", "foxtrot", "gary", "nimrod", "hotboy", "343434", "1111111", "asdfghjkl", "goose", "overlord", "blood", "wood", "stranger", "454545", "shaolin", "sooners", "socrates", "spiderman", "peanuts", "maxine", "rogers", "13131313", "andrew1", "filthy", "donnie", "ohyeah", "africa", "national", "kenny", "keith", "monique", "intrepid", "jasmin", "pickles", "assass", "fright", "potato", "darwin", "hhhhhh", "kingdom", "weezer", "424242", "pepsi1", "throat", "romeo", "gerard", "looker", "puppy", "butch", "monika", "suzanne", "sweets", "temple", "laurie", "josh", "megadeth", "analsex", "nymets", "ddddddd", "bigballs", "support", "stick", "today", "down", "oakland", "oooooo", "qweasd", "chucky", "bridge", "carrot", "chargers", "discover", "dookie", "condor", "night", "butler", "hoover", "horny1", "isabella", "sunrise", "sinner", "jojo", "megapass", "martini", "assfuck", "grateful", "ffffff", "abigail", "esther", "mushroom", "janice", "jamaica", "wright", "sims", "space", "there", "timmy", "7654321", "77777", "cccccc", "gizmodo", "roxanne", "ralph", "tractor", "cristina", "dance", "mypass", "hongkong", "helena", "1975", "blue123", "pissing", "thomas1", "redred", "rich", "basketball", "attack", "cash", "satan666", "drunk", "dixie", "dublin", "bollox", "kingkong", "katrina", "miles", "1971", "22222", "272727", "sexx", "penelope", "thompson", "anything", "bbbb", "battle", "grizzly", "passat", "porter", "tracy", "defiant", "bowler", "knickers", "monitor", "wisdom", "wild", "slappy", "thor", "letsgo", "robert1", "feet", "rush", "brownie", "hudson", "098765", "playing", "playtime", "lightnin", "melvin", "atomic", "bart", "hawk", "goku", "glory", "llllll", "qwaszx", "cosmos", "bosco", "knights", "bentley", "beast", "slapshot", "lewis", "assword", "frosty", "gillian", "sara", "dumbass", "mallard", "dddd", "deanna", "elwood", "wally", "159357", "titleist", "angelo", "aussie", "guest", "golfing", "doobie", "loveit", "chloe", "elliott", "werewolf", "vipers", "janine", "1965", "blabla", "surf", "sucking", "tardis", "serena", "shelley", "thegame", "legion", "rebels", "fernando", "fast", "gerald", "sarah1", "double", "onelove", "loulou", "toto", "crash", "blackcat", "0007", "tacobell", "soccer1", "jedi", "manuel", "method", "river", "chase", "ludwig", "poopie", "derrick", "boob", "breast", "kittycat", "isabel", "belly", "pikachu", "thunder1", "thankyou", "jose", "celeste", "celtics", "frances", "frogger", "scoobydo", "sabbath", "coltrane", "budman", "willis", "jackal", "bigger", "zzzzz", "silvia", "sooner", "licking", "gopher", "geheim", "lonestar", "primus", "pooper", "newpass", "brasil", "heather1", "husker", "element", "moomoo", "beefcake", "zzzzzzzz", "tammy", "shitty", "smokin", "personal", "jjjj", "anthony1", "anubis", "backup", "gorilla", "fuckface", "painter", "lowrider", "punkrock", "traffic", "claude", "daniela", "dale", "delta1", "nancy", "boys", "easy", "kissing", "kelley", "wendy", "theresa", "amazon", "alan", "fatass", "dodgeram", "dingdong", "malcolm", "qqqqqqqq", "breasts", "boots", "honda1", "spidey", "poker", "temp", "johnjohn", "miguel", "147852", "archer", "asshole1", "dogdog", "tricky", "crusader", "weather", "syracuse", "spankme", "speaker", "meridian", "amadeus", "back", "harley1", "falcons", "dorothy", "turkey50", "kenwood", "keyboard", "ilovesex", "1978", "blackman", "shazam", "shalom", "lickit", "jimbob", "richmond", "roller", "carson", "check", "fatman", "funny", "garbage", "sandiego", "loving", "magnus", "cooldude", "clover", "mobile", "bell", "payton", "plumber", "texas1", "tool", "topper", "jenna", "mariners", "rebel", "harmony", "caliente", "celica", "fletcher", "german", "diana", "oxford", "osiris", "orgasm", "punkin", "porsche9", "tuesday", "close", "breeze", "bossman", "kangaroo", "billie", "latinas", "judith", "astros", "scruffy", "donna", "qwertyu", "davis", "hearts", "kathy", "jammer", "java", "springer", "rhonda", "ricky", "1122", "goodtime", "chelsea1", "freckles", "flyboy", "doodle", "city", "nebraska", "bootie", "kicker", "webmaster", "vulcan", "iverson", "191919", "blueeyes", "stoner", "321321", "farside", "rugby", "director", "pussy69", "power1", "bobbie", "hershey", "hermes", "monopoly", "west", "birdman", "blessed", "blackjac", "southern", "peterpan", "thumbs", "lawyer", "melinda", "fingers", "fuckyou1", "rrrrrr", "a1b2c3d4", "coke", "nicola", "bohica", "heart", "elvis1", "kids", "blacky", "stories", "sentinel", "snake1", "phoebe", "jesse", "richard1", "1234abcd", "guardian", "candyman", "fisting", "scarlet", "dildo", "pancho", "mandingo", "lucky7", "condom", "munchkin", "billyboy", "summer1", "student", "sword", "skiing", "sergio", "site", "sony", "thong", "rootbeer", "assassin", "cassidy", "frederic", "fffff", "fitness", "giovanni", "scarlett", "durango", "postal", "achilles", "dawn", "dylan", "kisses", "warriors", "imagine", "plymouth", "topdog", "asterix", "hallo", "cameltoe", "fuckfuck", "bridget", "eeeeee", "mouth", "weird", "will", "sithlord", "sommer", "toby", "theking", "juliet", "avenger", "backdoor", "goodbye", "chevrole", "faith", "lorraine", "trance", "cosworth", "brad", "houses", "homers", "eternity", "kingpin", "verbatim", "incubus", "1961", "blond", "zaphod", "shiloh", "spurs", "station", "jennie", "maynard", "mighty", "aliens", "hank", "charly", "running", "dogman", "omega1", "printer", "aggies", "chocolate", "deadhead", "hope", "javier", "bitch1", "stone55", "pineappl", "thekid", "lizzie", "rockets", "ashton", "camels", "formula", "forrest", "rosemary", "oracle", "rain", "pussey", "porkchop", "abcde", "clancy", "nellie", "mystic", "inferno", "blackdog", "steve1", "pauline", "alexander", "alice", "alfa", "grumpy", "flames", "scream", "lonely", "puffy", "proxy", "valhalla", "unreal", "cynthia", "herbie", "engage", "yyyyyy", "010101", "solomon", "pistol", "melody", "celeb", "flying", "gggg", "santiago", "scottie", "oakley", "portugal", "a12345", "newbie", "mmmm", "venus", "1qazxsw2", "beverly", "zorro", "work", "writer", "stripper", "sebastia", "spread", "phil", "tobias", "links", "members", "metal", "1221", "andre", "565656", "funfun", "trojans", "again", "cyber", "hurrican", "moneys", "1x2zkg8w", "zeus", "thing", "tomato", "lion", "atlantic", "celine", "usa123", "trans", "account", "aaaaaaa", "homerun", "hyperion", "kevin1", "blacks", "44444444", "skittles", "sean", "hastings", "fart", "gangbang", "fubar", "sailboat", "older", "oilers", "craig", "conrad", "church", "damian", "dean", "broken", "buster1", "hithere", "immortal", "sticks", "pilot", "peters", "lexmark", "jerkoff", "maryland", "anders", "cheers", "possum", "columbus", "cutter", "muppet", "beautiful", "stolen", "swordfish", "sport", "sonic", "peter1", "jethro", "rockon", "asdfghj", "pass123", "paper", "pornos", "ncc1701a", "bootys", "buttman", "bonjour", "escape", "1960", "becky", "bears", "362436", "spartans", "tinman", "threesom", "lemons", "maxmax", "1414", "bbbbb", "camelot", "chad", "chewie", "gogo", "fusion", "saint", "dilligaf", "nopass", "myself", "hustler", "hunter1", "whitey", "beast1", "yesyes", "spank", "smudge", "pinkfloy", "patriot", "lespaul", "annette", "hammers", "catalina", "finish", "formula1", "sausage", "scooter1", "orioles", "oscar1", "over", "colombia", "cramps", "natural", "eating", "exotic", "iguana", "bella", "suckers", "strong", "sheena", "start", "slave", "pearl", "topcat", "lancelot", "angelica", "magelan", "racer", "ramona", "crunch", "british", "button", "eileen", "steph", "456123", "skinny", "seeking", "rockhard", "chief", "filter", "first", "freaks", "sakura", "pacman", "poontang", "dalton", "newlife", "homer1", "klingon", "watcher", "walleye", "tasha", "tasty", "sinatra", "starship", "steel", "starbuck", "poncho", "amber1", "gonzo", "grover", "catherin", "carol", "candle", "firefly", "goblin", "scotch", "diver", "usmc", "huskies", "eleven", "kentucky", "kitkat", "israel", "beckham", "bicycle", "yourmom", "studio", "tara", "33333333", "shane", "splash", "jimmy1", "reality", "12344321", "caitlin", "focus", "sapphire", "mailman", "raiders1", "clark", "ddddd", "hopper", "excalibu", "more", "wilbur", "illini", "imperial", "phillips", "lansing", "maxx", "gothic", "golfball", "carlton", "camille", "facial", "front242", "macdaddy", "qwer1234", "vectra", "cowboys1", "crazy1", "dannyboy", "jane", "betty", "benny", "bennett", "leader", "martinez", "aquarius", "barkley", "hayden", "caught", "franky", "ffff", "floyd", "sassy", "pppp", "pppppppp", "prodigy", "clarence", "noodle", "eatpussy", "vortex", "wanking", "beatrice", "billy1", "siemens", "pedro", "phillies", "research", "groups", "carolyn", "chevy1", "cccc", "fritz", "gggggggg", "doughboy", "dracula", "nurses", "loco", "madrid", "lollipop", "trout", "utopia", "chrono", "cooler", "conner", "nevada", "wibble", "werner", "summit", "marco", "marilyn", "1225", "babies", "capone", "fugazi", "panda", "mama", "qazwsxed", "puppies", "triton", "9876", "command", "nnnnnn", "ernest", "momoney", "iforgot", "wolfie", "studly", "shawn", "renee", "alien", "hamburg", "81fukkc", "741852", "catman", "china", "forgot", "gagging", "scott1", "drew", "oregon", "qweqwe", "train", "crazybab", "daniel1", "cutlass", "brothers", "holes", "heidi", "mothers", "music1", "what", "walrus", "1957", "bigtime", "bike", "xtreme", "simba", "ssss", "rookie", "angie", "bathing", "fresh", "sanchez", "rotten", "maestro", "luis", "look", "turbo1", "99999", "butthole", "hhhh", "elijah", "monty", "bender", "yoda", "shania", "shock", "phish", "thecat", "rightnow", "reagan", "baddog", "asia", "greatone", "gateway1", "randall", "abstr", "napster", "brian1", "bogart", "high", "hitler", "emma", "kill", "weaver", "wildfire", "jackson1", "isaiah", "1981", "belinda", "beaner", "yoyo", "0.0.0.000", "super1", "select", "snuggles", "slutty", "some", "phoenix1", "technics", "toon", "raven1", "rayray", "123789", "1066", "albion", "greens", "fashion", "gesperrt", "santana", "paint", "powell", "credit", "darling", "mystery", "bowser", "bottle", "brucelee", "hehehe", "kelly1", "mojo", "1998", "bikini", "woofwoof", "yyyy", "strap", "sites", "spears", "theodore", "julius", "richards", "amelia", "central", "f**k", "nyjets", "punisher", "username", "vanilla", "twisted", "bryant", "brent", "bunghole", "here", "elizabeth", "erica", "kimber", "viagra", "veritas", "pony", "pool", "titts", "labtec", "lifetime", "jenny1", "masterbate", "mayhem", "redbull", "govols", "gremlin", "505050", "gmoney", "rupert", "rovers", "diamond1", "lorenzo", "trident", "abnormal", "davidson", "deskjet", "cuddles", "nice", "bristol", "karina", "milano", "vh5150", "jarhead", "1982", "bigbird", "bizkit", "sixers", "slider", "star69", "starfish", "penetration", "tommy1", "john316", "meghan", "michaela", "market", "grant", "caligula", "carl", "flicks", "films", "madden", "railroad", "cosmo", "cthulhu", "bradford", "br0d3r", "military", "bearbear", "swedish", "spawn", "patrick1", "polly", "these", "todd", "reds", "anarchy", "groove", "franco", "fuckher", "oooo", "tyrone", "vegas", "airbus", "cobra1", "christine", "clips", "delete", "duster", "kitty1", "mouse1", "monkeys", "jazzman", "1919", "262626", "swinging", "stroke", "stocks", "sting", "pippen", "labrador", "jordan1", "justdoit", "meatball", "females", "saturday", "park", "vector", "cooter", "defender", "desert", "demon", "nike", "bubbas", "bonkers", "english", "kahuna", "wildman", "4121", "sirius", "static", "piercing", "terror", "teenage", "leelee", "marissa", "microsof", "mechanic", "robotech", "rated", "hailey", "chaser", "sanders", "salsero", "nuts", "macross", "quantum", "rachael", "tsunami", "universe", "daddy1", "cruise", "nguyen", "newpass6", "nudes", "hellyeah", "vernon", "1959", "zaq12wsx", "striker", "sixty", "steele", "spice", "spectrum", "smegma", "thumb", "jjjjjjjj", "mellow", "astrid", "cancun", "cartoon", "sabres", "samiam", "pants", "oranges", "oklahoma", "lust", "coleman", "denali", "nude", "noodles", "buzz", "brest", "hooter", "mmmmmmmm", "warthog", "bloody", "blueblue", "zappa", "wolverine", "sniffing", "lance", "jean", "jjjjj", "harper", "calico", "freee", "rover", "door", "pooter", "closeup", "bonsai", "evelyn", "emily1", "kathryn", "keystone", "iiii", "1955", "yzerman", "theboss", "tolkien", "jill", "megaman", "rasta", "bbbbbbbb", "bean", "handsome", "hal9000", "goofy", "gringo", "gofish", "gizmo1", "samsam", "scuba", "onlyme", "tttttttt", "corrado", "clown", "clapton", "deborah", "boris", "bulls", "vivian", "jayhawk", "bethany", "wwww", "sharky", "seeker", "ssssssss", "somethin", "pillow", "thesims", "lighter", "lkjhgf", "melissa1", "marcius2", "barry", "guiness", "gymnast", "casey1", "goalie", "godsmack", "doug", "lolo", "rangers1", "poppy", "abby", "clemson", "clipper", "deeznuts", "nobody", "holly1", "elliot", "eeee", "kingston", "miriam", "belle", "yosemite", "sucked", "sex123", "sexy69", "pic's", "tommyboy", "lamont", "meat", "masterbating", "marianne", "marc", "gretzky", "happyday", "frisco", "scratch", "orchid", "orange1", "manchest", "quincy", "unbelievable", "aberdeen", "dawson", "nathalie", "ne1469", "boxing", "hill", "korn", "intercourse", "161616", "1985", "ziggy", "supersta", "stoney", "senior", "amature", "barber", "babyboy", "bcfields", "goliath", "hack", "hardrock", "children", "frodo", "scout", "scrappy", "rosie", "qazqaz", "tracker", "active", "craving", "commando", "cohiba", "deep", "cyclone", "dana", "bubba69", "katie1", "mpegs", "vsegda", "jade", "irish1", "better", "sexy1", "sinclair", "smelly", "squerting", "lions", "jokers", "jeanette", "julia", "jojojo", "meathead", "ashley1", "groucho", "cheetah", "champ", "firefox", "gandalf1", "packer", "magnolia", "love69", "tyler1", "typhoon", "tundra", "bobby1", "kenworth", "village", "volley", "beth", "wolf359", "0420", "000007", "swimmer", "skydive", "smokes", "patty", "peugeot", "pompey", "legolas", "kristy", "redhot", "rodman", "redalert", "having", "grapes", "4runner", "carrera", "floppy", "dollars", "ou8122", "quattro", "adams", "cloud9", "davids", "nofear", "busty", "homemade", "mmmmm", "whisper", "vermont", "webmaste", "wives", "insertion", "jayjay", "philips", "phone", "topher", "tongue", "temptress", "midget", "ripken", "havefun", "gretchen", "canon", "celebrity", "five", "getting", "ghetto", "direct", "otto", "ragnarok", "trinidad", "usnavy", "conover", "cruiser", "dalshe", "nicole1", "buzzard", "hottest", "kingfish", "misfit", "moore", "milfnew", "warlord", "wassup", "bigsexy", "blackhaw", "zippy", "shearer", "tights", "thursday", "kungfu", "labia", "journey", "meatloaf", "marlene", "rider", "area51", "batman1", "bananas", "636363", "cancel", "ggggg", "paradox", "mack", "lynn", "queens", "adults", "aikido", "cigars", "nova", "hoosier", "eeyore", "moose1", "warez", "interacial", "streaming", "313131", "pertinant", "pool6123", "mayday", "rivers", "revenge", "animated", "banker", "baddest", "gordon24", "ccccc", "fortune", "fantasies", "touching", "aisan", "deadman", "homepage", "ejaculation", "whocares", "iscool", "jamesbon", "1956", "1pussy", "womam", "sweden", "skidoo", "spock", "sssss", "petra", "pepper1", "pinhead", "micron", "allsop", "amsterda", "army", "aside", "gunnar", "666999", "chip", "foot", "fowler", "february", "face", "fletch", "george1", "sapper", "science", "sasha1", "luckydog", "lover1", "magick", "popopo", "public", "ultima", "derek", "cypress", "booker", "businessbabe", "brandon1", "edwards", "experience", "vulva", "vvvv", "jabroni", "bigbear", "yummy", "010203", "searay", "secret1", "showing", "sinbad", "sexxxx", "soleil", "software", "piccolo", "thirteen", "leopard", "legacy", "jensen", "justine", "memorex", "marisa", "mathew", "redwing", "rasputin", "134679", "anfield", "greenbay", "gore", "catcat", "feather", "scanner", "pa55word", "contortionist", "danzig", "daisy1", "hores", "erik", "exodus", "vinnie", "iiiiii", "zero", "1001", "subway", "tank", "second", "snapple", "sneakers", "sonyfuck", "picks", "poodle", "test1234", "their", "llll", "junebug", "june", "marker", "mellon", "ronaldo", "roadkill", "amanda1", "asdfjkl", "beaches", "greene", "great1", "cheerleaers", "force", "doitnow", "ozzy", "madeline", "radio", "tyson", "christian", "daphne", "boxster", "brighton", "housewifes", "emmanuel", "emerson", "kkkk", "mnbvcx", "moocow", "vides", "wagner", "janet", "1717", "bigmoney", "blonds", "1000", "storys", "stereo", "4545", "420247", "seductive", "sexygirl", "lesbean", "live", "justin1", "124578", "animals", "balance", "hansen", "cabbage", "canadian", "gangbanged", "dodge1", "dimas", "lori", "loud", "malaka", "puss", "probes", "adriana", "coolman", "crawford", "dante", "nacked", "hotpussy", "erotica", "kool", "mirror", "wearing", "implants", "intruder", "bigass", "zenith", "woohoo", "womans", "tanya", "tango", "stacy", "pisces", "laguna", "krystal", "maxell", "andyod22", "barcelon", "chainsaw", "chickens", "flash1", "downtown", "orgasms", "magicman", "profit", "pusyy", "pothead", "coconut", "chuckie", "contact", "clevelan", "designer", "builder", "budweise", "hotshot", "horizon", "hole", "experienced", "mondeo", "wifes", "1962", "strange", "stumpy", "smiths", "sparks", "slacker", "piper", "pitchers", "passwords", "laptop", "jeremiah", "allmine", "alliance", "bbbbbbb", "asscock", "halflife", "grandma", "hayley", "88888", "cecilia", "chacha", "saratoga", "sandy1", "santos", "doogie", "number", "positive", "qwert40", "transexual", "crow", "close-up", "darrell", "bonita", "ib6ub9", "volvo", "jacob1", "iiiii", "beastie", "sunnyday", "stoned", "sonics", "starfire", "snapon", "pictuers", "pepe", "testing1", "tiberius", "lisalisa", "lesbain", "litle", "retard", "ripple", "austin1", "badgirl", "golfgolf", "flounder", "garage", "royals", "dragoon", "dickie", "passwor", "ocean", "majestic", "poppop", "trailers", "dammit", "nokia", "bobobo", "br549", "emmitt", "knock", "minime", "mikemike", "whitesox", "1954", "3232", "353535", "seamus", "solo", "sparkle", "sluttey", "pictere", "titten", "lback", "1024", "angelina", "goodluck", "charlton", "fingerig", "gallaries", "goat", "ruby", "passme", "oasis", "lockerroom", "logan1", "rainman", "twins", "treasure", "absolutely", "club", "custom", "cyclops", "nipper", "bucket", "homepage-", "hhhhh", "momsuck", "indain", "2345", "beerbeer", "bimmer", "susanne", "stunner", "stevens", "456456", "shell", "sheba", "tootsie", "tiny", "testerer", "reefer", "really", "1012", "harcore", "gollum", "545454", "chico", "caveman", "carole", "fordf150", "fishes", "gaymen", "saleen", "doodoo", "pa55w0rd", "looney", "presto", "qqqqq", "cigar", "bogey", "brewer", "helloo", "dutch", "kamikaze", "monte", "wasser", "vietnam", "visa", "japanees", "0123", "swords", "slapper", "peach", "jump", "marvel", "masterbaiting", "march", "redwood", "rolling", "1005", "ametuer", "chiks", "cathy", "callaway", "fucing", "sadie1", "panasoni", "mamas", "race", "rambo", "unknown", "absolut", "deacon", "dallas1", "housewife", "kristi", "keywest", "kirsten", "kipper", "morning", "wings", "idiot", "18436572", "1515", "beating", "zxczxc", "sullivan", "303030", "shaman", "sparrow", "terrapin", "jeffery", "masturbation", "mick", "redfish", "1492", "angus", "barrett", "goirish", "hardcock", "felicia", "forfun", "galary", "freeporn", "duchess", "olivier", "lotus", "pornographic", "ramses", "purdue", "traveler", "crave", "brando", "enter1", "killme", "moneyman", "welder", "windsor", "wifey", "indon", "yyyyy", "stretch", "taylor1", "4417", "shopping", "picher", "pickup", "thumbnils", "johnboy", "jets", "jess", "maureen", "anne", "ameteur", "amateurs", "apollo13", "hambone", "goldwing", "5050", "charley", "sally1", "doghouse", "padres", "pounding", "quest", "truelove", "underdog", "trader", "crack", "climber", "bolitas", "bravo", "hohoho", "model", "italian", "beanie", "beretta", "wrestlin", "stroker", "tabitha", "sherwood", "sexyman", "jewels", "johannes", "mets", "marcos", "rhino", "bdsm", "balloons", "goodman", "grils", "happy123", "flamingo", "games", "route66", "devo", "dino", "outkast", "paintbal", "magpie", "llllllll", "twilight", "critter", "christie", "cupcake", "nickel", "bullseye", "krista", "knickerless", "mimi", "murder", "videoes", "binladen", "xerxes", "slim", "slinky", "pinky", "peterson", "thanatos", "meister", "menace", "ripley", "retired", "albatros", "balloon", "bank", "goten", "5551212", "getsdown", "donuts", "divorce", "nwo4life", "lord", "lost", "underwear", "tttt", "comet", "deer", "damnit", "dddddddd", "deeznutz", "nasty1", "nonono", "nina", "enterprise", "eeeee", "misfit99", "milkman", "vvvvvv", "isaac", "1818", "blueboy", "beans", "bigbutt", "wyatt", "tech", "solution", "poetry", "toolman", "laurel", "juggalo", "jetski", "meredith", "barefoot", "50spanks", "gobears", "scandinavian", "original", "truman", "cubbies", "nitram", "briana", "ebony", "kings", "warner", "bilbo", "yumyum", "zzzzzzz", "stylus", "321654", "shannon1", "server", "secure", "silly", "squash", "starman", "steeler", "staples", "phrases", "techniques", "laser", "135790", "allan", "barker", "athens", "cbr600", "chemical", "fester", "gangsta", "fucku2", "freeze", "game", "salvador", "droopy", "objects", "passwd", "lllll", "loaded", "louis", "manchester", "losers", "vedder", "clit", "chunky", "darkman", "damage", "buckshot", "buddah", "boobed", "henti", "hillary", "webber", "winter1", "ingrid", "bigmike", "beta", "zidane", "talon", "slave1", "pissoff", "person", "thegreat", "living", "lexus", "matador", "readers", "riley", "roberta", "armani", "ashlee", "goldstar", "5656", "cards", "fmale", "ferris", "fuking", "gaston", "fucku", "ggggggg", "sauron", "diggler", "pacers", "looser", "pounded", "premier", "pulled", "town", "trisha", "triangle", "cornell", "collin", "cosmic", "deeper", "depeche", "norway", "bright", "helmet", "kristine", "kendall", "mustard", "misty1", "watch", "jagger", "bertie", "berger", "word", "3x7pxr", "silver1", "smoking", "snowboar", "sonny", "paula", "penetrating", "photoes", "lesbens", "lambert", "lindros", "lillian", "roadking", "rockford", "1357", "143143", "asasas", "goodboy", "898989", "chicago1", "card", "ferrari1", "galeries", "godfathe", "gawker", "gargoyle", "gangster", "rubble", "rrrr", "onetime", "pussyman", "pooppoop", "trapper", "twenty", "abraham", "cinder", "company", "newcastl", "boricua", "bunny1", "boxer", "hotred", "hockey1", "hooper", "edward1", "evan", "kris", "misery", "moscow", "milk", "mortgage", "bigtit", "show", "snoopdog", "three", "lionel", "leanne", "joshua1", "july", "1230", "assholes", "cedric", "fallen", "farley", "gene", "frisky", "sanity", "script", "divine", "dharma", "lucky13", "property", "tricia", "akira", "desiree", "broadway", "butterfly", "hunt", "hotbox", "hootie", "heat", "howdy", "earthlink", "karma", "kiteboy", "motley", "westwood", "1988", "bert", "blackbir", "biggles", "wrench", "working", "wrestle", "slippery", "pheonix", "penny1", "pianoman", "tomorrow", "thedude", "jenn", "jonjon", "jones1", "mattie", "memory", "micheal", "roadrunn", "arrow", "attitude", "azzer", "seahawks", "diehard", "dotcom", "lola", "tunafish", "chivas", "cinnamon", "clouds", "deluxe", "northern", "nuclear", "north", "boom", "boobie", "hurley", "krishna", "momomo", "modles", "volume", "23232323", "bluedog", "wwwwwww", "zerocool", "yousuck", "pluto", "limewire", "link", "joung", "marcia", "awnyce", "gonavy", "haha", "films+pic+galeries", "fabian", "francois", "girsl", "fuckthis", "girfriend", "rufus", "drive", "uncencored", "a123456", "airport", "clay", "chrisbln", "combat", "cygnus", "cupoi", "never", "netscape", "brett", "hhhhhhhh", "eagles1", "elite", "knockers", "kendra", "mommy", "1958", "tazmania", "shonuf", "piano", "pharmacy", "thedog", "lips", "jillian", "jenkins", "midway", "arsenal1", "anaconda", "australi", "gromit", "gotohell", "787878", "66666", "carmex2", "camber", "gator1", "ginger1", "fuzzy", "seadoo", "dorian", "lovesex", "rancid", "uuuuuu", "911911", "nature", "bulldog1", "helen", "health", "heater", "higgins", "kirk", "monalisa", "mmmmmmm", "whiteout", "virtual", "ventura", "jamie1", "japanes", "james007", "2727", "2469", "blam", "bitchass", "believe", "zephyr", "stiffy", "sweet1", "silent", "southpar", "spectre", "tigger1", "tekken", "lenny", "lakota", "lionking", "jjjjjjj", "medical", "megatron", "1369", "hawaiian", "gymnastic", "golfer1", "gunners", "7779311", "515151", "famous", "glass", "screen", "rudy", "royal", "sanfran", "drake", "optimus", "panther1", "love1", "mail", "maggie1", "pudding", "venice", "aaron1", "delphi", "niceass", "bounce", "busted", "house1", "killer1", "miracle", "momo", "musashi", "jammin", "2003", "234567", "wp2003wp", "submit", "silence", "sssssss", "state", "spikes", "sleeper", "passwort", "toledo", "kume", "media", "meme", "medusa", "mantis", "remote", "reading", "reebok", "1017", "artemis", "hampton", "harry1", "cafc91", "fettish", "friendly", "oceans", "oooooooo", "mango", "ppppp", "trainer", "troy", "uuuu", "909090", "cross", "death1", "news", "bullfrog", "hokies", "holyshit", "eeeeeee", "mitch", "jasmine1", "&amp", "&amp;", "sergeant", "spinner", "leon", "jockey", "records", "right", "babyblue", "hans", "gooner", "474747", "cheeks", "cars", "candice", "fight", "glow", "pass1234", "parola", "okokok", "pablo", "magical", "major", "ramsey", "poseidon", "989898", "confused", "circle", "crusher", "cubswin", "nnnn", "hollywood", "erin", "kotaku", "milo", "mittens", "whatsup", "vvvvv", "iomega", "insertions", "bengals", "bermuda", "biit", "yellow1", "012345", "spike1", "south", "sowhat", "pitures", "peacock", "pecker", "theend", "juliette", "jimmie", "romance", "augusta", "hayabusa", "hawkeyes", "castro", "florian", "geoffrey", "dolly", "lulu", "qaz123", "usarmy", "twinkle", "cloud", "chuckles", "cold", "hounddog", "hover", "hothot", "europa", "ernie", "kenshin", "kojak", "mikey1", "water1", "196969", "because", "wraith", "zebra", "wwwww", "33333", "simon1", "spider1", "snuffy", "philippe", "thunderb", "teddy1", "lesley", "marino13", "maria1", "redline", "renault", "aloha", "antoine", "handyman", "cerberus", "gamecock", "gobucks", "freesex", "duffman", "ooooo", "papa", "nuggets", "magician", "longbow", "preacher", "porno1", "county", "chrysler", "contains", "dalejr", "darius", "darlene", "dell", "navy", "buffy1", "hedgehog", "hoosiers", "honey1", "hott", "heyhey", "europe", "dutchess", "everest", "wareagle", "ihateyou", "sunflowe", "3434", "senators", "shag", "spoon", "sonoma", "stalker", "poochie", "terminal", "terefon", "laurence", "maradona", "maryann", "marty", "roman", "1007", "142536", "alibaba", "america1", "bartman", "astro", "goth", "century", "chicken1", "cheater", "four", "ghost1", "passpass", "oral", "r2d2c3po", "civic", "cicero", "myxworld", "kkkkk", "missouri", "wishbone", "infiniti", "jameson", "1a2b3c", "1qwerty", "wonderboy", "skip", "shojou", "stanford", "sparky1", "smeghead", "poiuy", "titanium", "torres", "lantern", "jelly", "jeanne", "meier", "1213", "bayern", "basset", "gsxr750", "cattle", "charlene", "fishing1", "fullmoon", "gilles", "dima", "obelix", "popo", "prissy", "ramrod", "unique", "absolute", "bummer", "hotone", "dynasty", "entry", "konyor", "missy1", "moses", "282828", "yeah", "xyz123", "stop", "426hemi", "404040", "seinfeld", "simmons", "pingpong", "lazarus", "matthews", "marine1", "manning", "recovery", "12345a", "beamer", "babyface", "greece", "gustav", "7007", "charity", "camilla", "ccccccc", "faggot", "foxy", "frozen", "gladiato", "duckie", "dogfood", "paranoid", "packers1", "longjohn", "radical", "tuna", "clarinet", "claudio", "circus", "danny1", "novell", "nights", "bonbon", "kashmir", "kiki", "mortimer", "modelsne", "moondog", "monaco", "vladimir", "insert", "1953", "zxc123", "supreme", "3131", "sexxx", "selena", "softail", "poipoi", "pong", "together", "mars", "martin1", "rogue", "alone", "avalanch", "audia4", "55bgates", "cccccccc", "chick", "came11", "figaro", "geneva", "dogboy", "dnsadm", "dipshit", "paradigm", "othello", "operator", "officer", "malone", "post", "rafael", "valencia", "tripod", "choice", "chopin", "coucou", "coach", "cocksuck", "common", "creature", "borussia", "book", "browning", "heritage", "hiziad", "homerj", "eight", "earth", "millions", "mullet", "whisky", "jacques", "store", "4242", "speedo", "starcraf", "skylar", "spaceman", "piggy", "pierce", "tiger2", "legos", "lala", "jezebel", "judy", "joker1", "mazda", "barton", "baker", "727272", "chester1", "fishman", "food", "rrrrrrrr", "sandwich", "dundee", "lumber", "magazine", "radar", "ppppppp", "tranny", "aaliyah", "admiral", "comics", "cleo", "delight", "buttfuck", "homeboy", "eternal", "kilroy", "kellie", "khan", "violin", "wingman", "walmart", "bigblue", "blaze", "beemer", "beowulf", "bigfish", "yyyyyyy", "woodie", "yeahbaby", "0123456", "tbone", "style", "syzygy", "starter", "lemon", "linda1", "merlot", "mexican", "11235813", "anita", "banner", "bangbang", "badman", "barfly", "grease", "carla", "charles1", "ffffffff", "screw", "doberman", "diane", "dogshit", "overkill", "counter", "coolguy", "claymore", "demons", "demo", "nomore", "normal", "brewster", "hhhhhhh", "hondas", "iamgod", "enterme", "everett", "electron", "eastside", "kayla", "minimoni", "mybaby", "wildbill", "wildcard", "ipswich", "200000", "bearcat", "zigzag", "yyyyyyyy", "xander", "sweetnes", "369369", "skyler", "skywalker", "pigeon", "peyton", "tipper", "lilly", "asdf123", "alphabet", "asdzxc", "babybaby", "banane", "barnes", "guyver", "graphics", "grand", "chinook", "florida1", "flexible", "fuckinside", "otis", "ursitesux", "tototo", "trust", "tower", "adam12", "christma", "corey", "chrome", "buddie", "bombers", "bunker", "hippie", "keegan", "misfits", "vickie", "292929", "woofer", "wwwwwwww", "stubby", "sheep", "secrets", "sparta", "stang", "spud", "sporty", "pinball", "jorge", "just4fun", "johanna", "maxxxx", "rebecca1", "gunther", "fatima", "fffffff", "freeway", "garion", "score", "rrrrr", "sancho", "outback", "maggot", "puddin", "trial", "adrienne", "987456", "colton", "clyde", "brain", "brains", "hoops", "eleanor", "dwayne", "kirby", "mydick", "villa", "19691969", "bigcat", "becker", "shiner", "silverad", "spanish", "templar", "lamer", "juicy", "marsha", "mike1", "maximum", "rhiannon", "real", "1223", "10101010", "arrows", "andres", "alucard", "baldwin", "baron", "avenue", "ashleigh", "haggis", "channel", "cheech", "safari", "ross", "dog123", "orion1", "paloma", "qwerasdf", "presiden", "vegitto", "trees", "969696", "adonis", "colonel", "cookie1", "newyork1", "brigitte", "buddyboy", "hellos", "heineken", "dwight", "eraser", "kerstin", "motion", "moritz", "millwall", "visual", "jaybird", "1983", "beautifu", "bitter", "yvette", "zodiac", "steven1", "sinister", "slammer", "smashing", "slick1", "sponge", "teddybea", "theater", "this", "ticklish", "lipstick", "jonny", "massage", "mann", "reynolds", "ring", "1211", "amazing", "aptiva", "applepie", "bailey1", "guitar1", "chanel", "canyon", "gagged", "fuckme1", "rough", "digital1", "dinosaur", "punk", "98765", "90210", "clowns", "cubs", "daniels", "deejay", "nigga", "naruto", "boxcar", "icehouse", "hotties", "electra", "kent", "widget", "india", "insanity", "1986", "2004", "best", "bluefish", "bingo1", "*****", "stratus", "strength", "sultan", "storm1", "44444", "4200", "sentnece", "season", "sexyboy", "sigma", "smokie", "spam", "point", "pippo", "ticket", "temppass", "joel", "manman", "medicine", "1022", "anton", "almond", "bacchus", "aztnm", "axio", "awful", "bamboo", "hakr", "gregor", "hahahaha", "5678", "casanova", "caprice", "camero1", "fellow", "fountain", "dupont", "dolphin1", "dianne", "paddle", "magnet", "qwert1", "pyon", "porsche1", "tripper", "vampires", "coming", "noway", "burrito", "bozo", "highheel", "hughes", "hookem", "eddie1", "ellie", "entropy", "kkkkkkkk", "kkkkkkk", "illinois", "jacobs", "1945", "1951", "24680", "21212121", "100000", "stonecold", "taco", "subzero", "sharp", "sexxxy", "skolko", "shanna", "skyhawk", "spurs1", "sputnik", "piazza", "testpass", "letter", "lane", "kurt", "jiggaman", "matilda", "1224", "harvard", "hannah1", "525252", "4ever", "carbon", "chef", "federico", "ghosts", "gina", "scorpio1", "rt6ytere", "madison1", "loki", "raquel", "promise", "coolness", "christina", "coldbeer", "citadel", "brittney", "highway", "evil", "monarch", "morgan1", "washingt", "1997", "bella1", "berry", "yaya", "yolanda", "superb", "taxman", "studman", "stephanie", "3636", "sherri", "sheriff", "shepherd", "poland", "pizzas", "tiffany1", "toilet", "latina", "lassie", "larry1", "joseph1", "mephisto", "meagan", "marian", "reptile", "rico", "razor", "1013", "barron", "hammer1", "gypsy", "grande", "carroll", "camper", "chippy", "cat123", "call", "chimera", "fiesta", "glock", "glenn", "domain", "dieter", "dragonba", "onetwo", "nygiants", "odessa", "password2", "louie", "quartz", "prowler", "prophet", "towers", "ultra", "cocker", "corleone", "dakota1", "cumm", "nnnnnnn", "natalia", "boxers", "hugo", "heynow", "hollow", "iceberg", "elvira", "kittykat", "kate", "kitchen", "wasabi", "vikings1", "impact", "beerman", "string", "sleep", "splinter", "snoopy1", "pipeline", "pocket", "legs", "maple", "mickey1", "manuela", "mermaid", "micro", "meowmeow", "redbird", "alisha", "baura", "battery", "grass", "chevys", "chestnut", "caravan", "carina", "charmed", "fraser", "frogman", "diving", "dogger", "draven", "drifter", "oatmeal", "paris1", "longdong", "quant4307s", "rachel1", "vegitta", "cole", "cobras", "corsair", "dadada", "noelle", "mylife", "nine", "bowwow", "body", "hotrats", "eastwood", "moonligh", "modena", "wave", "illusion", "iiiiiii", "jayhawks", "birgit", "zone", "sutton", "susana", "swingers", "shocker", "shrimp", "sexgod", "squall", "stefanie", "squeeze", "soul", "patrice", "poiu", "players", "tigers1", "toejam", "tickler", "line", "julie1", "jimbo1", "jefferso", "juanita", "michael2", "rodeo", "robot", "1023", "annie1", "bball", "guess", "happy2", "charter", "farm", "flasher", "falcon1", "fiction", "fastball", "gadget", "scrabble", "diaper", "dirtbike", "dinner", "oliver1", "partner", "paco", "lucille", "macman", "poopy", "popper", "postman", "ttttttt", "ursula", "acura", "cowboy1", "conan", "daewoo", "cyrus", "customer", "nation", "nemrac58", "nnnnn", "nextel", "bolton", "bobdylan", "hopeless", "eureka", "extra", "kimmie", "kcj9wx5n", "killbill", "musica", "volkswag", "wage", "windmill", "wert", "vintage", "iloveyou1", "itsme", "bessie", "zippo", "311311", "starligh", "smokey1", "spot", "snappy", "soulmate", "plasma", "thelma", "tonight", "krusty", "just4me", "mcdonald", "marius", "rochelle", "rebel1", "1123", "alfredo", "aubrey", "audi", "chantal", "fick", "goaway", "roses", "sales", "rusty2", "dirt", "dogbone", "doofus", "ooooooo", "oblivion", "mankind", "luck", "mahler", "lllllll", "pumper", "puck", "pulsar", "valkyrie", "tupac", "compass", "concorde", "costello", "cougars", "delaware", "niceguy", "nocturne", "bob123", "boating", "bronze", "hopkins", "herewego", "hewlett", "houhou", "hubert", "earnhard", "eeeeeeee", "keller", "mingus", "mobydick", "venture", "verizon", "imation", "1950", "1948", "1949", "223344", "bigbig", "blossom", "zack", "wowwow", "sissy", "skinner", "spiker", "square", "snooker", "sluggo", "player1", "junk", "jeannie", "jsbach", "jumbo", "jewel", "medic", "robins", "reddevil", "reckless", "123456a", "1125", "1031", "beacon", "astra", "gumby", "hammond", "hassan", "757575", "585858", "chillin", "fuck1", "sander", "lowell", "radiohea", "upyours", "trek", "courage", "coolcool", "classics", "choochoo", "darryl", "nikki1", "nitro", "bugs", "boytoy", "ellen", "excite", "kirsty", "kane", "wingnut", "wireless", "icu812", "1master", "beatle", "bigblock", "blanca", "wolfen", "summer99", "sugar1", "tartar", "sexysexy", "senna", "sexman", "sick", "someone", "soprano", "pippin", "platypus", "pixies", "telephon", "land", "laura1", "laurent", "rimmer", "road", "report", "1020", "12qwaszx", "arturo", "around", "hamish", "halifax", "fishhead", "forum", "dododo", "doit", "outside", "paramedi", "lonesome", "mandy1", "twist", "uuuuu", "uranus", "ttttt", "butcher", "bruce1", "helper", "hopeful", "eduard", "dusty1", "kathy1", "katherin", "moonbeam", "muscles", "monster1", "monkeybo", "morton", "windsurf", "vvvvvvv", "vivid", "install", "1947", "187187", "1941", "1952", "tatiana", "susan1", "31415926", "sinned", "sexxy", "senator", "sebastian", "shadows", "smoothie", "snowflak", "playstat", "playa", "playboy1", "toaster", "jerry1", "marie1", "mason1", "merlin1", "roger1", "roadster", "112358", "1121", "andrea1", "bacardi", "auto", "hardware", "hardy", "789789", "5555555", "captain1", "flores", "fergus", "sascha", "rrrrrrr", "dome", "onion", "nutter", "lololo", "qqqqqqq", "quick", "undertak", "uuuuuuuu", "uuuuuuu", "criminal", "cobain", "cindy1", "coors", "dani", "descent", "nimbus", "nomad", "nanook", "norwich", "bomb", "bombay", "broker", "hookup", "kiwi", "winners", "jackpot", "1a2b3c4d", "1776", "beardog", "bighead", "blast", "bird33", "0987", "stress", "shot", "spooge", "pelican", "peepee", "perry", "pointer", "titan", "thedoors", "jeremy1", "annabell", "altima", "baba", "hallie", "hate", "hardone", "5454", "candace", "catwoman", "flip", "faithful", "finance", "farmboy", "farscape", "genesis1", "salomon", "destroy", "papers", "option", "page", "loser1", "lopez", "r2d2", "pumpkins", "training", "chriss", "cumcum", "ninjas", "ninja1", "hung", "erika", "eduardo", "killers", "miller1", "islander", "jamesbond", "intel", "jarvis", "19841984", "2626", "bizzare", "blue12", "biker", "yoyoma", "sushi", "styles", "shitface", "series", "shanti", "spanker", "steffi", "smart", "sphinx", "please1", "paulie", "pistons", "tiburon", "limited", "maxwell1", "mdogg", "rockies", "armstron", "alexia", "arlene", "alejandr", "arctic", "banger", "audio", "asimov", "augustus", "grandpa", "753951", "4you", "chilly", "care1839", "chapman", "flyfish", "fantasia", "freefall", "santa", "sandrine", "oreo", "ohshit", "macbeth", "madcat", "loveya", "mallory", "rage", "quentin", "qwerqwer", "project", "ramirez", "colnago", "citizen", "chocha", "cobalt", "crystal1", "dabears", "nevets", "nineinch", "broncos1", "helene", "huge", "edgar", "epsilon", "easter", "kestrel", "moron", "virgil", "winston1", "warrior1", "iiiiiiii", "iloveyou2", "1616", "beat", "bettina", "woowoo", "zander", "straight", "shower", "sloppy", "specialk", "tinkerbe", "jellybea", "reader", "romero", "redsox1", "ride", "1215", "1112", "annika", "arcadia", "answer", "baggio", "base", "guido", "555666", "carmel", "cayman", "cbr900rr", "chips", "gabriell", "gertrude", "glennwei", "roxy", "sausages", "disco", "pass1", "luna", "lovebug", "macmac", "queenie", "puffin", "vanguard", "trip", "trinitro", "airwolf", "abbott", "aaa111", "cocaine", "cisco", "cottage", "dayton", "deadly", "datsun", "bricks", "bumper", "eldorado", "kidrock", "wizard1", "whiskers", "wind", "wildwood", "istheman", "interest", "italy", "25802580", "benoit", "bigones", "woodland", "wolfpac", "strawber", "suicide", "3030", "sheba1", "sixpack", "peace1", "physics", "pearson", "tigger2", "toad", "megan1", "meow", "ringo", "roll", "amsterdam", "717171", "686868", "5424", "catherine", "canuck", "football1", "footjob", "fulham", "seagull", "orgy", "lobo", "mancity", "truth", "trace", "vancouve", "vauxhall", "acidburn", "derf", "myspace1", "boozer", "buttercu", "howell", "hola", "easton", "minemine", "munch", "jared", "1dragon", "biology", "bestbuy", "bigpoppa", "blackout", "blowfish", "bmw325", "bigbob", "stream", "talisman", "tazz", "sundevil", "3333333", "skate", "shutup", "shanghai", "shop", "spencer1", "slowhand", "polish", "pinky1", "tootie", "thecrow", "leroy", "jonathon", "jubilee", "jingle", "martine", "matrix1", "manowar", "michaels", "messiah", "mclaren", "resident", "reilly", "redbaron", "rollins", "romans", "return", "rivera", "andromed", "athlon", "beach1", "badgers", "guitars", "harald", "harddick", "gotribe", "6996", "7grout", "5wr2i7h8", "635241", "chase1", "carver", "charlotte", "fallout", "fiddle", "fredrick", "fenris", "francesc", "fortuna", "ferguson", "fairlane", "felipe", "felix1", "forward", "gasman", "frost", "fucks", "sahara", "sassy1", "dogpound", "dogbert", "divx1", "manila", "loretta", "priest", "pornporn", "quasar", "venom", "987987", "access1", "clippers", "daylight", "decker", "daman", "data", "dentist", "crusty", "nathan1", "nnnnnnnn", "bruno1", "bucks", "brodie", "budapest", "kittens", "kerouac", "mother1", "waldo1", "wedding", "whistler", "whatwhat", "wanderer", "idontkno", "1942", "1946", "bigdawg", "bigpimp", "zaqwsx", "414141", "3000gt", "434343", "shoes", "serpent", "starr", "smurf", "pasword", "tommie", "thisisit", "lake", "john1", "robotics", "redeye", "rebelz", "1011", "alatam", "asses", "asians", "bama", "banzai", "harvest", "gonzalez", "hair", "hanson", "575757", "5329", "cascade", "chinese", "fatty", "fender1", "flower2", "funky", "sambo", "drummer1", "dogcat", "dottie", "oedipus", "osama", "macleod", "prozac", "private1", "rampage", "punch", "presley", "concord", "cook", "cinema", "cornwall", "cleaner", "christopher", "ciccio", "corinne", "clutch", "corvet07", "daemon", "bruiser", "boiler", "hjkl", "eyes", "egghead", "expert", "ethan", "kasper", "mordor", "wasted", "jamess", "iverson3", "bluesman", "zouzou", "090909", "1002", "switch", "stone1", "4040", "sisters", "sexo", "shawna", "smith1", "sperma", "sneaky", "polska", "thewho", "terminat", "krypton", "lawson", "library", "lekker", "jules", "johnson1", "johann", "justus", "rockie", "romano", "aspire", "bastards", "goodie", "cheese1", "fenway", "fishon", "fishin", "fuckoff1", "girls1", "sawyer", "dolores", "desmond", "duane", "doomsday", "pornking", "ramones", "rabbits", "transit", "aaaaa1", "clock", "delilah", "noel", "boyz", "bookworm", "bongo", "bunnies", "brady", "buceta", "highbury", "henry1", "heels", "eastern", "krissy", "mischief", "mopar", "ministry", "vienna", "weston", "wildone", "vodka", "jayson", "bigbooty", "beavis1", "betsy", "xxxxxx1", "yogibear", "000001", "0815", "zulu", "420000", "september", "sigmar", "sprout", "stalin", "peggy", "patch", "lkjhgfds", "lagnaf", "rolex", "redfox", "referee", "123123123", "1231", "angus1", "ariana", "ballin", "attila", "hall", "greedy", "grunt", "747474", "carpedie", "cecile", "caramel", "foxylady", "field", "gatorade", "gidget", "futbol", "frosch", "saiyan", "schmidt", "drums", "donner", "doggy1", "drum", "doudou", "pack", "pain", "nutmeg", "quebec", "valdepen", "trash", "triple", "tosser", "tuscl", "track", "comfort", "choke", "comein", "cola", "deputy", "deadpool", "bremen", "borders", "bronson", "break", "hotass", "hotmail1", "eskimo", "eggman", "koko", "kieran", "katrin", "kordell1", "komodo", "mone", "munich", "vvvvvvvv", "winger", "jaeger", "ivan", "jackson5", "2222222", "bergkamp", "bennie", "bigben", "zanzibar", "worm", "xxx123", "sunny1", "373737", "services", "sheridan", "slater", "slayer1", "snoop", "stacie", "peachy", "thecure", "times", "little1", "jennaj", "marquis", "middle", "rasta69", "1114", "aries", "havana", "gratis", "calgary", "checkers", "flanker", "salope", "dirty1", "draco", "dogface", "luv2epus", "rainbow6", "qwerty123", "umpire", "turnip", "vbnm", "tucson", "troll", "aileen", "codered", "commande", "damon", "nana", "neon", "nico", "nightwin", "neil", "boomer1", "bushido", "hotmail0", "horace", "enternow", "kaitlyn", "keepout", "karen1", "mindy", "mnbv", "viewsoni", "volcom", "wizards", "wine", "1995", "berkeley", "bite", "zach", "woodstoc", "tarpon", "shinobi", "starstar", "phat", "patience", "patrol", "toolbox", "julien", "johnny1", "joebob", "marble", "riders", "reflex", "120676", "1235", "angelus", "anthrax", "atlas", "hawks", "grandam", "harlem", "hawaii50", "gorgeous", "655321", "cabron", "challeng", "callisto", "firewall", "firefire", "fischer", "flyer", "flower1", "factory", "federal", "gambler", "frodo1", "funk", "sand", "sam123", "scania", "dingo", "papito", "passmast", "olive", "palermo", "ou8123", "lock", "ranch", "pride", "randy1", "twiggy", "travis1", "transfer", "treetop", "addict", "admin1", "963852", "aceace", "clarissa", "cliff", "cirrus", "clifton", "colin", "bobdole", "bonner", "bogus", "bonjovi", "bootsy", "boater", "elway7", "edison", "kelvin", "kenny1", "moonshin", "montag", "moreno", "wayne1", "white1", "jazzy", "jakejake", "1994", "1991", "2828", "blunt", "bluejays", "beau", "belmont", "worthy", "systems", "sensei", "southpark", "stan", "peeper", "pharao", "pigpen", "tomahawk", "teensex", "leedsutd", "larkin", "jermaine", "jeepster", "jimjim", "josephin", "melons", "marlon", "matthias", "marriage", "robocop", "1003", "1027", "antelope", "azsxdc", "gordo", "hazard", "granada", "8989", "7894", "ceasar", "cabernet", "cheshire", "california", "chelle", "candy1", "fergie", "fanny", "fidelio", "giorgio", "fuckhead", "ruth", "sanford", "diego", "dominion", "devon", "panic", "longer", "mackie", "qawsed", "trucking", "twelve", "chloe1", "coral", "daddyo", "nostromo", "boyboy", "booster", "bucky", "honolulu", "esquire", "dynamite", "motor", "mollydog", "wilder", "windows1", "waffle", "wallet", "warning", "virus", "washburn", "wealth", "vincent1", "jabber", "jaguars", "javelin", "irishman", "idefix", "bigdog1", "blue42", "blanked", "blue32", "biteme1", "bearcats", "blaine", "yessir", "sylveste", "team", "stephan", "sunfire", "tbird", "stryker", "3ip76k2", "sevens", "sheldon", "pilgrim", "tenchi", "titman", "leeds", "lithium", "lander", "linkin", "landon", "marijuan", "mariner", "markie", "midnite", "reddwarf", "1129", "123asd", "12312312", "allstar", "albany", "asdf12", "antonia", "aspen", "hardball", "goldfing", "7734", "49ers", "carlo", "chambers", "cable", "carnage", "callum", "carlos1", "fitter", "fandango", "festival", "flame", "gofast", "gamma", "fucmy69", "scrapper", "dogwood", "django", "magneto", "loose", "premium", "addison", "9999999", "abc1234", "cromwell", "newyear", "nichole", "bookie", "burns", "bounty", "brown1", "bologna", "earl", "entrance", "elway", "killjoy", "kerry", "keenan", "kick", "klondike", "mini", "mouser", "mohammed", "wayer", "impreza", "irene", "insomnia", "24682468", "2580", "24242424", "billbill", "bellaco", "blessing", "blues1", "bedford", "blanco", "blunts", "stinks", "teaser", "streets", "sf49ers", "shovel", "solitude", "spikey", "sonia", "pimpdadd", "timeout", "toffee", "lefty", "johndoe", "johndeer", "mega", "manolo", "mentor", "margie", "ratman", "ridge", "record", "rhodes", "robin1", "1124", "1210", "1028", "1226", "another", "babylove", "barbados", "harbor", "gramma", "646464", "carpente", "chaos1", "fishbone", "fireblad", "glasgow", "frogs", "scissors", "screamer", "salem", "scuba1", "ducks", "driven", "doggies", "dicky", "donovan", "obsidian", "rams", "progress", "tottenham", "aikman", "comanche", "corolla", "clarke", "conway", "cumslut", "cyborg", "dancing", "boston1", "bong", "houdini", "helmut", "elvisp", "edge", "keksa12", "misha", "monty1", "monsters", "wetter", "watford", "wiseguy", "veronika", "visitor", "janelle", "1989", "1987", "20202020", "biatch", "beezer", "bigguns", "blueball", "bitchy", "wyoming", "yankees2", "wrestler", "stupid1", "sealteam", "sidekick", "simple1", "smackdow", "sporting", "spiral", "smeller", "sperm", "plato", "tophat", "test2", "theatre", "thick", "toomuch", "leigh", "jello", "jewish", "junkie", "maxim", "maxime", "meadow", "remingto", "roofer", "124038", "1018", "1269", "1227", "123457", "arkansas", "alberta", "aramis", "andersen", "beaker", "barcelona", "baltimor", "googoo", "goochi", "852456", "4711", "catcher", "carman", "champ1", "chess", "fortress", "fishfish", "firefigh", "geezer", "rsalinas", "samuel1", "saigon", "scooby1", "doors", "dick1", "devin", "doom", "dirk", "doris", "dontknow", "load", "magpies", "manfred", "raleigh", "vader1", "universa", "tulips", "defense", "mygirl", "burn", "bowtie", "bowman", "holycow", "heinrich", "honeys", "enforcer", "katherine", "minerva", "wheeler", "witch", "waterboy", "jaime", "irving", "1992", "23skidoo", "bimbo", "blue11", "birddog", "woodman", "womble", "zildjian", "030303", "stinker", "stoppedby", "sexybabe", "speakers", "slugger", "spotty", "smoke1", "polopolo", "perfect1", "things", "torpedo", "tender", "thrasher", "lakeside", "lilith", "jimmys", "jerk", "junior1", "marsh", "masamune", "rice", "root", "1214", "april1", "allgood", "bambi", "grinch", "767676", "5252", "cherries", "chipmunk", "cezer121", "carnival", "capecod", "finder", "flint", "fearless", "goats", "funstuff", "gideon", "savior", "seabee", "sandro", "schalke", "salasana", "disney1", "duckman", "options", "pancake", "pantera1", "malice", "lookin", "love123", "lloyd", "qwert123", "puppet", "prayers", "union", "tracer", "crap", "creation", "cwoui", "nascar24", "hookers", "hollie", "hewitt", "estrella", "erection", "ernesto", "ericsson", "edthom", "kaylee", "kokoko", "kokomo", "kimball", "morales", "mooses", "monk", "walton", "weekend", "inter", "internal", "1michael", "1993", "19781978", "25252525", "worker", "summers", "surgery", "shibby", "shamus", "skibum", "sheepdog", "sex69", "spliff", "slipper", "spoons", "spanner", "snowbird", "slow", "toriamos", "temp123", "tennesse", "lakers1", "jomama", "julio", "mazdarx7", "rosario", "recon", "riddle", "room", "revolver", "1025", "1101", "barney1", "babycake", "baylor", "gotham", "gravity", "hallowee", "hancock", "616161", "515000", "caca", "cannabis", "castor", "chilli", "fdsa", "getout", "fuck69", "gators1", "sail", "sable", "rumble", "dolemite", "dork", "dickens", "duffer", "dodgers1", "painting", "onions", "logger", "lorena", "lookout", "magic32", "port", "poon", "prime", "twat", "coventry", "citroen", "christmas", "civicsi", "cocksucker", "coochie", "compaq1", "nancy1", "buzzer", "boulder", "butkus", "bungle", "hogtied", "honor", "hero", "hotgirls", "hilary", "heidi1", "eggplant", "mustang6", "mortal", "monkey12", "wapapapa", "wendy1", "volleyba", "vibrate", "vicky", "bledsoe", "blink", "birthday4", "woof", "xxxxx1", "talk", "stephen1", "suburban", "stock", "tabatha", "sheeba", "start1", "soccer10", "something", "starcraft", "soccer12", "peanut1", "plastics", "penthous", "peterbil", "tools", "tetsuo", "torino", "tennis1", "termite", "ladder", "last", "lemmein", "lakewood", "jughead", "melrose", "megane", "reginald", "redone", "request", "angela1", "alive", "alissa", "goodgirl", "gonzo1", "golden1", "gotyoass", "656565", "626262", "capricor", "chains", "calvin1", "foolish", "fallon", "getmoney", "godfather", "gabber", "gilligan", "runaway", "salami", "dummy", "dungeon", "dudedude", "dumb", "dope", "opus", "paragon", "oxygen", "panhead", "pasadena", "opendoor", "odyssey", "magellan", "lottie", "printing", "pressure", "prince1", "trustme", "christa", "court", "davies", "neville", "nono", "bread", "buffet", "hound", "kajak", "killkill", "mona", "moto", "mildred", "winner1", "vixen", "whiteboy", "versace", "winona", "voyager1", "instant", "indy", "jackjack", "bigal", "beech", "biggun", "blake1", "blue99", "big1", "woods", "synergy", "success1", "336699", "sixty9", "shark1", "skin", "simba1", "sharpe", "sebring", "spongebo", "spunk", "springs", "sliver", "phialpha", "password9", "pizza1", "plane", "perkins", "pookey", "tickling", "lexingky", "lawman", "joe123", "jolly", "mike123", "romeo1", "redheads", "reserve", "apple123", "alanis", "ariane", "antony", "backbone", "aviation", "band", "hand", "green123", "haley", "carlitos", "byebye", "cartman1", "camden", "chewy", "camaross", "favorite6", "forumwp", "franks", "ginscoot", "fruity", "sabrina1", "devil666", "doughnut", "pantie", "oldone", "paintball", "lumina", "rainbow1", "prosper", "total", "true", "umbrella", "ajax", "951753", "achtung", "abc12345", "compact", "color", "corn", "complete", "christi", "closer", "corndog", "deerhunt", "darklord", "dank", "nimitz", "brandy1", "bowl", "breanna", "holidays", "hetfield", "holein1", "hillbill", "hugetits", "east", "evolutio", "kenobi", "whiplash", "waldo", "wg8e3wjf", "wing", "istanbul", "invis", "1996", "benton", "bigjohn", "bluebell", "beef", "beater", "benji", "bluejay", "xyzzy", "wrestling", "storage", "superior", "suckdick", "taichi", "stellar", "stephane", "shaker", "skirt", "seymour", "semper", "splurge", "squeak", "pearls", "playball", "pitch", "phyllis", "pooky", "piss", "tomas", "titfuck", "joemama", "johnny5", "marcello", "marjorie", "married", "maxi", "rhubarb", "rockwell", "ratboy", "reload", "rooney", "redd", "1029", "1030", "1220", "anchor", "bbking", "baritone", "gryphon", "gone", "57chevy", "494949", "celeron", "fishy", "gladiator", "fucker1", "roswell", "dougie", "downer", "dicker", "diva", "domingo", "donjuan", "nympho", "omar", "praise", "racers", "trick", "trauma", "truck1", "trample", "acer", "corwin", "cricket1", "clemente", "climax", "denmark", "cuervo", "notnow", "nittany", "neutron", "native", "bosco1", "buffa", "breaker", "hello2", "hydro", "estelle", "exchange", "explore", "kisskiss", "kittys", "kristian", "montecar", "modem", "mississi", "mooney", "weiner", "washington", "20012001", "bigdick1", "bibi", "benfica", "yahoo1", "striper", "tabasco", "supra", "383838", "456654", "seneca", "serious", "shuttle", "socks", "stanton", "penguin1", "pathfind", "testibil", "thethe", "listen", "lightning", "lighting", "jeter2", "marma", "mark1", "metoo", "republic", "rollin", "redleg", "redbone", "redskin", "rocco", "1245", "armand", "anthony7", "altoids", "andrews", "barley", "away", "asswipe", "bauhaus", "bbbbbb1", "gohome", "harrier", "golfpro", "goldeney", "818181", "6666666", "5000", "5rxypn", "cameron1", "calling", "checker", "calibra", "fields", "freefree", "faith1", "fist", "fdm7ed", "finally", "giraffe", "glasses", "giggles", "fringe", "gate", "georgie", "scamper", "rrpass1", "screwyou", "duffy", "deville", "dimples", "pacino", "ontario", "passthie", "oberon", "quest1", "postov1000", "puppydog", "puffer", "raining", "protect", "qwerty7", "trey", "tribe", "ulysses", "tribal", "adam25", "a1234567", "compton", "collie", "cleopatr", "contract", "davide", "norris", "namaste", "myrtle", "buffalo1", "bonovox", "buckley", "bukkake", "burning", "burner", "bordeaux", "burly", "hun999", "emilie", "elmo", "enters", "enrique", "keisha", "mohawk", "willard", "vgirl", "whale", "vince", "jayden", "jarrett", "1812", "1943", "222333", "bigjim", "bigd", "zoom", "wordup", "ziggy1", "yahooo", "workout", "young1", "written", "xmas", "zzzzzz1", "surfer1", "strife", "sunlight", "tasha1", "skunk", "shauna", "seth", "soft", "sprinter", "peaches1", "planes", "pinetree", "plum", "pimping", "theforce", "thedon", "toocool", "leeann", "laddie", "list", "lkjh", "lara", "joke", "jupiter1", "mckenzie", "matty", "rene", "redrose", "1200", "102938", "annmarie", "alexa", "antares", "austin31", "ground", "goose1", "737373", "78945612", "789987", "6464", "calimero", "caster", "casper1", "cement", "chevrolet", "chessie", "caddy", "chill", "child", "canucks", "feeling", "favorite", "fellatio", "f00tball", "francine", "gateway2", "gigi", "gamecube", "giovanna", "rugby1", "scheisse", "dshade", "dudes", "dixie1", "owen", "offshore", "olympia", "lucas1", "macaroni", "manga", "pringles", "puff", "tribble", "trouble1", "ussy", "core", "clint", "coolhand", "colonial", "colt", "debra", "darthvad", "dealer", "cygnusx1", "natalie1", "newark", "husband", "hiking", "errors", "eighteen", "elcamino", "emmett", "emilia", "koolaid", "knight1", "murphy1", "volcano", "idunno", "2005", "2233", "block", "benito", "blueberr", "biguns", "yamahar1", "zapper", "zorro1", "0911", "3006", "sixsix", "shopper", "siobhan", "sextoy", "stafford", "snowboard", "speedway", "sounds", "pokey", "peabody", "playboy2", "titi", "think", "toast", "toonarmy", "lister", "lambda", "joecool", "jonas", "joyce", "juniper", "mercer", "max123", "manny", "massimo", "mariposa", "met2002", "reggae", "ricky1", "1236", "1228", "1016", "all4one", "arianna", "baberuth", "asgard", "gonzales", "484848", "5683", "6669", "catnip", "chiquita", "charisma", "capslock", "cashmone", "chat", "figure", "galant", "frenchy", "gizmodo1", "girlies", "gabby", "garner", "screwy", "doubled", "divers", "dte4uw", "done", "dragonfl", "maker", "locks", "rachelle", "treble", "twinkie", "trailer", "tropical", "acid", "crescent", "cooking", "cococo", "cory", "dabomb", "daffy", "dandfa", "cyrano", "nathanie", "briggs", "boners", "helium", "horton", "hoffman", "hellas", "espresso", "emperor", "killa", "kikimora", "wanda", "w4g8at", "verona", "ilikeit", "iforget", "1944", "20002000", "birthday1", "beatles1", "blue1", "bigdicks", "beethove", "blacklab", "blazers", "benny1", "woodwork", "0069", "0101", "taffy", "susie", "survivor", "swim", "stokes", "4567", "shodan", "spoiled", "steffen", "pissed", "pavlov", "pinnacle", "place", "petunia", "terrell", "thirty", "toni", "tito", "teenie", "lemonade", "lily", "lillie", "lalakers", "lebowski", "lalalala", "ladyboy", "jeeper", "joyjoy", "mercury1", "mantle", "mannn", "rocknrol", "riversid", "reeves", "123aaa", "11112222", "121314", "1021", "1004", "1120", "allen1", "ambers", "amstel", "ambrose", "alice1", "alleycat", "allegro", "ambrosia", "alley", "australia", "hatred", "gspot", "graves", "goodsex", "hattrick", "harpoon", "878787", "8inches", "4wwvte", "cassandr", "charlie123", "case", "chavez", "fighting", "gabriela", "gatsby", "fudge", "gerry", "generic", "gareth", "fuckme2", "samm", "sage", "seadog", "satchmo", "scxakv", "santafe", "dipper", "dingle", "dizzy", "outoutout", "madmad", "london1", "qbg26i", "pussy123", "randolph", "vaughn", "tzpvaw", "vamp", "comedy", "comp", "cowgirl", "coldplay", "dawgs", "delaney", "nt5d27", "novifarm", "needles", "notredam", "newness", "mykids", "bryan1", "bouncer", "hihihi", "honeybee", "iceman1", "herring", "horn", "hook", "hotlips", "dynamo", "klaus", "kittie", "kappa", "kahlua", "muffy", "mizzou", "mohamed", "musical", "wannabe", "wednesda", "whatup", "weller", "waterfal", "willy1", "invest", "blanche", "bear1", "billabon", "youknow", "zelda", "yyyyyy1", "zachary1", "01234567", "070462", "zurich", "superstar", "storms", "tail", "stiletto", "strat", "427900", "sigmachi", "shelter", "shells", "sexy123", "smile1", "sophie1", "stefano", "stayout", "somerset", "smithers", "playmate", "pinkfloyd", "phish1", "payday", "thebear", "telefon", "laetitia", "kswbdu", "larson", "jetta", "jerky", "melina", "metro", "revoluti", "retire", "respect", "1216", "1201", "1204", "1222", "1115", "archange", "barry1", "handball", "676767", "chandra", "chewbacc", "flesh", "furball", "gocubs", "fruit", "fullback", "gman", "gentle", "dunbar", "dewalt", "dominiqu", "diver1", "dhip6a", "olemiss", "ollie", "mandrake", "mangos", "pretzel", "pusssy", "tripleh", "valdez", "vagabond", "clean", "comment", "crew", "clovis", "deaths", "dandan", "csfbr5yy", "deadspin", "darrel", "ninguna", "noah", "ncc74656", "bootsie", "bp2002", "bourbon", "brennan", "bumble", "books", "hose", "heyyou", "houston1", "hemlock", "hippo", "hornets", "hurricane", "horseman", "hogan", "excess", "extensa", "muffin1", "virginie", "werdna", "idontknow", "info", "iron", "jack1", "1bitch", "151nxjmt", "bendover", "bmwbmw", "bills", "zaq123", "wxcvbn", "surprise", "supernov", "tahoe", "talbot", "simona", "shakur", "sexyone", "seviyi", "sonja", "smart1", "speed1", "pepito", "phantom1", "playoffs", "terry1", "terrier", "laser1", "lite", "lancia", "johngalt", "jenjen", "jolene", "midori", "message", "maserati", "matteo", "mental", "miami1", "riffraff", "ronald1", "reason", "rhythm", "1218", "1026", "123987", "1015", "1103", "armada", "architec", "austria", "gotmilk", "hawkins", "gray", "camila", "camp", "cambridg", "charge", "camero", "flex", "foreplay", "getoff", "glacier", "glotest", "froggie", "gerbil", "rugger", "sanity72", "salesman", "donna1", "dreaming", "deutsch", "orchard", "oyster", "palmtree", "ophelia", "pajero", "m5wkqf", "magenta", "luckyone", "treefrog", "vantage", "usmarine", "tyvugq", "uptown", "abacab", "aaaaaa1", "advance", "chuck1", "delmar", "darkange", "cyclones", "nate", "navajo", "nope", "border", "bubba123", "building", "iawgk2", "hrfzlz", "dylan1", "enrico", "encore", "emilio", "eclipse1", "killian", "kayleigh", "mutant", "mizuno", "mustang2", "video1", "viewer", "weed420", "whales", "jaguar1", "insight", "1990", "159159", "1love", "bliss", "bears1", "bigtruck", "binder", "bigboss", "blitz", "xqgann", "yeahyeah", "zeke", "zardoz", "stickman", "table", "3825", "signal", "sentra", "side", "shiva", "skipper1", "singapor", "southpaw", "sonora", "squid", "slamdunk", "slimjim", "placid", "photon", "placebo", "pearl1", "test12", "therock1", "tiger123", "leinad", "legman", "jeepers", "joeblow", "mccarthy", "mike23", "redcar", "rhinos", "rjw7x4", "1102", "13576479", "112211", "alcohol", "gwju3g", "greywolf", "7bgiqk", "7878", "535353", "4snz9g", "candyass", "cccccc1", "carola", "catfight", "cali", "fister", "fosters", "finland", "frankie1", "gizzmo", "fuller", "royalty", "rugrat", "sandie", "rudolf", "dooley", "dive", "doreen", "dodo", "drop", "oemdlg", "out3xf", "paddy", "opennow", "puppy1", "qazwsxedc", "pregnant", "quinn", "ramjet", "under", "uncle", "abraxas", "corner", "creed", "cocoa", "crown", "cows", "cn42qj", "dancer1", "death666", "damned", "nudity", "negative", "nimda2k", "buick", "bobb", "braves1", "brook", "henrik", "higher", "hooligan", "dust", "everlast", "karachi", "mortis", "mulligan", "monies", "motocros", "wally1", "weapon", "waterman", "view", "willie1", "vicki", "inspiron", "1test", "2929", "bigblack", "xytfu7", "yackwin", "zaq1xsw2", "yy5rbfsc", "100100", "0660", "tahiti", "takehana", "talks", "332211", "3535", "sedona", "seawolf", "skydiver", "shine", "spleen", "slash", "spjfet", "special1", "spooner", "slimshad", "sopranos", "spock1", "penis1", "patches1", "terri", "thierry", "thething", "toohot", "large", "limpone", "johnnie", "mash4077", "matchbox", "masterp", "maxdog", "ribbit", "reed", "rita", "rockin", "redhat", "rising", "1113", "14789632", "1331", "allday", "aladin", "andrey", "amethyst", "ariel", "anytime", "baseball1", "athome", "basil", "goofy1", "greenman", "gustavo", "goofball", "ha8fyp", "goodday", "778899", "charon", "chappy", "castillo", "caracas", "cardiff", "capitals", "canada1", "cajun", "catter", "freddy1", "favorite2", "frazier", "forme", "follow", "forsaken", "feelgood", "gavin", "gfxqx686", "garlic", "sarge", "saskia", "sanjose", "russ", "salsa", "dilbert1", "dukeduke", "downhill", "longhair", "loop", "locutus", "lockdown", "malachi", "mamacita", "lolipop", "rainyday", "pumpkin1", "punker", "prospect", "rambo1", "rainbows", "quake", "twin", "trinity1", "trooper1", "aimee", "citation", "coolcat", "crappy", "default", "dental", "deniro", "d9ungl", "daddys", "napoli", "nautica", "nermal", "bukowski", "brick", "bubbles1", "bogota", "board", "branch", "breath", "buds", "hulk", "humphrey", "hitachi", "evans", "ender", "export", "kikiki", "kcchiefs", "kram", "morticia", "montrose", "mongo", "waqw3p", "wizzard", "visited", "whdbtp", "whkzyc", "image", "154ugeiu", "1fuck", "binky", "blind", "bigred1", "blubber", "benz", "becky1", "year2005", "wonderfu", "wooden", "xrated", "0001", "tampabay", "survey", "tammy1", "stuffer", "3mpz4r", "3000", "3some", "selina", "sierra1", "shampoo", "silk", "shyshy", "slapnuts", "standby", "spartan1", "sprocket", "sometime", "stanley1", "poker1", "plus", "thought", "theshit", "torture", "thinking", "lavalamp", "light1", "laserjet", "jediknig", "jjjjj1", "jocelyn", "mazda626", "menthol", "maximo", "margaux", "medic1", "release", "richter", "rhino1", "roach", "renate", "repair", "reveal", "1209", "1234321", "amigos", "apricot", "alexandra", "asdfgh1", "hairball", "hatter", "graduate", "grimace", "7xm5rq", "6789", "cartoons", "capcom", "cheesy", "cashflow", "carrots", "camping", "fanatic", "fool", "format", "fleming", "girlie", "glover", "gilmore", "gardner", "safeway", "ruthie", "dogfart", "dondon", "diapers", "outsider", "odin", "opiate", "lollol", "love12", "loomis", "mallrats", "prague", "primetime21", "pugsley", "program", "r29hqq", "touch", "valleywa", "airman", "abcdefg1", "darkone", "cummer", "dempsey", "damn", "nadia", "natedogg", "nineball", "ndeyl5", "natchez", "newone", "normandy", "nicetits", "buddy123", "buddys", "homely", "husky", "iceland", "hr3ytm", "highlife", "holla", "earthlin", "exeter", "eatmenow", "kimkim", "karine", "k2trix", "kernel", "kirkland", "money123", "moonman", "miles1", "mufasa", "mousey", "wilma", "wilhelm", "whites", "warhamme", "instinct", "jackass1", "2277", "20spanks", "blobby", "blair", "blinky", "bikers", "blackjack", "becca", "blue23", "xman", "wyvern", "085tzzqi", "zxzxzx", "zsmj2v", "suede", "t26gn4", "sugars", "sylvie", "tantra", "swoosh", "swiss", "4226", "4271", "321123", "383pdjvl", "shoe", "shane1", "shelby1", "spades", "spain", "smother", "soup", "sparhawk", "pisser", "photo1", "pebble", "phones", "peavey", "picnic", "pavement", "terra", "thistle", "tokyo", "therapy", "lives", "linden", "kronos", "lilbit", "linux", "johnston", "material", "melanie1", "marbles", "redlight", "reno", "recall", "1208", "1138", "1008", "alchemy", "aolsucks", "alexalex", "atticus", "auditt", "ballet", "b929ezzh", "goodyear", "hanna", "griffith", "gubber", "863abgsg", "7474", "797979", "464646", "543210", "4zqauf", "4949", "ch5nmk", "carlito", "chewey", "carebear", "caleb", "checkmat", "cheddar", "chachi", "fever", "forgetit", "fine", "forlife", "giants1", "gates", "getit", "gamble", "gerhard", "galileo", "g3ujwg", "ganja", "rufus1", "rushmore", "scouts", "discus", "dudeman", "olympus", "oscars", "osprey", "madcow", "locust", "loyola", "mammoth", "proton", "rabbit1", "question", "ptfe3xxp", "pwxd5x", "purple1", "punkass", "prophecy", "uyxnyd", "tyson1", "aircraft", "access99", "abcabc", "cocktail", "colts", "civilwar", "cleveland", "claudia1", "contour", "clement", "dddddd1", "cypher", "denied", "dapzu455", "dagmar", "daisydog", "name", "noles", "butters", "buford", "hoochie", "hotel", "hoser", "eddy", "ellis", "eldiablo", "kingrich", "mudvayne", "motown", "mp8o6d", "wife", "vipergts", "italiano", "innocent", "2055", "2211", "beavers", "bloke", "blade1", "yamato", "zooropa", "yqlgr667", "050505", "zxcvbnm1", "zw6syj", "suckcock", "tango1", "swing", "stern", "stephens", "swampy", "susanna", "tammie", "445566", "333666", "380zliki", "sexpot", "sexylady", "sixtynin", "sickboy", "spiffy", "sleeping", "skylark", "sparkles", "slam", "pintail", "phreak", "places", "teller", "timtim", "tires", "thighs", "left", "latex", "llamas", "letsdoit", "lkjhg", "landmark", "letters", "lizzard", "marlins", "marauder", "metal1", "manu", "register", "righton", "1127", "alain", "alcat", "amigo", "basebal1", "azertyui", "attract", "azrael", "hamper", "gotenks", "golfgti", "gutter", "hawkwind", "h2slca", "harman", "grace1", "6chid8", "789654", "canine", "casio", "cazzo", "chamber", "cbr900", "cabrio", "calypso", "capetown", "feline", "flathead", "fisherma", "flipmode", "fungus", "goal", "g9zns4", "full", "giggle", "gabriel1", "fuck123", "saffron", "dogmeat", "dreamcas", "dirtydog", "dunlop", "douche", "dresden", "dickdick", "destiny1", "pappy", "oaktree", "lydia", "luft4", "puta", "prayer", "ramada", "trumpet1", "vcradq", "tulip", "tracy71", "tycoon", "aaaaaaa1", "conquest", "click", "chitown", "corps", "creepers", "constant", "couples", "code", "cornhole", "danman", "dada", "density", "d9ebk7", "cummins", "darth", "cute", "nash", "nirvana1", "nixon", "norbert", "nestle", "brenda1", "bonanza", "bundy", "buddies", "hotspur", "heavy", "horror", "hufmqw", "electro", "erasure", "enough", "elisabet", "etvww4", "ewyuza", "eric1", "kinder", "kenken", "kismet", "klaatu", "musician", "milamber", "willi", "waiting", "isacs155", "igor", "1million", "1letmein", "x35v8l", "yogi", "ywvxpz", "xngwoj", "zippy1", "020202", "****", "stonewal", "sweeney", "story", "sentry", "sexsexsex", "spence", "sonysony", "smirnoff", "star12", "solace", "sledge", "states", "snyder", "star1", "paxton", "pentagon", "pkxe62", "pilot1", "pommes", "paulpaul", "plants", "tical", "tictac", "toes", "lighthou", "lemans", "kubrick", "letmein22", "letmesee", "jys6wz", "jonesy", "jjjjjj1", "jigga", "joelle", "mate", "merchant", "redstorm", "riley1", "rosa", "relief", "14141414", "1126", "allison1", "badboy1", "asthma", "auggie", "basement", "hartley", "hartford", "hardwood", "gumbo", "616913", "57np39", "56qhxs", "4mnveh", "cake", "forbes", "fatluvr69", "fqkw5m", "fidelity", "feathers", "fresno", "godiva", "gecko", "gladys", "gibson1", "gogators", "fridge", "general1", "saxman", "rowing", "sammys", "scotts", "scout1", "sasasa", "samoht", "dragon69", "ducky", "dragonball", "driller", "p3wqaw", "nurse", "papillon", "oneone", "openit", "optimist", "longshot", "portia", "rapier", "pussy2", "ralphie", "tuxedo", "ulrike", "undertow", "trenton", "copenhag", "come", "delldell", "culinary", "deltas", "mytime", "nicky", "nickie", "noname", "noles1", "bucker", "bopper", "bullock", "burnout", "bryce", "hedges", "ibilltes", "hihje863", "hitter", "ekim", "espana", "eatme69", "elpaso", "envelope", "express1", "eeeeee1", "eatme1", "karaoke", "kara", "mustang5", "misses", "wellingt", "willem", "waterski", "webcam", "jasons", "infinite", "iloveyou!", "jakarta", "belair", "bigdad", "beerme", "yoshi", "yinyang", "zimmer", "x24ik3", "063dyjuy", "0000007", "ztmfcq", "stopit", "stooges", "survival", "stockton", "symow8", "strato", "2hot4u", "ship", "simons", "skins", "shakes", "sex1", "shield", "snacks", "softtail", "slimed123", "pizzaman", "pipe", "pitt", "pathetic", "pinto", "tigercat", "tonton", "lager", "lizzy", "juju", "john123", "jennings", "josiah", "jesse1", "jordon", "jingles", "martian", "mario1", "rootedit", "rochard", "redwine", "requiem", "riverrat", "rats", "1117", "1014", "1205", "althea", "allie", "amor", "amiga", "alpina", "alert", "atreides", "banana1", "bahamut", "hart", "golfman", "happines", "7uftyx", "5432", "5353", "5151", "4747", "byron", "chatham", "chadwick", "cherie", "foxfire", "ffvdj474", "freaked", "foreskin", "gayboy", "gggggg1", "glenda", "gameover", "glitter", "funny1", "scoobydoo", "scroll", "rudolph", "saddle", "saxophon", "dingbat", "digimon", "omicron", "parsons", "ohio", "panda1", "loloxx", "macintos", "lululu", "lollypop", "racer1", "queen1", "qwertzui", "prick", "upnfmc", "tyrant", "trout1", "9skw5g", "aceman", "adelaide", "acls2h", "aaabbb", "acapulco", "aggie", "comcast", "craft", "crissy", "cloudy", "cq2kph", "custer", "d6o8pm", "cybersex", "davecole", "darian", "crumbs", "daisey", "davedave", "dasani", "needle", "mzepab", "myporn", "narnia", "nineteen", "booger1", "bravo1", "budgie", "btnjey", "highlander", "hotel6", "humbug", "edwin", "ewtosi", "kristin1", "kobe", "knuckles", "keith1", "katarina", "muff", "muschi", "montana1", "wingchun", "wiggle", "whatthe", "walking", "watching", "vette1", "vols", "virago", "intj3a", "ishmael", "intern", "jachin", "illmatic", "199999", "2010", "beck", "blender", "bigpenis", "bengal", "blue1234", "your", "zaqxsw", "xray", "xxxxxxx1", "zebras", "yanks", "worlds", "tadpole", "stripes", "svetlana", "3737", "4343", "3728", "4444444", "368ejhih", "solar", "sonne", "smalls", "sniffer", "sonata", "squirts", "pitcher", "playstation", "pktmxr", "pescator", "points", "texaco", "lesbos", "lilian", "l8v53x", "jo9k2jw2", "jimbeam", "josie", "jimi", "jupiter2", "jurassic", "marines1", "maya", "rocket1", "ringer", "14725836", "12345679", "1219", "123098", "1233", "alessand", "althor", "angelika", "arch", "armando", "alpha123", "basher", "barefeet", "balboa", "bbbbb1", "banks", "badabing", "harriet", "gopack", "golfnut", "gsxr1000", "gregory1", "766rglqy", "8520", "753159", "8dihc6", "69camaro", "666777", "cheeba", "chino", "calendar", "cheeky", "camel1", "fishcake", "falling", "flubber", "giuseppe", "gianni", "gloves", "gnasher23", "frisbee", "fuzzy1", "fuzzball", "sauce", "save13tx", "schatz", "russell1", "sandra1", "scrotum", "scumbag", "sabre", "samdog", "dripping", "dragon12", "dragster", "paige", "orwell", "mainland", "lunatic", "lonnie", "lotion", "maine", "maddux", "qn632o", "poophead", "rapper", "porn4life", "producer", "rapunzel", "tracks", "velocity", "vanessa1", "ulrich", "trueblue", "vampire1", "abacus", "902100", "crispy", "corky", "crane", "chooch", "d6wnro", "cutie", "deal", "dabulls", "dehpye", "navyseal", "njqcw4", "nownow", "nigger1", "nightowl", "nonenone", "nightmar", "bustle", "buddy2", "boingo", "bugman", "bulletin", "bosshog", "bowie", "hybrid", "hillside", "hilltop", "hotlegs", "honesty", "hzze929b", "hhhhh1", "hellohel", "eloise", "evilone", "edgewise", "e5pftu", "eded", "embalmer", "excalibur", "elefant", "kenzie", "karl", "karin", "killah", "kleenex", "mouses", "mounta1n", "motors", "mutley", "muffdive", "vivitron", "winfield", "wednesday", "w00t88", "iloveit", "jarjar", "incest", "indycar", "17171717", "1664", "17011701", "222777", "2663", "beelch", "benben", "yitbos", "yyyyy1", "yasmin", "zapata", "zzzzz1", "stooge", "tangerin", "taztaz", "stewart1", "summer69", "sweetness", "system1", "surveyor", "stirling", "3qvqod", "3way", "456321", "sizzle", "simhrq", "shrink", "shawnee", "someday", "sparty", "ssptx452", "sphere", "spark", "slammed", "sober", "persian", "peppers", "ploppy", "pn5jvw", "poobear", "pianos", "plaster", "testme", "tiff", "thriller", "larissa", "lennox", "jewell", "master12", "messier", "rockey", "1229", "1217", "1478", "1009", "anastasi", "almighty", "amonra", "aragon", "argentin", "albino", "azazel", "grinder", "6uldv8", "83y6pv", "8888888", "4tlved", "515051", "carsten", "changes", "flanders", "flyers88", "ffffff1", "firehawk", "foreman", "firedog", "flashman", "ggggg1", "gerber", "godspeed", "galway", "giveitup", "funtimes", "gohan", "giveme", "geryfe", "frenchie", "sayang", "rudeboy", "savanna", "sandals", "devine", "dougal", "drag0n", "dga9la", "disaster", "desktop", "only", "onlyone", "otter", "pandas", "mafia", "lombard", "luckys", "lovejoy", "lovelife", "manders", "product", "qqh92r", "qcmfd454", "pork", "radar1", "punani", "ptbdhw", "turtles", "undertaker", "trs8f7", "tramp", "ugejvp", "abba", "911turbo", "acdc", "abcd123", "clever", "corina", "cristian", "create", "crash1", "colony", "crosby", "delboy", "daniele", "davinci", "daughter", "notebook", "niki", "nitrox", "borabora", "bonzai", "budd", "brisbane", "hotter", "heeled", "heroes", "hooyah", "hotgirl", "i62gbq", "horse1", "hills", "hpk2qc", "epvjb6", "echo", "korean", "kristie", "mnbvc", "mohammad", "mind", "mommy1", "munster", "wade", "wiccan", "wanted", "jacket", "2369", "bettyboo", "blondy", "bismark", "beanbag", "bjhgfi", "blackice", "yvtte545", "ynot", "yess", "zlzfrh", "wolvie", "007bond", "******", "tailgate", "tanya1", "sxhq65", "stinky1", "3234412", "3ki42x", "seville", "shimmer", "sheryl", "sienna", "shitshit", "skillet", "seaman", "sooners1", "solaris", "smartass", "pastor", "pasta", "pedros", "pennywis", "pfloyd", "tobydog", "thetruth", "lethal", "letme1n", "leland", "jenifer", "mario66", "micky", "rocky2", "rewq", "ripped", "reindeer", "1128", "1207", "1104", "1432", "aprilia", "allstate", "alyson", "bagels", "basic", "baggies", "barb", "barrage", "greatest", "gomez", "guru", "guard", "72d5tn", "606060", "4wcqjn", "caldwell", "chance1", "catalog", "faust", "film", "flange", "fran", "fartman", "geil", "gbhcf2", "fussball", "glen", "fuaqz4", "gameboy", "garnet", "geneviev", "rotary", "seahawk", "russel", "saab", "seal", "samadams", "devlt4", "ditto", "drevil", "drinker", "deuce", "dipstick", "donut", "octopus", "ottawa", "losangel", "loverman", "porky", "q9umoz", "rapture", "pump", "pussy4me", "university", "triplex", "ue8fpw", "trent", "trophy", "turbos", "troubles", "agent", "aaa340", "churchil", "crazyman", "consult", "creepy", "craven", "class", "cutiepie", "ddddd1", "dejavu", "cuxldv", "nettie", "nbvibt", "nikon", "niko", "norwood", "nascar1", "nolan", "bubba2", "boobear", "boogers", "buff", "bullwink", "bully", "bulldawg", "horsemen", "escalade", "editor", "eagle2", "dynamic", "ella", "efyreg", "edition", "kidney", "minnesot", "mogwai", "morrow", "msnxbi", "moonlight", "mwq6qlzo", "wars", "werder", "verygood", "voodoo1", "wheel", "iiiiii1", "159951", "1624", "1911a1", "2244", "bellagio", "bedlam", "belkin", "bill1", "woodrow", "xirt2k", "worship", "??????", "tanaka", "swift", "susieq", "sundown", "sukebe", "tales", "swifty", "2fast4u", "senate", "sexe", "sickness", "shroom", "shaun", "seaweed", "skeeter1", "status", "snicker", "sorrow", "spanky1", "spook", "patti", "phaedrus", "pilots", "pinch", "peddler", "theo", "thumper1", "tessie", "tiger7", "tmjxn151", "thematri", "l2g7k3", "letmeinn", "lazy", "jeffjeff", "joan", "johnmish", "mantra", "mariana", "mike69", "marshal", "mart", "mazda6", "riptide", "robots", "rental", "1107", "1130", "142857", "11001001", "1134", "armored", "alvin", "alec", "allnight", "alright", "amatuers", "bartok", "attorney", "astral", "baboon", "bahamas", "balls1", "bassoon", "hcleeb", "happyman", "granite", "graywolf", "golf1", "gomets", "8vjzus", "7890", "789123", "8uiazp", "5757", "474jdvff", "551scasi", "50cent", "camaro1", "cherry1", "chemist", "final", "firenze", "fishtank", "farrell", "freewill", "glendale", "frogfrog", "gerhardt", "ganesh", "same", "scirocco", "devilman", "doodles", "dinger", "okinawa", "olympic", "nursing", "orpheus", "ohmygod", "paisley", "pallmall", "null", "lounge", "lunchbox", "manhatta", "mahalo", "mandarin", "qwqwqw", "qguvyt", "pxx3eftp", "president", "rambler", "puzzle", "poppy1", "turk182", "trotter", "vdlxuc", "trish", "tugboat", "valiant", "tracie", "uwrl7c", "chris123", "coaster", "cmfnpu", "decimal", "debbie1", "dandy", "daedalus", "dede", "natasha1", "nissan1", "nancy123", "nevermin", "napalm", "newcastle", "boats", "branden", "britt", "bonghit", "hester", "ibxnsm", "hhhhhh1", "holger", "durham", "edmonton", "erwin", "equinox", "dvader", "kimmy", "knulla", "mustafa", "monsoon", "mistral", "morgana", "monica1", "mojave", "month", "monterey", "mrbill", "vkaxcs", "victor1", "wacker", "wendell", "violator", "vfdhif", "wilson1", "wavpzt", "verena", "wildstar", "winter99", "iqzzt580", "jarrod", "imback", "1914", "19741974", "1monkey", "1q2w3e4r5t", "2500", "2255", "blank", "bigshow", "bigbucks", "blackcoc", "zoomer", "wtcacq", "wobble", "xmen", "xjznq5", "yesterda", "yhwnqc", "zzzxxx", "streak", "393939", "2fchbg", "skinhead", "skilled", "shakira", "shaft", "shadow12", "seaside", "sigrid", "sinful", "silicon", "smk7366", "snapshot", "sniper1", "soccer11", "staff", "slap", "smutty", "peepers", "pleasant", "plokij", "pdiddy", "pimpdaddy", "thrust", "terran", "topaz", "today1", "lionhear", "littlema", "lauren1", "lincoln1", "lgnu9d", "laughing", "juneau", "methos", "medina", "merlyn", "rogue1", "romulus", "redshift", "1202", "1469", "12locked", "arizona1", "alfarome", "al9agd", "aol123", "altec", "apollo1", "arse", "baker1", "bbb747", "bach", "axeman", "astro1", "hawthorn", "goodfell", "hawks1", "gstring", "hannes", "8543852", "868686", "4ng62t", "554uzpad", "5401", "567890", "5232", "catfood", "frame", "flow", "fire1", "flipflop", "fffff1", "fozzie", "fluff", "garrison", "fzappa", "furious", "round", "rustydog", "sandberg", "scarab", "satin", "ruger", "samsung1", "destin", "diablo2", "dreamer1", "detectiv", "dominick", "doqvq3", "drywall", "paladin1", "papabear", "offroad", "panasonic", "nyyankee", "luetdi", "qcfmtz", "pyf8ah", "puddles", "privacy", "rainer", "pussyeat", "ralph1", "princeto", "trivia", "trewq", "tri5a3", "advent", "9898", "agyvorc", "clarkie", "coach1", "courier", "contest", "christo", "corinna", "chowder", "concept", "climbing", "cyzkhw", "davidb", "dad2ownu", "days", "daredevi", "de7mdf", "nose", "necklace", "nazgul", "booboo1", "broad", "bonzo", "brenna", "boot", "butch1", "huskers1", "hgfdsa", "hornyman", "elmer", "elektra", "england1", "elodie", "kermit1", "knife", "kaboom", "minute", "modern", "motherfucker", "morten", "mocha", "monday1", "morgoth", "ward", "weewee", "weenie", "walters", "vorlon", "website", "wahoo", "ilovegod", "insider", "jayman", "1911", "1dallas", "1900", "1ranger", "201jedlz", "2501", "1qaz", "bertram", "bignuts", "bigbad", "beebee", "billows", "belize", "bebe", "wvj5np", "wu4etd", "yamaha1", "wrinkle5", "zebra1", "yankee1", "zoomzoom", "09876543", "0311", "?????", "stjabn", "tainted", "3tmnej", "shoot", "skooter", "skelter", "sixteen", "starlite", "smack", "spice1", "stacey1", "smithy", "perrin", "pollux", "peternorth", "pixie", "paulina", "piston", "pick", "poets", "pine", "toons", "tooth", "topspin", "kugm7b", "legends", "jeepjeep", "juliana", "joystick", "junkmail", "jojojojo", "jonboy", "judge", "midland", "meteor", "mccabe", "matter", "mayfair", "meeting", "merrill", "raul", "riches", "reznor", "rockrock", "reboot", "reject", "robyn", "renee1", "roadway", "rasta220", "1411", "1478963", "1019", "archery", "allman", "andyandy", "barks", "bagpuss", "auckland", "gooseman", "hazmat", "gucci", "guns", "grammy", "happydog", "greek", "7kbe9d", "7676", "6bjvpe", "5lyedn", "5858", "5291", "charlie2", "chas", "c7lrwu", "candys", "chateau", "ccccc1", "cardinals", "fear", "fihdfv", "fortune12", "gocats", "gaelic", "fwsadn", "godboy", "gldmeo", "fx3tuo", "fubar1", "garland", "generals", "gforce", "rxmtkp", "rulz", "sairam", "dunhill", "division", "dogggg", "detect", "details", "doll", "drinks", "ozlq6qwm", "ov3ajy", "lockout", "makayla", "macgyver", "mallorca", "loves", "prima", "pvjegu", "qhxbij", "raphael", "prelude1", "totoro", "tusymo", "trousers", "tunnel", "valeria", "tulane", "turtle1", "tracy1", "aerosmit", "abbey1", "address", "clticic", "clueless", "cooper1", "comets", "collect", "corbin", "delpiero", "derick", "cyprus", "dante1", "dave1", "nounours", "neal", "nexus6", "nero", "nogard", "norfolk", "brent1", "booyah", "bootleg", "buckaroo", "bulls23", "bulls1", "booper", "heretic", "icecube", "hellno", "hounds", "honeydew", "hooters1", "hoes", "howie", "hevnm4", "hugohugo", "eighty", "epson", "evangeli", "eeeee1", "eyphed"];
+
+module.exports = CommonPasswords;
 
 /***/ }),
 /* 301 */
@@ -29964,9 +30794,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 "use strict";
 
 
-var Client = __webpack_require__(3);
+var Client = __webpack_require__(4);
 var getLanguage = __webpack_require__(17).get;
-var urlForStatic = __webpack_require__(10).urlForStatic;
+var urlForStatic = __webpack_require__(9).urlForStatic;
 var Pushwoosh = __webpack_require__(493).Pushwoosh;
 
 var BinaryPushwoosh = function () {
@@ -30439,5 +31269,5 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 /* (ignored) */
 
 /***/ })
-],[300]);
+],[298]);
 //# sourceMappingURL=binary.js.map

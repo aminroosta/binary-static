@@ -2,14 +2,14 @@
 <html>
     <head>
         <style id="antiClickjack">body{display:none !important;}</style>
-        <script type="text/javascript">
-            if (self === top) {
-                var antiClickjack = document.getElementById("antiClickjack");
-                antiClickjack.parentNode.removeChild(antiClickjack);
-            } else {
-                top.location = self.location;
-            }
-        </script>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <meta http-equiv="Content-Language" content="DE" />
         <meta name="description" content=" Binary.com ICO, Investieren Sie in die weltweit führende Plattform für den Handel mit binären Optionen" />
@@ -65,8 +65,8 @@
         
     <link rel="icon" sizes="32x32" type="image/png" href="https://style.binary.com/images/favicons/favicon-32x32.png">
 
-        <link href="/binary-static/css/ico.css" rel="stylesheet" />
-        <link href="https://style.binary.com/binary.css" rel="stylesheet" />
+        <link href="/binary-static/css/ico.css?wxhhp7w8" rel="stylesheet" />
+        <link href="https://style.binary.com/binary.css?wxhhp7w8" rel="stylesheet" />
     </head>
 
     <body>
@@ -79,16 +79,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-MZWFF7');</script>
 <!-- End Google Tag Manager -->
-        <div class="navbar-fixed-top" role="navigation">
+        <div class="navbar-fixed-top" role="navigation" id="navigation">
             <div class="">
                 <div class="navbar-header">
                     <span id="toggle-menu" href="button" class="navbar-toggle"></span>
-                    <a class="navbar-brand page-scroll logo" href="#page-top"></a>
+                    <a class="navbar-brand logo" href="/binary-static/de/home.html"></a>
                 </div>
                 <div class="navbar-collapse">
                     <ul class="nav navbar-nav">
                         <li class="invisible">
                             <a href="#page-top"></a>
+                        </li>
+                        <li>
+                            <a href="ico-disclaimer.html">Informationsmemorandum</a>
                         </li>
                         <li>
                             <a class="page-scroll" href="#how-ico-works">Wie die ICO funktioniert</a>
@@ -98,6 +101,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </li>
                         <li>
                             <a class="page-scroll" href="#our-growth">Unser Wachstum</a>
+                        </li>
+                        <li>
+                            <a href="javascript:;" class="faq-btn">FAQ</a>
                         </li>
                     </ul>
                 </div>
@@ -134,6 +140,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                             <input type="hidden" name="meta_message" value="1001" />
                                             <input type="hidden" name="meta_required" value="email" />
                                             <input type="hidden" name="meta_tooltip" value="" />
+                                            <input type="hidden" name="custom language" value="" class="frm-language" />
                                         </div>
                                         <div id="af-form-713141817" class="af-form">
                                             <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
@@ -155,7 +162,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                         document.getElementById('redirect_600c7e6a647457c51ede13e8b4d377e6').value = document.location + '#done';
                                     </script>
                                     <!-- /AWeber Web Form Generator 3.0.1 -->
-                                    <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Thanks for subscribing! Keep an eye on your inbox for the latest updates on our ICO.</p>
+                                    <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Vielen Dank für Ihre Anmeldung! Halten Sie in Ihrem Posteingang Ausschau nach den neuesten Updates auf unserer ICO.</p>
                                 </div>
                             </div>
                         </div>
@@ -204,6 +211,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             </div>
                         </div>
                     </div>
+                    <p class="gr-12">
+                        <a class="button" href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">
+                            <span>Wie man an der Binary.com ICO teilnehmen kann</span>
+                        </a>
+                    </p>
                 </div>
             </div>
             <hr>
@@ -230,13 +242,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
             </div>
 
+            <div id="read-im-section" class="content-section primary-bg-color center-text">
+                <div class="gr-row">
+                    <div class="gr-6 gr-push-3 gr-12-m gr-push-0-m">
+                        <h2 class="content-inverse-color">Lesen Sie den Entwurf des Informationsmemorandums für weitere Informationen über das vorgeschlagene Angebot.</h2>
+                        <button onclick="window.location.href='ico-disclaimer.html'" class="button">Memorandum ansehen</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="faq-section" class="content-section fill-bg-color center-text">
                 <div class="gr-row">
                     <div class="gr-12">
                         <h2>Benötigen Sie weitere Informationen über die ICO?</h2>
                     </div>
                     <div class="gr-12">
-                        <button id="faq-btn" class="button">Lesen Sie unsere FAQ</button>
+                        <button id="faq-btn" class="button faq-btn">Lesen Sie unsere FAQ</button>
                     </div>
                 </div>
             </div>
@@ -340,12 +361,62 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div class="gr-6 gr-12-m">
                         <div class="chart">
-                            <h5 class="chart-heading chart-heading-left">Mitarbeiter</h5>
+                            <h5 class="chart-heading chart-heading-left">Mitarbeiter und Auftragnehmer</h5>
                             <img src="/binary-static/images/ico/images/nec_chart.svg" />
-                            <p>Wir haben über die Jahre an Größe gewonnen &mdash; &mdash; sowohl in Bezug auf Arbeitskräfte wie auch Firmensitze. Wir haben derzeit mehr als 130 Mitarbeiter an fünf Standorten in drei Ländern: Malta, Malaysia und Japan.</p>
+                            <p>Wir haben über die Jahre an Größe gewonnen &mdash; &mdash; sowohl in Bezug auf Arbeitskräfte wie auch Firmensitze. Wir haben derzeit mehr als 130 Mitarbeiter an vier Standorten in drei Ländern: Malta, Malaysia und Japan.</p>
                         </div>
                     </div>
                     <div class="vertical-line"></div>
+                    <p class="chart-note">Hinweis: 2017-Zahlen werden auf die vorläufigen Zahlen von August projiziert</p>
+                </div>
+            </div>
+            <div id="acquired-section" class="content-section center-text acquired-bg">
+                <div class="container">
+                    <div class="gr-row">
+                        <div class="gr-6 gr-push-3 gr-12-m gr-push-0-m">
+                            <h2 class="content-inverse-color">Im August 2017 erwarb die Binary Group Ltd. 100 % der Binary Ltd. für die Zwecke des ICO.</h2>
+                            <a class="button" href="https://ico_documents.binary.com/binary_ltd_2016_annual_report.pdf" target="_blank">
+                                <span>Sehen Sie sich Binary Ltds Jahresbericht 2016 an</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="board-of-directors" class="content-section">
+                <div class="gr-row center-text">
+                    <div class="gr-4">
+                        <h2 class="boxed-heading-center">Vorstand</h2>
+                    </div>
+                </div>
+                <div class="container">
+                    <div class="gr-row">
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/jy@2x.png" />
+                                <h4>Jean-Yves Sireau</h4>
+                                <a href="https://www.linkedin.com/in/jeanyvessireau/" target="_blank"><img class="icon--sm social--linkedin" /></a>
+                                <a href="https://twitter.com/jysireau" target="_blank"><img class="icon--sm social--twitter" /></a>
+                            </div>
+                            <p>Jean-Yves Sireau ist der Gründer des Unternehmens. Ein Unternehmer im Herzen, gründete er sein erstes Unternehmen im Jahr 1991. Auf Grund seiner Leistungen wurde er mit nur 21 Jahren mit dem renommierten Foundation Jaques Dounce Preis für junge Unternehmer von der französischen Premierministerin Edith Bresson, und dem Neuilly Professions Preis vom zukünftigen Präsidenten Nicolas Sarkozy ausgezeichnet. 1993 gründete Jean-Yves Fortitude Fund Management, eine Hedge-Fonds-Management-Gruppe, und 1999 Binary.com (vormals bekannt als Betonmarkets.com).</p>
+                        </div>
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/joanna@2x.png" />
+                                <h4>Joanna Frendo</h4>
+                                <a href="https://www.linkedin.com/in/joanna-frendo-prof-pgdip-fcc-4449975/" target="_blank"><img class="icon--sm social--linkedin" /></a>
+                            </div>
+                            <p>Joanna betreut die verfahrensrechtlichen und regulatorischen Einhaltungen der Gruppe, mit den verschiedenen Lizenz-Einhaltungs-Jurisdiktionen der Binary.com Gruppe, darüber hinaus beaufsichtigt sie eine Reihe von operativen Schlüsselbereichen des Konzerns, wie Zahlungen und Kundenkonto-Management. Joanna ist seit 1999 Mitglied des Institute of Management in Malta, hat ein Diplom in Financial Services Operations and Compliance und ein Professional-Post-Graduate Diploma in Financial Crime Compliance mit der International Compliance Association.</p>
+                        </div>
+                        <div class="gr-4 gr-12-m">
+                            <div class="center-text">
+                                <img class="responsive" src="/binary-static/images/ico/images/jm@2x.png" />
+                                <h4>Jim Mellon</h4>
+                                <a href="https://twitter.com/jimmhk" target="_blank"><img class="icon--sm social--twitter" /></a>
+                                <a href="https://www.youtube.com/results?search_query=jim+mellon" target="_blank"><img class="icon--sm social--youtube" /></a>
+                            </div>
+                            <p>Jim Mellon is a well-known and successful entrepreneur, starting his career in fund management and now including biopharma, property, mining, and information technology amongst his many investments. Jim is listed at number 140 on the Sunday Times Rich List with a net worth of &pound;920 million, and holds directorships in a number of publicly quoted companies. He is the founder and principal shareholder of the Regent Pacific Group, quoted on the Hong Kong Stock Exchange, who were the founding investor of Binary.com in 1999.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="content-section blue-bg">
@@ -451,62 +522,104 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Was ist ein ICO?</h4>
-                            <p>Ein „Initial Coin Offering” (oder kurz „ICO”) ist eine Geldbeschaffungs-Methode, die einer Börseneinführung weitgehend ähnlich ist. Bei einer ICO, werden Kryptowährungen so wie „Colored Coins” oder „Ethereum Token” anstelle von Aktien ausgestellt.</p>
+                            <p>Ein „Initial Coin Offering” (oder „ICO”) ist eine Geldbeschaffungs-Methode, die einer Börseneinführung weitgehend ähnlich ist. Bei einer ICO allerdings, werden Kryptowährungen so wie „Colored Coins” oder „Ethereum Token” an Investoren, anstelle von Aktien ausgestellt.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Warum will Binary.com ein ICO durchführen?</h4>
-                            <p>Binary.com ist ein etabliertes Unternehmen, das in 1999 gegründet wurde. Der Wachstum unseres Unternehmens hat uns, sowie im Fall der meisten erfolgreichen Unternehmen, dazu verleitet eine Börseneinführung zu erwägen. Allerdings glauben wir, dass die Börsen im kommenden Jahrzehnt schrittweise mit Kryptowährungs-Börsen ersetzt werden werden, und Börseneinführungen schrittweise mit ICOs (Initial Coin Offering) ersetzt werden werden. Das ist auch der Grund, weswegen wir uns dazu entschieden haben eine ICO anstelle einer Börseneinführung durchzuführen.</p>
+                            <p>Binary.com wurde 1999 gegründet. Heute ist es ein gut etabliertes und sehr erfolgreiches Unternehmen. Wie viele erfolgreiche Unternehmen, führte das Wachstum unseres Geschäfts uns dazu einen Börsengang zu erwägen.</p>
+                            <p>Wir glauben jedoch, dass traditionelle Börsen im kommenden Jahrzehnt allmählich durch den Blockchain-Austausch, und dass Börseneinführungen allmählich von ICOs ersetzt werden werden. Und zwar deshalb, weil Blockchain Technologien viel leistungsfähiger als die älteren Technologien der traditionellen Börsen sind, was zu niedrigeren Transaktionskosten, zu schnelleren Abwicklungszeiten und zu fehlerfreien unveränderlichen Protokollen führt. Daher haben wir beschlossen, ein ICO anstelle eines Börsengangs durchzuführen.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Wie funktioniert die ICO?</h4>
-                            <p>Binary.com wird eine Anzahl an Blockchain Token für Investoren anbieten. Diese Token können in diversen Formen auf unterschiedlichen Blockchains herausgegeben werden, so wie die „Colored Coins” auf der Bitcoin Blockchain und „ERC20” Token auf der Ethereum Blockchain.</p>
-                            <p>Unabhängig von der Art des Tokens, verschafft Ihnen jeder Token zwei Rechte:</p>
+                            <p>Binary.com wird eine Anzahl an Blockchain Token für Investoren anbieten. Diese Token können in diversen Formen auf unterschiedlichen Blockchains herausgegeben werden, so wie „ERC20” Token auf der Ethereum Blockchain.</p>
+                            <p>Unabhängig von der Art des ausgestellten Tokens, verschafft jeder Token Investoren zwei Rechte:</p>
                             <ol>
-                                <li>Anspruch darauf, Zahlungen, die Dividenden entsprechen, zu erhalten; angezahlt auf Binary Group Ltd. Stammaktien</li>
-                                <li>Das Recht, Token in Stammaktien umzuwandeln</li>
+                                <li>Anspruch darauf, Zahlungen, die Dividenden entsprechen, die auf Binary Group Ltd. Stammaktien ausgezahlt werden, zu erhalten; und</li>
+                                <li>Das Recht, Token in Stammaktien umzuwandeln.</li>
                             </ol>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
+                            <h4>Warum sind die Token in Aktien umwandelbar, anstatt direkt Aktien darzustellen?</h4>
+                            <p>Das Gesellschaftsrecht in den meisten Jurisdiktionen (einschließlich der British Virgin Islands, wo unsere Konzerngesellschaft aufgenommen ist) unterstützt Blockchain-basierte Aktienregister noch nicht.</p>
+                            <p>Daher werden die Token als Derivative Wertpapiere, die in Stammaktien umwandelbar sind, ausgegeben.</p>
+                            <p>Die Token berechtigen den Inhaber dazu, mit Dividenden verbundene Zahlungen zu erhalten, und tragen wirtschaftliche Vorteile, die Stammaktien entsprechen. Somit gäbe es normalerweise keinen praktischen Grund für Tokeninhaber ihre Token in Aktien zu konvertieren.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Wann werden die Token angeboten werden?</h4>
+                            <p>Das genaue Datum des ICO ist noch nicht bestimmt, aber wir zielen das vierte Quartal 2017 an.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
                             <h4>Wie werden die Token angeboten?</h4>
-                            <p>Die Token werden über einen Zeitraum von einem Monat angeboten. Das genaue Datum der ICO ist noch nicht bestimmt, aber wir zielen auf das vierte Quartal 2017 hin. Der ICO-Preis und die Auktions-Methode werden in Kürze bekanntgegeben.</p>
+                            <p>Die Token werden über ein Auktionsverfahren angeboten werden. Sehen Sie unseren <a href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">Guide</a> für die Token-Auktion an.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Wer kann die Token kaufen?</h4>
-                            <p>Token werden nur an Binary.com Kunden angeboten, die ein Echtgeld-Konto haben und die unseren Konto-Authentifizierungsprozess abgeschlossen haben.</p>
+                            <p>Token werden nur an Binary.com Kunden angeboten, die ein Echtgeld-Konto haben und die unseren <a href="https://ico_documents.binary.com/2017_Authentication_Process.pdf" target="_blank">Konto-Authentifizierungs/KYCprozess</a> abgeschlossen haben.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Ist die ICO in allen Ländern erhältlich?</h4>
-                            <p>Die ICO wird in einer Reihe von Ländern auf qualifizierte oder professionelle Investoren, in Übereinstimmung mit den Regeln und Vorschriften von solchen Ländern, beschränkt werden.</p>
+                            <p>Die ICO wird in einer Reihe von Ländern auf qualifizierte oder professionelle Investoren, in Übereinstimmung mit den Regeln und Vorschriften von solchen Ländern, beschränkt werden. Im Besonderen ist die ICO für Investoren in den Vereinigten Staaten nicht zugänglich.</p>
+                            <p>Bitte wählen Sie Ihr Land aus der Dropdown-Liste auf der <a href="/binary-static/de/ico-disclaimer.html">Informationsmemorandum</a> Seite aus, um herauszufinden, ob die ICO in Ihrem Land verfügbar ist, und wenn dies der Fall ist, ob Sie dazu qualifiziert sind, Token zu abonnieren.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
-                            <h4>Wie kann ich Ihre Token kaufen?</h4>
-                            <p>Sie können unsere Token in Verwendung der Gelder in Ihrem Binary.com Konto erwerben. Wir werden bald native <strong>BTC (Bitcoin)</strong> und <strong>ETH (Ethereum)</strong> Konto Einrichtungen einführen, um Ihre Teilnahme am ICO zu ermöglichen.</p>
+                            <h4>Wie kann ich Token kaufen?</h4>
+                            <p>Sie werden Token mit den Geldern in Ihrem %Konto kaufen können. Sie können dazu alle verfügbaren Währungen in unserem <a href="/binary-static/de/cashier/payment_methods.html" target="_blank">Kassensystem</a> verwenden. Wenn Sie sich entscheiden, in einer anderen Währung als in USD zu bieten, wird der Gebotsbetrag auf US-Dollar zum geltenden Wechselkurs zum Zeitpunkt da die Auktion endet, umgerechnet.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Wo werden die Token gelistet werden?</h4>
+                            <p>Binary.com ist eine Vereinbarung eingegangen, die Token an der <a href="https://www.lykke.com" target="_blank">Lykke.com</a> Kryptowährung-Börse zu listen. Lykke ist ein Schweizer Fintech Unternehmen, das einen globalen Blockchain-betriebenen Marktplatz für mit Wertpapier verbundene Token erstellt.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Was sind die Vorteile eines Token-Kaufs?</h4>
+                            <p>Es wird zwei wesentliche Vorteile für den Kauf von Token geben.</p>
+                            <p>Zuerst, werden Tokeninhaber mit Dividenden verbundene Zahlungen, die den von Stammaktien ausgezahlten Dividenden des Unternehmens, entsprechen, erhalten. Daher werden Tokeninhaber den zukünftigen Erfolg des Unternehmens auf die gleiche Weise wie Aktionäre teilen.</p>
+                            <p>Zweitens, werden Tokeninhaber ihre Token frei handeln können. Im Gegensatz dazu sind Stammaktien nicht aufgeführt und können daher nicht an einer Börse gehandelt werden. In diesem Sinne wird es besser sein, in Token als in Stammaktien zu investieren.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Was sind die Risiken eines Token-Kaufs?</h4>
+                            <p>Obwohl Binary.com ein erfolgreiches Unternehmen seit seiner Gründung im Jahr 1999 ist, sollten die Token als eine hochriskante Investition betrachtet werden. Das Binary.com-Geschäft unterliegt einer Reihe von Risiken, die sich negativ auf das Unternehmen auswirken könnten und folglich den zukünftigen Wert der Token beeinflussen könnten. Diese Risiken sind im <a href="/binary-static/de/ico-disclaimer.html">Informationsmemorandum</a> detailliert und sollten sehr sorgfältig geprüft werden, bevor Sie mit einer Investition in Token fortfahren.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Wie kann ich mehr über Binary.com erfahren?</h4>
+                            <p>Um mehr über Binary.com zu erfahren, lesen Sie über unsere <a href="/binary-static/de/group-history.html" target="_blank">Konzerngeschichte</a>, unseren <a href="/binary-static/de/regulation.html" target="_blank">Regulierungsstatus</a> und unsere <a href="/binary-static/de/careers.html" target="_blank">Unternehmenskultur</a>. Sie können auch den <a href="https://blog.binary.com/" target="_blank">Firmen-Blog</a> lesen.</p>
+                            <p>Sie können über die ICO auch auf <a href="https://www.financemagnates.com/binary-options/brokers/exclusive-binary-com-ico-shows-company-profits-surpass-20-mln-2017/" target="_blank">FinanceMagnates</a> und <a href="https://www.leaprate.com/binary-options/broker/binary-com-ico-finances-binary-options-broker/" target="_blank">Leaprate</a> nachlesen.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Wie erfahre ich mehr über ICOs und Kryptowährungen?</h4>
-                            <p>Um mehr über Bitcoin zu erfahren, empfehlen wir, dass Sie <a href='https://blockchain.info/wallet/#/'> ein Bitcoin-Wallet mit Blockchain eröffnen </a> und <a href='https://www.bitcoin.com/buy-bitcoin'> Bitcoins mit einem Ortsamt in Ihrem Land </a> erwerben.</p>
-                            <p>Um mehr über Ethereum zu erfahren, empfehlen wir, dass Sie das <a href='https://metamask.io/'> Metamask-Plugin für Chrome</a> installieren, das Ihnen erlauben wird, Ihre Bitcoin zu Ether zu konvertieren.</p>
-                            <p>Um zu erfahren, wie man Kryptowährungs-Vermögenswerte handelt, empfehlen wir, dass Sie ein Konto mit dem US-amerikanischen Kryptowährungs-Austausch <a href='https://poloniex.com/'> POLONIEX</a> eröffnen.</p>
+                            <p>Um mehr über Bitcoin zu erfahren, empfehlen wir, dass Sie ein Bitcoin-Wallet mit <a href="https://bitcoin-wallet.binary.com/" target="_blank">Binary.coms einfachem Bitcoin-Wallet</a> eröffnen, und Bitcoins mit einem Ortsamt in Ihrem Land erwerben.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Wie kann ich über die Binary.com ICO informiert bleiben?</h4>
                             <p>Melden Sie sich für unsere Mailing-Liste mit dem untenstehenden Formular, für gelegentliche Ankündigungen in Bezug auf die ICO, an.</p>
+                            <p>Sie können auch ein<a href="/binary-static/de/home.html" target="_blank">gratis Konto Binary.com eröffnen</a>.</p>
                         </div>
                     </div>
                 </div>
@@ -529,6 +642,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 <input type="hidden" name="meta_message" value="1001" />
                                 <input type="hidden" name="meta_required" value="email" />
                                 <input type="hidden" name="meta_tooltip" value="" />
+                                <input type="hidden" name="custom language" value="" class="frm-language" />
                             </div>
                             <div id="af-form-713141817" class="af-form">
                                 <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
@@ -550,7 +664,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             document.getElementById('redirect_600c7e6a647457c51ede13e8b4d377e6').value = document.location + '#done';
                         </script>
                         <!-- /AWeber Web Form Generator 3.0.1 -->
-                        <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Thanks for subscribing! Keep an eye on your inbox for the latest updates on our ICO.</p>
+                        <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Vielen Dank für Ihre Anmeldung! Halten Sie in Ihrem Posteingang Ausschau nach den neuesten Updates auf unserer ICO.</p>
                     </div>
                 </div>
             </div>
@@ -561,7 +675,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <p>Eine Investition in die vorgeschlagenen Token wird voraussichtlich ein hohes Risiko beinhalten; es gibt keine Gewähr, dass Tokeninhaber eine Kapitalrückzahlung oder irgendwelche Renditen auf ihre Investition erhalten. Potenzielle Anleger in Token sollten die Risikofaktoren, die im Informationsmemorandum beschrieben sind, sorgfältig berücksichtigen.</p>
             </div>
         </div>
-        <script src="/binary-static/js/ico/ico.js"></script>
+        <script src="/binary-static/js/landing_pages/common.js?wxhhp7w8"></script>
+        <script src="/binary-static/js/landing_pages/ico.js?wxhhp7w8"></script>
     </body>
 
 </html>

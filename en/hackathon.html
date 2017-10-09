@@ -2,14 +2,14 @@
 <html>
     <head>
         <style id="antiClickjack">body{display:none !important;}</style>
-        <script type="text/javascript">
-            if (self === top) {
-                var antiClickjack = document.getElementById("antiClickjack");
-                antiClickjack.parentNode.removeChild(antiClickjack);
-            } else {
-                top.location = self.location;
-            }
-        </script>
+<script type="text/javascript">
+    if (self === top) {
+        var antiClickjack = document.getElementById("antiClickjack");
+        antiClickjack.parentNode.removeChild(antiClickjack);
+    } else {
+        top.location = self.location;
+    }
+</script>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <meta http-equiv="Content-Language" content="EN" />
         <meta name="description" content="Binary.com Hackathon Competition" />
@@ -65,11 +65,11 @@
         
     <link rel="icon" sizes="32x32" type="image/png" href="https://style.binary.com/images/favicons/favicon-32x32.png">
 
-        <link href="/binary-static/css/hackathon.css" rel="stylesheet" />
+        <link href="/binary-static/css/hackathon.css?wxhhp7w8" rel="stylesheet" />
     </head>
 
     <body>
-        <div class="navbar">
+        <div class="navbar" id="navigation">
             <div class="container">
                 <div class="navbar-header">
                     <span id="toggle-menu" href="button" class="navbar-toggle"></span>
@@ -151,11 +151,92 @@
             </div>
         </section>
 
+        
         <section id="agenda">
             <div class="white-bg">
                 <div class="container">
                     <h2>Agenda</h2>
-                    <p>To be confirmed</p>
+                    <h3 class="text-bold">Saturday, 30th September 2017</h3>
+                    <div class="gr-row">
+                        <div class="gr-10 gr-push-1 gr-12-m gr-push-0-m">
+                            <div class="agenda">
+                                <div class="agenda__vertical-line"></div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-register"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">08.30 AM</li>
+                                            <li class="agenda__box__title">Registration of participants and breakfast</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-microphone"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">09.30 AM</li>
+                                            <li class="agenda__box__title">Briefing about the Hackathon challenge and house rules</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-start"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">10.00 AM</li>
+                                            <li class="agenda__box__title">Hackathon begins</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-lunch"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">12.30 PM</li>
+                                            <li class="agenda__box__title">Lunch</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-tea_time"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">05.00 PM</li>
+                                            <li class="agenda__box__title">Hackathon ends and tea time</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-presentation"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">05.30 PM</li>
+                                            <li class="agenda__box__title">Presentation</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-winner"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">06.30 PM</li>
+                                            <li class="agenda__box__title">Announcement of winners</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-photos"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">06.45 PM</li>
+                                            <li class="agenda__box__title">Group photo</li>
+                                        </ul>
+                                    </div>
+                                
+                                    <div class="agenda__box">
+                                        <span class="agenda__box__icon icon-finish"></span>
+                                        <ul>
+                                            <li class="agenda__box__time">07.00 PM</li>
+                                            <li class="agenda__box__title">Event ends</li>
+                                        </ul>
+                                    </div>
+                                
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -229,6 +310,7 @@
             </div>
         </footer>
 
-        <script src="/binary-static/js/hackathon/hackathon.js"></script>
+        <script src="/binary-static/js/landing_pages/common.js?wxhhp7w8"></script>
+        <script src="/binary-static/js/landing_pages/hackathon.js?wxhhp7w8"></script>
     </body>
 </html>
