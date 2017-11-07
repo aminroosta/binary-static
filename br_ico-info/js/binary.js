@@ -3430,7 +3430,10 @@ var Header = function () {
     };
 
     var logoOnClick = function logoOnClick() {
-        BinaryPjax.load(Client.isLoggedIn() ? Url.defaultRedirectUrl() : Url.urlFor(''));
+        var is_ico = Client.get('is_ico_only');
+        var url = Client.isLoggedIn() && !is_ico ? Url.defaultRedirectUrl() // eslint-disable-line no-nested-ternary
+        : Client.isLoggedIn() && is_ico ? Url.urlFor('user/ico-subscribe') : Url.urlFor('');
+        BinaryPjax.load(url);
     };
 
     var loginOnClick = function loginOnClick(e) {
@@ -8482,13 +8485,13 @@ var AccountOpening = function () {
         return false;
     };
 
-    var populateForm = function populateForm(form_id, getValidations, is_financial) {
+    var populateForm = function populateForm(form_id, getValidations, is_financial, is_ico_only) {
         getResidence();
         BinarySocket.send({ states_list: Client.get('residence') }).then(function (data) {
             return handleState(data.states_list, form_id, getValidations);
         });
         generateBirthDate();
-        professionalClient.init(is_financial);
+        professionalClient.init(is_financial, false, is_ico_only);
     };
 
     var getResidence = function getResidence() {
@@ -15054,17 +15057,17 @@ var professionalClient = function () {
         });
     };
 
-    var init = function init(is_financial, is_page) {
+    var init = function init(is_financial, is_page, is_ico_only) {
         is_in_page = !!is_page;
         BinarySocket.wait('landing_company').then(function () {
-            populateProfessionalClient(is_financial);
+            populateProfessionalClient(is_financial, is_ico_only);
         });
     };
 
-    var populateProfessionalClient = function populateProfessionalClient(is_financial) {
+    var populateProfessionalClient = function populateProfessionalClient(is_financial, is_ico_only) {
         var financial_company = State.getResponse('landing_company.financial_company.shortcode');
-        if (!/costarica|maltainvest/.test(financial_company) || // limited to these landing companies
-        financial_company === 'maltainvest' && !is_financial) return; // then it's not upgrading to financial
+        if ((!/costarica|maltainvest/.test(financial_company) || // limited to these landing companies
+        financial_company === 'maltainvest' && !is_financial) && !is_ico_only) return; // then it's not upgrading to financial
 
         var $container = $('#fs_professional');
         var $chk_professional = $container.find('#chk_professional');
@@ -27662,7 +27665,8 @@ var Accounts = function () {
             populateExistingAccounts();
 
             var element_to_show = '#no_new_accounts_wrapper';
-            var upgrade_info = Client.getUpgradeInfo(landing_company);
+            var account_type_ico = Client.get('is_ico_only');
+            var upgrade_info = Client.getUpgradeInfo(landing_company, undefined, account_type_ico);
             if (upgrade_info.can_upgrade) {
                 populateNewAccounts(upgrade_info);
                 element_to_show = '#new_accounts_wrapper';
@@ -27945,10 +27949,13 @@ var ICOInfo = function () {
         $root = void 0,
         chart = void 0;
 
-    var init = function init(ico_info) {
+    var init = function init(website_status) {
         if (is_initialized) return;
 
-        var final_price = +ico_info.final_price;
+        var ico_info = website_status.ico_info;
+        var ico_status = website_status.ico_status;
+
+        var final_price = ico_status !== 'open' ? +ico_info.final_price : 0;
 
         var bucket_size = +ico_info.histogram_bucket_size;
 
@@ -28020,8 +28027,8 @@ var ICOInfo = function () {
 
         getHighstock(function (Highstock) {
             Highcharts = Highstock;
-            BinarySocket.wait('website_status').then(function (response) {
-                init(response.website_status.ico_info);
+            BinarySocket.send({ website_status: 1 }, { forced: true }).then(function (response) {
+                init(response.website_status);
             });
         });
     };
@@ -28914,7 +28921,6 @@ var RealAccOpening = function () {
     var onLoad = function onLoad() {
         if (Client.get('residence')) {
             var account_type_ico = /ico/.test(window.location.hash);
-            console.log(AccountOpening.redirectAccount(account_type_ico));
 
             if (AccountOpening.redirectAccount(account_type_ico)) return;
 
@@ -28922,7 +28928,7 @@ var RealAccOpening = function () {
                 var form_id = '#frm_real';
                 AccountOpening.populateForm(form_id, function () {
                     return AccountOpening.commonValidations().concat(AccountOpening.selectCheckboxValidation(form_id));
-                }, account_type_ico);
+                }, false, account_type_ico);
 
                 FormManager.handleSubmit({
                     form_selector: form_id,
