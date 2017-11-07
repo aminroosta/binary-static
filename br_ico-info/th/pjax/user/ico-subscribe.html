@@ -1,9 +1,31 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin" onclick="window.open('https://www.binary.com/en/ico', '_blank');">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-9 gr-12-p gr-12-m"><p>Binary.com จะเริ่ม ICO ในวันที่ 15 พฤศจิกายน พ.ศ. 2560</p></div>
+                            <div class="gr-3 gr-12-p gr-12-m learn-btn"><a class="button" target="_blank" href="https://www.binary.com/en/ico"><span>เรียนเพิ่มเติม</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>สมัคร ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
 
@@ -59,7 +81,7 @@
                         <button id="btn_submit" type="submit">สถานที่ประมูล</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">บัญชีของท่านมีเงินไม่เพียงพอ</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/br_ico-info/th/cashier/forwardws.html#deposit">top up in cashier</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/br_ico-info/th/cashier/forwardws.html#deposit">เติมเงิน</a></div>
                         </div>
                     </div>
                 </div>
@@ -120,9 +142,14 @@
     <div class="separator-line "></div>
 </div>
     <div id="ico_bids">
-        <h1>Binary.com ICO ราคาเสนอซื้อในการประมูล</h1>
+        <h1>ราคาเสนอซื้อ Binary.com ICO</h1>
         
 
+        <div class="invisible" id="view_ico_info">
+            <a href="/binary-static/br_ico-info/th/user/ico-info.html">
+                <p>View bidding prices histogram</p>
+            </a>
+        </div>
         <div id="portfolio">
             <p class="notice-msg center-text invisible" id="error-msg"></p>
 
@@ -169,7 +196,7 @@
         <p>บันทึก:</p>
         <ol>
             <li>การยกเลิกการเสนอซื้อทุกครั้งจะมีค่าธรรมเนียมการยกเลิก 2%</li>
-            <li>Unsuccessful bidders will receive a full refund.</li>
+            <li>ผู้ประมูลไม่สำเร็จจะได้รับเงินคืนเต็มจำนวน</li>
         </ol>
     </div>
     <a href="#_" class="no-ajax img-lightbox popup" id="auction">
@@ -177,19 +204,24 @@
             <img class="responsive ico-auction" />
         </div>
     </a>
-    <div id="ico_info">
-        <div class="barChart"></div>
-        <div class="y-label invisible">
-            <div class='arrow-left'></div>
-            <div>Total Bids In USD</div>
-            <div class='arrow-right'></div>
-        </div>
-        <div class="x-label invisible">
-            <div class='arrow-left'></div>
-            <div>Bid Price Per Token ($USD)</div>
-            <div class='arrow-right'></div>
-        </div>
-        <div class='caption'>Bidding Prices</div>
-        <div class="loading"></div>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Please confirm that you are a <a href='/binary-static/br_ico-info/th/user/settings/professional.html'>professional trader</a> to proceed.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Please select your CR account to proceed.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p>This feature is only available to CR clients. Please upgrade to proceed.</p>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Upgrade</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
     </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
 </div>

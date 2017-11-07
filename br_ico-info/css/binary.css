@@ -466,6 +466,64 @@ button .barspinner.white {
   background-color: #14602B;
 }
 
+#ico_banner_container .ico-banner {
+  cursor: pointer;
+  border: 1px solid #F2F2F2;
+  background: url("../images/ico/banner/white_background.png") 100% no-repeat/cover;
+}
+#ico_banner_container .ico-banner .ico-box {
+  position: relative;
+}
+#ico_banner_container .ico-banner .ico-box div:nth-child(1) {
+  padding-left: 0;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column {
+  min-height: 80px;
+  -ms-flex-pack: center;
+      justify-content: center;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column .learn-btn {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+      justify-content: center;
+  padding-top: 10px;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a span {
+  font-size: 1rem;
+}
+#ico_banner_container .ico-banner .ico-box .left-bg {
+  background: url("../images/ico/banner/image_left_area.png") 100% no-repeat/cover;
+}
+#ico_banner_container .ico-banner .ico-box p {
+  text-transform: uppercase;
+  font-size: 1.3225rem;
+  font-weight: 400;
+  color: #2A3052;
+}
+#ico_banner_container .ico-banner .ico-box .close-btn {
+  content: url("../images/ico/banner/close_icon.svg");
+  width: 15px;
+  cursor: pointer;
+  padding: 5px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#ico_banner_container .ico-banner.top-margin {
+  margin-top: 2.5em;
+}
+#ico_banner_container .ico-banner.bottom-margin {
+  margin-bottom: 2em;
+}
+#ico_banner_container.ico-banner-container {
+  margin: 0 auto;
+  max-width: 960px;
+  padding-right: 10px;
+  padding-left: 10px;
+  box-sizing: border-box;
+}
+
 .days_to_crack {
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -486,6 +544,21 @@ ul.bullet.gr-row > li {
 
 .pull-requests-content {
   margin-bottom: 0 !important;
+}
+
+.toggle-arrow:after {
+  content: '';
+  display: inline-block;
+  margin-left: 7px;
+  border-left: 4px dashed;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+.toggle-arrow.open:after {
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-bottom: 0;
 }
 
 *, *:after, *:before {
@@ -4676,14 +4749,6 @@ body #not_authenticated_financial ul.checked > li {
   position: relative;
   margin-top: 50px;
 }
-#ico_info .caption {
-  color: #fff;
-  background-color: #2A3052;
-  position: absolute;
-  top: -40px;
-  padding: 10px;
-  font-size: 20px;
-}
 #ico_info .barChart {
   padding-left: 14px;
   padding-bottom: 14px;
@@ -5050,6 +5115,25 @@ body.ZH_TW .google-play-badge {
   .table-container {
     overflow-x: auto;
   }
+
+  #ico_banner_container .ico-banner .ico-box div:nth-child(1) {
+    padding-left: unset;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column {
+    min-height: unset;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn {
+    padding-top: unset;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a {
+    text-align: center;
+  }
+  #ico_banner_container .ico-banner .ico-box p {
+    text-align: center;
+    font-size: 1.15rem;
+  }
 }
 @media screen and (max-width: 480px) {
   #sell_popup_container {
@@ -5076,6 +5160,14 @@ body.ZH_TW .google-play-badge {
 
   .home-jp-content #banner {
     background-position-x: 15%;
+  }
+
+  #ico_banner_container .ico-banner .ico-box p {
+    padding-top: 10px;
+    margin-bottom: 10px;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a {
+    margin-bottom: 1em;
   }
 }
 @media print {
