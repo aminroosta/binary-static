@@ -1,7 +1,7 @@
 <div id="content" class="ico-subscribe-content">
             
                 <div id="ico_banner_container"  class="ico-banner-container">
-    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin" onclick="window.open('https://www.binary.com/en/ico', '_blank');">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin" onclick="window.open('/binary-static/br_ico-info/zh_cn/ico.html', '_blank');">
         <div class="gr-row gr-centered">
             <div class="gr-12">
                 <div class="gr-row gr-no-gutter ico-box">
@@ -9,7 +9,7 @@
                     <div class="gr-9 gr-padding-10 ico-column">
                         <div class="gr-row gr-no-gutter">
                             <div class="gr-9 gr-12-p gr-12-m"><p>Binary.com ICO 于2017年11月15日开始</p></div>
-                            <div class="gr-3 gr-12-p gr-12-m learn-btn"><a class="button" target="_blank" href="https://www.binary.com/en/ico"><span>了解更多</span></a></div>
+                            <div class="gr-3 gr-12-p gr-12-m learn-btn"><a class="button" target="_blank" href="/binary-static/br_ico-info/zh_cn/ico.html"><span>了解更多</span></a></div>
                         </div>
                     </div>
                     <div id="close_ico_banner" class="close-btn"></div>
@@ -142,14 +142,19 @@
     <div class="separator-line "></div>
 </div>
     <div id="ico_bids">
-        <h1>Binary.com ICO 拍卖出价</h1>
+        <h1>
+            <span>Binary.com ICO 拍卖出价</span>
+            <div class="invisible" id="view_ico_info">
+                <a class="button" href="/binary-static/br_ico-info/zh_cn/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/br_ico-info/images/ico/icons/bar_chart.svg">
+                        View bidding prices histogram
+                    </span>
+                </a>
+            </div>
+        </h1>
         
 
-        <div class="invisible" id="view_ico_info">
-            <a href="/binary-static/br_ico-info/zh_cn/user/ico-info.html">
-                <p>View bidding prices histogram</p>
-            </a>
-        </div>
         <div id="portfolio">
             <p class="notice-msg center-text invisible" id="error-msg"></p>
 
@@ -207,21 +212,21 @@
 </div>
 
 <div class="invisible" id="ico_professional_message">
-    <p>Please confirm that you are a <a href='/binary-static/br_ico-info/zh_cn/user/settings/professional.html'>professional trader</a> to proceed.</p>
+    <p>请确认您是<a href='/binary-static/br_ico-info/zh_cn/user/settings/professional.html'>专业交易者</a>以便继续操作。</p>
 </div>
 
 <div class="invisible" id="ico_account_message">
-    <p>Please select your CR account to proceed.</p>
+    <p>请选择您的 CR 账户继续操作。</p>
 </div>
 
 <div class="invisible" id="ico_new_account_message">
-    <p>This feature is only available to CR clients. Please upgrade to proceed.</p>
+    <p>此功能仅 CR 客户可用。请升级以继续。</p>
     <div class="center-text">
-        <a href="javascript:;" class="button" id="ico_new_account"><span>Upgrade</span></a>
+        <a href="javascript:;" class="button" id="ico_new_account"><span>升级</span></a>
         <p class="error-msg invisible" id="new_account_error"></p>
     </div>
 </div>
 
 <div class="invisible" id="feature_not_allowed">
-    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
+    <p class="center-text notice-msg">您的管辖权内无法使用此功能。</p>
 </div>

@@ -1905,9 +1905,11 @@ var BinaryPjax = function () {
     };
 
     var handlePopstate = function handlePopstate(e) {
-        var url = e.state && e.state.url;
+        var url = e.state && e.state.url ? e.state.url : !window.location.hash ? window.location.href : '';
         if (url) {
             processUrl(url, true);
+        } else {
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
         return false;
     };
@@ -15043,17 +15045,18 @@ var BinarySocket = __webpack_require__(3);
 var BinaryPjax = __webpack_require__(12);
 var State = __webpack_require__(6).State;
 var getPropertyValue = __webpack_require__(1).getPropertyValue;
+var Client = __webpack_require__(4);
 
 var professionalClient = function () {
     var is_in_page = false;
 
     var onLoad = function onLoad() {
         BinarySocket.wait('get_account_status').then(function (response) {
-            if (/professional_requested/.test(getPropertyValue(response, ['get_account_status', 'status']))) {
+            if (/professional_requested|professional/.test(getPropertyValue(response, ['get_account_status', 'status']))) {
                 BinaryPjax.loadPreviousUrl();
                 return;
             }
-            init(true, true);
+            init(Client.isAccountOfType('financial'), true, Client.get('is_ico_only'));
         });
     };
 
@@ -15067,8 +15070,13 @@ var professionalClient = function () {
     var populateProfessionalClient = function populateProfessionalClient(is_financial, is_ico_only) {
         var financial_company = State.getResponse('landing_company.financial_company.shortcode');
         if ((!/costarica|maltainvest/.test(financial_company) || // limited to these landing companies
-        financial_company === 'maltainvest' && !is_financial) && !is_ico_only) return; // then it's not upgrading to financial
-
+        financial_company === 'maltainvest' && !is_financial) && !is_ico_only) {
+            // then it's not upgrading to financial
+            if (is_in_page) {
+                BinaryPjax.loadPreviousUrl();
+            }
+            return;
+        }
         var $container = $('#fs_professional');
         var $chk_professional = $container.find('#chk_professional');
         var $info = $container.find('#professional_info');
@@ -26041,6 +26049,7 @@ var BinarySocket = __webpack_require__(3);
 var Client = __webpack_require__(4);
 var getPropertyValue = __webpack_require__(1).getPropertyValue;
 var jpClient = __webpack_require__(10).jpClient;
+var State = __webpack_require__(6).State;
 
 var Settings = function () {
     var onLoad = function onLoad() {
@@ -26060,8 +26069,10 @@ var Settings = function () {
                 $('#change_password').setVisibility(1);
             }
 
+            var financial_company = State.getResponse('landing_company.financial_company.shortcode');
+            var is_ico_only = Client.get('is_ico_only');
             // Professional Client menu should only be shown to MF and CR accounts.
-            if (!is_jp && !/professional_requested/.test(status) && !Client.isAccountOfType('gaming')) {
+            if (!is_jp && !/professional_requested|professional/.test(status) && (Client.isAccountOfType('financial') || /costarica/.test(financial_company) && Client.isAccountOfType('real') || is_ico_only)) {
                 $('#professional_client').setVisibility(1);
             }
 
@@ -27967,7 +27978,7 @@ var ICOInfo = function () {
         var allValues = [];
         if (keys.length > 0) {
             var max = Math.min(keys[keys.length - 1] + 1, MAX_BID_PRICE);
-            var min = Math.max(keys[0] - 1, 1);
+            var min = final_price ? Math.max(Math.min(keys[0], final_price) - 1, 1) : Math.max(keys[0] - 1, 1);
             for (var key = max - bucket_size; key >= min; key -= bucket_size) {
                 key = +key.toFixed(2);
                 var value = keys.indexOf(key) !== -1 ? ico_info.histogram['' + key] : 0;
@@ -27981,7 +27992,7 @@ var ICOInfo = function () {
             }
 
             var aboveMaxPrice = keys.filter(function (key) {
-                return key > MAX_BID_PRICE;
+                return key >= MAX_BID_PRICE;
             }).map(function (key) {
                 return ico_info.histogram['' + key];
             }).reduce(function (a, b) {
@@ -28013,6 +28024,7 @@ var ICOInfo = function () {
             chart = Highcharts.chart($chart[0], config);
             is_initialized = true;
         } else {
+            $('#no_bids_to_show').setVisibility(1);
             $root.hide();
         }
     };
@@ -28368,7 +28380,7 @@ var ICOSubscribe = function () {
         $('#view_ico_info').setVisibility(1);
         var to_show = 'feature_not_allowed';
         if (Client.get('landing_company_shortcode') === 'costarica') {
-            if (/au|ca|ch|nz|sg/.test(Client.get('residence')) && !/professional_requested/.test(State.getResponse('get_account_status.status'))) {
+            if (/au|ca|ch|nz|sg/.test(Client.get('residence')) && !/professional_requested|professional/.test(State.getResponse('get_account_status.status'))) {
                 to_show = 'ico_professional_message';
             } else {
                 to_show = 'ico_subscribe';
