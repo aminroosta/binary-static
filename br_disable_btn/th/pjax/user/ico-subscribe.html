@@ -211,6 +211,22 @@
 
 <div class="invisible" id="ico_new_account_message">
     <p>This feature is only available to CR clients. Please upgrade to proceed.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                เหตุผลในการเปิดบัญชี
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">โปรดระบุ</option>
+        <option value="Speculative">เก็งกำไร</option>
+        <option value="Income Earning">การรับรายได้</option>
+        <option value="Hedging">เฮดจิ้ง</option>
+                        </select>
+            
+        </div>
+    </div>
     <div class="center-text">
         <a href="javascript:;" class="button" id="ico_new_account"><span>Upgrade</span></a>
         <p class="error-msg invisible" id="new_account_error"></p>

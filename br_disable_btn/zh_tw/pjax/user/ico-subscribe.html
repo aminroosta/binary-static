@@ -211,6 +211,22 @@
 
 <div class="invisible" id="ico_new_account_message">
     <p>此功能僅 CR 客戶可用。請升級以繼續。</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                開立帳戶的原因
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">請選擇</option>
+        <option value="Speculative">投機</option>
+        <option value="Income Earning">賺取收入</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
     <div class="center-text">
         <a href="javascript:;" class="button" id="ico_new_account"><span>升級</span></a>
         <p class="error-msg invisible" id="new_account_error"></p>

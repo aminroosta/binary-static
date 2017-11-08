@@ -4918,6 +4918,13 @@ body.ZH_CN .contact-content .border-bottom, body.ZH_TW .contact-content .border-
   min-height: 215px;
 }
 
+body.PL a, body.PL button, body.PL .button, body.PL span, body.PL input {
+  text-transform: initial !important;
+}
+body.PL h1, body.PL h2, body.PL h3, body.PL h4, body.PL h5, body.PL h6 {
+  text-transform: initial !important;
+}
+
 body.EN .app-store-badge {
   background-image: url("../images/pages/applications/appstore_en.svg");
 }
