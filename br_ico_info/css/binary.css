@@ -466,6 +466,64 @@ button .barspinner.white {
   background-color: #14602B;
 }
 
+#ico_banner_container .ico-banner {
+  cursor: pointer;
+  border: 1px solid #F2F2F2;
+  background: no-repeat 100%/cover url("../images/ico/banner/white_background.png");
+}
+#ico_banner_container .ico-banner .ico-box {
+  position: relative;
+}
+#ico_banner_container .ico-banner .ico-box div:nth-child(1) {
+  padding-left: 0;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column {
+  min-height: 80px;
+  -ms-flex-pack: center;
+      justify-content: center;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column .learn-btn {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+      justify-content: center;
+  padding-top: 10px;
+}
+#ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a span {
+  font-size: 1rem;
+}
+#ico_banner_container .ico-banner .ico-box .left-bg {
+  background: no-repeat 100%/cover url("../images/ico/banner/image_left_area.png");
+}
+#ico_banner_container .ico-banner .ico-box p {
+  text-transform: uppercase;
+  font-size: 1.3225rem;
+  font-weight: 400;
+  color: #2A3052;
+}
+#ico_banner_container .ico-banner .ico-box .close-btn:after {
+  content: '';
+  background: no-repeat 100%/cover url("../images/ico/banner/close_icon.svg");
+  cursor: pointer;
+  padding: 10px;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+#ico_banner_container .ico-banner.top-margin {
+  margin-top: 2.5em;
+}
+#ico_banner_container .ico-banner.bottom-margin {
+  margin-bottom: 2em;
+}
+#ico_banner_container.ico-banner-container {
+  margin: 0 auto;
+  max-width: 960px;
+  padding-right: 10px;
+  padding-left: 10px;
+  box-sizing: border-box;
+}
+
 .days_to_crack {
   width: -webkit-fit-content;
   width: -moz-fit-content;
@@ -486,6 +544,21 @@ ul.bullet.gr-row > li {
 
 .pull-requests-content {
   margin-bottom: 0 !important;
+}
+
+.toggle-arrow:after {
+  content: '';
+  display: inline-block;
+  margin-left: 7px;
+  border-left: 4px dashed;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+}
+.toggle-arrow.open:after {
+  border-top: 4px dashed;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-bottom: 0;
 }
 
 *, *:after, *:before {
@@ -951,6 +1024,62 @@ a.previous-wrapper:hover {
 
 #trading_socket_container #notifications_wrapper .notice-msg, #trading_socket_container_beta #notifications_wrapper .notice-msg {
   margin-bottom: 10px;
+}
+
+/**
+ * Image lightbox.
+ * Example:
+ * Create an element like:
+ * <a href="#<target-name>" class="no-ajax"> <img src=".."></a> //Clicking this element will trigger the lightbox
+ * <a href="#_" class="img-lightbox no-ajax" id="<target-name>">
+ *  <div>
+ *      <img src="..">
+ *  </div>
+ * </a>
+ */
+.img-lightbox {
+  /** Default lightbox to hidden */
+  visibility: hidden;
+  /** Position and style */
+  position: fixed;
+  z-index: 999;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.3s;
+}
+.img-lightbox.thumbnail {
+  max-width: 40%;
+  max-height: 40%;
+}
+.img-lightbox > div {
+  max-width: 0%;
+  max-height: 0%;
+  background: #fff;
+  border-radius: 5px;
+  text-align: center;
+  margin: 5% auto;
+  box-shadow: -1px 1px 55px 0.5px #44484c;
+}
+.img-lightbox > div img {
+  width: 90%;
+  height: 90%;
+  padding: 20px;
+}
+.img-lightbox.popup > div {
+  transition: visibility 0s 0.3s, max-width 0.3s 0.5s, max-height 0.3s 0.5s;
+}
+.img-lightbox:target {
+  visibility: visible;
+  outline: none;
+  opacity: 1;
+}
+.img-lightbox:target > div {
+  max-width: 80%;
+  max-height: 80%;
 }
 
 /* pages */
@@ -2829,8 +2958,20 @@ body #not_authenticated_financial ul.checked > li {
 .ico-subscribe-content #frm_ico_bid .inactive:hover {
   cursor: auto;
 }
+.ico-subscribe-content .timer .text {
+  font-size: 0.7561436673rem;
+  font-weight: bold;
+}
 .ico-subscribe-content #portfolio th.details {
   width: auto;
+}
+.ico-subscribe-content #view_ico_info > a > span {
+  background-color: #E98024;
+  font-size: 16px;
+}
+.ico-subscribe-content #cancel_bid_confirmation {
+  left: 0;
+  top: 0;
 }
 
 .liquidity-solutions-content .box {
@@ -2898,6 +3039,37 @@ body #not_authenticated_financial ul.checked > li {
 #client-limits img {
   margin-left: 5px;
   margin-bottom: 3px;
+}
+
+.authenticate-content .fields > .gr-row > div > .button {
+  display: block;
+  text-align: center;
+  background: #F2F2F2;
+  padding: 5px 0;
+  border-radius: 3px;
+  width: 100%;
+}
+.authenticate-content .fields > .gr-row > div > .button > span {
+  position: relative;
+  top: 2px;
+  padding: 0;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  width: 1em;
+  height: 1em;
+  margin-left: 10px;
+}
+.authenticate-content .fields > .gr-row > div > .button > span.add {
+  background: url("../images/pages/authenticate/add.svg") no-repeat;
+}
+.authenticate-content .fields > .gr-row > div > .button > span.remove {
+  background: url("../images/pages/authenticate/remove.svg") no-repeat;
+}
+.authenticate-content .fields > .gr-row > div > input[type=file] {
+  display: none;
+}
+.authenticate-content .center-text .button .barspinner {
+  margin: 0 auto;
 }
 
 .timeline {
@@ -4581,6 +4753,75 @@ body #not_authenticated_financial ul.checked > li {
   background-image: url("../images/pages/binary_in_numbers/icons/ic-num-employees.svg");
 }
 
+#ico_info {
+  position: relative;
+  margin-top: 50px;
+}
+#ico_info .barChart {
+  padding-left: 14px;
+  padding-bottom: 14px;
+  box-sizing: border-box;
+}
+#ico_info .y-label {
+  transform: rotate(90deg);
+  transform-origin: top left;
+  top: 0;
+  left: 14px;
+  width: 400px;
+}
+#ico_info .x-label {
+  width: 100%;
+  left: 0;
+  bottom: 7px;
+}
+#ico_info .y-label, #ico_info .x-label {
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-direction: row;
+      flex-direction: row;
+  -ms-flex-align: center;
+      align-items: center;
+  font-size: 13px;
+  color: #2A3052;
+  position: absolute;
+  box-sizing: border-box;
+  padding: 0 30px;
+}
+#ico_info .y-label div:nth-child(2), #ico_info .x-label div:nth-child(2) {
+  text-align: center;
+  -ms-flex-positive: 0;
+      flex-grow: 0;
+  margin: 0 10px;
+}
+#ico_info .y-label div:nth-child(2n + 1), #ico_info .x-label div:nth-child(2n + 1) {
+  -ms-flex-positive: 1;
+      flex-grow: 1;
+  height: 2px;
+  box-sizing: border-box;
+  background: #C2C2C2;
+  margin: 0;
+  padding: 0;
+}
+#ico_info .arrow-left, #ico_info .arrow-right {
+  position: relative;
+}
+#ico_info .arrow-left:after, #ico_info .arrow-right:after {
+  content: ' ';
+  position: absolute;
+  background-image: url("../images/ico/images/arrow-head.svg");
+  background-size: 10px 10px;
+  width: 10px;
+  height: 10px;
+  top: -4px;
+}
+#ico_info .arrow-right:after {
+  right: -3px;
+}
+#ico_info .arrow-left:after {
+  left: -3px;
+  transform: rotate(180deg);
+}
+
 /* Language based rules */
 /* Specific rules for languages */
 body .calls_recording {
@@ -4754,6 +4995,13 @@ body.ZH_CN .contact-content .border-bottom, body.ZH_TW .contact-content .border-
   min-height: 215px;
 }
 
+body.PL a, body.PL button, body.PL .button, body.PL span, body.PL input {
+  text-transform: initial !important;
+}
+body.PL h1, body.PL h2, body.PL h3, body.PL h4, body.PL h5, body.PL h6 {
+  text-transform: initial !important;
+}
+
 body.EN .app-store-badge {
   background-image: url("../images/pages/applications/appstore_en.svg");
 }
@@ -4882,6 +5130,25 @@ body.ZH_TW .google-play-badge {
   .table-container {
     overflow-x: auto;
   }
+
+  #ico_banner_container .ico-banner .ico-box div:nth-child(1) {
+    padding-left: unset;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column {
+    min-height: unset;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn {
+    padding-top: unset;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a {
+    text-align: center;
+  }
+  #ico_banner_container .ico-banner .ico-box p {
+    text-align: center;
+    font-size: 1.15rem;
+  }
 }
 @media screen and (max-width: 480px) {
   #sell_popup_container {
@@ -4909,10 +5176,23 @@ body.ZH_TW .google-play-badge {
   .home-jp-content #banner {
     background-position-x: 15%;
   }
+
+  #ico_banner_container .ico-banner .ico-box p {
+    padding-top: 10px;
+    margin-bottom: 10px;
+  }
+  #ico_banner_container .ico-banner .ico-box .ico-column .learn-btn a {
+    margin-bottom: 1em;
+  }
 }
 @media print {
   .no-print, .no-print * {
     display: none !important;
+  }
+}
+@media screen and (max-width: 1024px) and (min-width: 769px) {
+  .center-text-t, .center-text-t div:first-child label {
+    text-align: center;
   }
 }
 /* external stylesheets

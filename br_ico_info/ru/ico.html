@@ -39,8 +39,8 @@
         <link rel="icon" sizes="16x16" type="image/png" href="/binary-static/br_ico_info/images/favicons/favicon-16x16.png" />  
         <link rel="icon" sizes="32x32" type="image/png" href="/binary-static/br_ico_info/images/favicons/favicon-32x32.png" />
 
-        <link href="/binary-static/br_ico_info/css/ico.css?dfzkk7rn" rel="stylesheet" />
-        <link href="https://style.binary.com/binary.css?dfzkk7rn" rel="stylesheet" />
+        <link href="/binary-static/br_ico_info/css/ico.css?5srbkvqz" rel="stylesheet" />
+        <link href="https://style.binary.com/binary.css?5srbkvqz" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/tiny-slider.css" rel="stylesheet">
     </head>
 
@@ -60,12 +60,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <a class="navbar-brand logo" href="/binary-static/br_ico_info/ru/home.html"></a>
             </div>
             <div class="navbar-collapse">
-                <ul class="nav navbar-nav">
+                <ul class="nav navbar-nav invisible">
                     <li class="invisible">
                         <a href="#page-top"></a>
                     </li>
                     <li>
-                        <a href="ico-disclaimer.html">Информационный меморандум</a>
+                        <a href="/binary-static/br_ico_info/ru/ico-disclaimer.html">Информационный меморандум</a>
                     </li>
                     <li>
                         <a class="page-scroll" href="#how-ico-works">Как работает ICO</a>
@@ -78,6 +78,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </li>
                     <li>
                         <a class="faq-btn" href="#faq">Частые вопросы</a>
+                    </li>
+                    <li id="language">
+                        <ul class="language-dropdown invisible">
+                            <a id="lang" class="selected" href="javascript:;">
+                                <span class="world"></span>
+                                <span id="selected-lang"></span>
+                                <span class="nav-caret"></span>
+                            </a>
+                            <li class="en">English</li>
+                            <li class="de">Deutsch</li>
+                            <li class="es">Español</li>
+                            <li class="fr">Français</li>
+                            <li class="id">Indonesia</li>
+                            <li class="it">Italiano</li>
+                            <!--li class="ja">日本語</li-->
+                            <li class="pl">Polish</li>
+                            <li class="pt">Português</li>
+                            <li class="ru">Русский</li>
+                            <li class="th">Thai</li>
+                            <li class="vi">Tiếng Việt</li>
+                            <li class="zh_cn">简体中文</li>
+                            <li class="zh_tw">繁體中文</li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -97,99 +120,122 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div id="coming-soon" class="content-section center-text transparent-dark-blue-bg">
                         <div class="gr-row">
-                            <div class="gr-12">
-                                <div id="countdown_container" class="invisible">
-                                    <h3 class="content-inverse-color">Token Sale Begins In</h3>
-                                    <div id="countdown">
-                                        
-                                        
-                                        
-                                        <span class="cd-item" id="cd_days">
-                                            <span class="arcs">
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_cover"></span>
-                                            </span>
-                                            <span class="cd-value"></span>
-                                            <span class="cd-label">Days</span>
-                                        </span>
-                                        
-                                        <span class="cd-item" id="cd_hours">
-                                            <span class="arcs">
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_cover"></span>
-                                            </span>
-                                            <span class="cd-value"></span>
-                                            <span class="cd-label">Hours</span>
-                                        </span>
-                                        
-                                        <span class="cd-item" id="cd_minutes">
-                                            <span class="arcs">
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_cover"></span>
-                                            </span>
-                                            <span class="cd-value"></span>
-                                            <span class="cd-label">Minutes</span>
-                                        </span>
-                                        
-                                        <span class="cd-item" id="cd_seconds">
-                                            <span class="arcs">
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_q"></span>
-                                                <span class="arc_cover"></span>
-                                            </span>
-                                            <span class="cd-value"></span>
-                                            <span class="cd-label">Seconds</span>
-                                        </span>
-                                        
-                                    </div>
+                            <div id="status_loading"><div class="barspinner white">
+    
+    <div class="rect1"></div>
+    
+    <div class="rect2"></div>
+    
+    <div class="rect3"></div>
+    
+    <div class="rect4"></div>
+    
+    <div class="rect5"></div>
+    
+</div></div>
+                            <div id="status_container" class="gr-12 invisible">
+                                <div class="status-toggle status-before-start">
+                                    <h3 class="content-inverse-color">Продажа токенов начнётся через</h3>
                                 </div>
-                                <p class="intro-subtext">Subscribe to our mailing list for exclusive updates on the ICO.</p>
-                                <div class="form-container">
-                                    <!-- AWeber Web Form Generator 3.0.1 -->
-                                    <form method="post" class="af-form-wrapper" accept-charset="UTF-8" action="https://www.aweber.com/scripts/addlead.pl">
-                                        <div style="display: none;">
-                                            <input type="hidden" name="meta_web_form_id" value="713141817" />
-                                            <input type="hidden" name="meta_split_id" value="" />
-                                            <input type="hidden" name="listname" value="awlist4685103" />
-                                            <input type="hidden" name="redirect" value="" id="redirect_600c7e6a647457c51ede13e8b4d377e6" />
-                                            <input type="hidden" name="meta_adtracking" value="Binary_ICO" />
-                                            <input type="hidden" name="meta_message" value="1001" />
-                                            <input type="hidden" name="meta_required" value="email" />
-                                            <input type="hidden" name="meta_tooltip" value="" />
-                                            <input type="hidden" name="custom language" value="" class="frm-language" />
-                                        </div>
-                                        <div id="af-form-713141817" class="af-form">
-                                            <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
-                                                <div class="af-element gr-row">
-                                                    <div class="gr-8 gr-12-m">
-                                                        <input class="text" placeholder="Enter your email" id="awf_field-90867273" type="text" name="email" value="" tabindex="500" onfocus=" if (this.value == '') { this.value = ''; }" onblur="if (this.value == '') { this.value='';} " />
+                                <div class="status-toggle status-started">
+                                    <h3 class="content-inverse-color">Продажа токенов Binary.com началась</h3>
+                                    <p class="intro-subtext">15 ноября – 25 декабря 2017</p>
+                                    <p class="intro-text">Продажа токенов оканчивается</p>
+                                </div>
+                                <div class="status-toggle status-ended">
+                                    <h3 class="content-inverse-color">Продажа токенов Binary.com закончилась</h3>
+                                    <p class="intro-subtext">See your winning bids and claim your tokens</p>
+                                </div>
+                                <div class="status-toggle status-before-start status-started" id="countdown">
+                                    
+                                    
+                                    
+                                    <span class="cd-item" id="cd_days">
+                                        <span class="arcs">
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_cover"></span>
+                                        </span>
+                                        <span class="cd-value"></span>
+                                        <span class="cd-label">Дней</span>
+                                    </span>
+                                    
+                                    <span class="cd-item" id="cd_hours">
+                                        <span class="arcs">
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_cover"></span>
+                                        </span>
+                                        <span class="cd-value"></span>
+                                        <span class="cd-label">Часов</span>
+                                    </span>
+                                    
+                                    <span class="cd-item" id="cd_minutes">
+                                        <span class="arcs">
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_cover"></span>
+                                        </span>
+                                        <span class="cd-value"></span>
+                                        <span class="cd-label">Минут</span>
+                                    </span>
+                                    
+                                    <span class="cd-item" id="cd_seconds">
+                                        <span class="arcs">
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_q"></span>
+                                            <span class="arc_cover"></span>
+                                        </span>
+                                        <span class="cd-value"></span>
+                                        <span class="cd-label">Секунд</span>
+                                    </span>
+                                    
+                                </div>
+                                <div class="status-toggle status-before-start">
+                                </div>
+                                <div class="status-toggle status-started">
+                                    <a class="button" href="/binary-static/br_ico_info/ru/user/ico-subscribe.html"><span>Поучаствуйте в продаже токенов</span></a>
+                                </div>
+                                <div class="status-toggle status-ended">
+                                    <a class="button" href="/binary-static/br_ico_info/ru/user/ico-subscribe.html"><span>Перейти по ссылке</span></a>
+                                </div>
+                                <div id="sign-up-section">
+                                    <div class="signup-desc">
+                                        <p>Investors need to open a Binary.com real money account to take part in the ICO.</p>
+                                        <p>Sign up now for free.</p>
+                                    </div>
+                                    <div class="signup-container gr-9 gr-12-p gr-12-m gr-centered">
+                                        <form id="frm_verify_email">
+                                            <div class="gr-row gr-row-align-center">
+                                                <div class="signup-box gr-8 gr-10-p gr-12-m gr-no-gutter secondary-bg-color">
+                                                    <div class="gr-row gr-padding-10" id="signup">
+                                                        <div class="gr-7 gr-10-m gr-centered">
+                                                            <input autocomplete="off" name="email" id="email" maxlength="50" placeholder="Введите свой email" />
+                                                            <div id="error_validate_email" class="invisible error-msg">Недействительный e-mail</div>
+                                                            <div id="error_no_email" class="invisible error-msg">Данное поле является необходимым.</div>
+                                                        </div>
+                                                        <div class="gr-5 gr-8-m gr-centered">
+                                                            <button class="primary-bg-color" id="btn_verify_email" type="submit">Открыть бесплатный счет</button>
+                                                        </div>
+                                                        <span class="gr-12 gr-padding-10 error-msg hint color-white center-text invisible" id="signup_error"></span>
                                                     </div>
-                                                    <div class="gr-4 gr-12-m">
-                                                        <input name="submit" id="af-submit-image-713141817" type="submit" class="image" alt="Submit" tabindex="501" value="Submit" />
+                                                    <div class="invisible" id="success">
+                                                        <div class="gr-padding-10 center-text hint gr-12 align-self-center">
+                                                            <p>Спасибо за регистрацию! Теперь проверьте электронную почту, чтобы завершить процесс.</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div style="display: none;">
-                                                <img src="https://forms.aweber.com/form/displays.htm?id=7IzMjCyMHIzs" alt="" />
-                                            </div>
-                                        </div>
-                                    </form>
-                                    <script type="text/javascript">
-                                        document.getElementById('redirect_600c7e6a647457c51ede13e8b4d377e6').value = document.location + '#done';
-                                    </script>
-                                    <!-- /AWeber Web Form Generator 3.0.1 -->
-                                    <p class="notice-msg gr-8 gr-push-2 gr-push-0-m gr-12-m invisible">Спасибо за подписку! Регулярно проверяйте почту и следите за последними новостями о нашем ICO.</p>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -239,7 +285,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </div>
                     </div>
                     <p class="gr-12">
-                        <a class="button" href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">
+                        <a class="button" id="howto-btn" href="javascript:;">
                             <span>Как поучаствовать в ICO от Binary.com</span>
                         </a>
                     </p>
@@ -250,13 +296,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div class="container">
                     <div class="gr-row">
                         <div class="gr-10 gr-push-1">
-                            <h2>Trade your tokens on the Lykke Exchange</h2>
+                            <h2>Торгуйте токенами на бирже Lykke</h2>
                             <img src="/binary-static/br_ico_info/images/ico/icons/lykke_logo.svg"/>
-                            <p>We've reached an agreement to list the tokens on the <a href="https://www.lykke.com/" target="_blank" rel="noreferrer noopener">Lykke Exchange</a>.</p>
+                            <p>Мы достигли соглашения разместить токены на <a href="https://www.lykke.com/" target="_blank" rel="noreferrer noopener">Бирже Lykke</a>.</p>
                             <a class="button" href="https://www.lykke.com/company/news/binary" target="_blank" rel="noreferrer noopener">
-                                <span>Read the official press release</span>
+                                <span>Официальный пресс-релиз</span>
                             </a>
-                            <p>As featured in <a href="https://www.financemagnates.com/cryptocurrency/exchange/binary-com-blockchain-ipo-tokens-list-lykke-vanuatu-exchange/" target="_blank" rel="noreferrer noopener">Finance Magnates</a></p>
+                            <p>По данным статьи в <a href="https://www.financemagnates.com/cryptocurrency/exchange/binary-com-blockchain-ipo-tokens-list-lykke-vanuatu-exchange/" target="_blank" rel="noreferrer noopener">Finance Magnates</a></p>
                         </div>
                     </div>
                 </div>
@@ -288,7 +334,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div id="read-im-section" class="content-section primary-bg-color center-text">
                 <div class="gr-row">
                     <div class="gr-6 gr-push-3 gr-12-m gr-push-0-m">
-                        <h2 class="content-inverse-color">Read the Information Memorandum for further information about the proposed offer.</h2>
+                        <h2 class="content-inverse-color">Прочтите Информационный меморандум, чтобы получить подробную информацию о нашем предложении.</h2>
                         <button onclick="window.location.href='ico-disclaimer.html'" class="button">Просмотреть меморандум</button>
                     </div>
                 </div>
@@ -339,7 +385,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             <div class="gr-row">
                                 <div class="gr-6 gr-12-m">
                                     <h4>Лучшие цены</h4>
-                                    <p>Наша передовая технология ценообразования даёт Вам тот же коэффициент прибыли, что и на межбанковском рынке.</p>
+                                    <p>Our cutting-edge pricing technology benchmarks our prices against interbank market rates wherever possible.</p>
                                 </div>
                                 <div class="gr-6 gr-12-m">
                                     <h4>Запатентованная технология</h4>
@@ -412,7 +458,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </div>
                     </div>
                     <div class="vertical-line"></div>
-                    <p class="chart-note">Примечание: данные за 2017 проецируются от от промежуточных данных за август</p>
+                    <p class="chart-note">Примечание: данные за 2017 спрогнозированы на основании промежуточных данных за август</p>
                 </div>
             </div>
             <div id="acquired-section" class="content-section center-text acquired-bg">
@@ -446,7 +492,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                     <img class="icon--sm" src="/binary-static/br_ico_info/images/ico/icons/twitter.svg" />
                                 </a>
                             </div>
-                            <p>Jean-Yves Sireau is the founder of the Company. A serial entrepreneur at heart, he founded his first company in 1991. His achievements at only 21 years old saw him awarded the prestigious Foundation Jacques Dounce prize for young entrepreneurs by the French prime minister Edith Cresson, and the Neuilly Professions prize by a future French president Nicolas Sarkozy. Jean-Yves founded Fortitude Fund Management, a hedge fund management group, in 1993, and Binary.com (formerly known as Betonmarkets.com) in 1999.</p>
+                            <p>Жан-Ив Серо – основатель компании. Будучи талантливым предпринимателем, он основал свою первую компанию в 1991 году. В возрасте 21 года Жан-Ив получил престижную награду от Фонда Жака Доунса для молодых предпринимателей (которая была вручена премьер-министром Франции Эдит Крессон), а также премию Neuilly Professions от будущего президента Франции Николя Саркози. В 1993 году Жан-Ив основал Fortitude Fund Management (группу управления хедж-фондами), а в 1999 году появился Binary.com (который раньше носил название Betonmarkets.com).</p>
                         </div>
                         <div class="gr-4 gr-12-m">
                             <div class="center-text">
@@ -487,7 +533,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <h4 class="secondary-color">Низкий минимальный залог</h4>
                         <p>Внесите на счёт всего USD 5 и начните торговать контрактами на минимальную сумму USD 5.</p>
                         <h4 class="secondary-color">Множество торговых возможностей</h4>
-                        <p>Торгуйте краткосрочными и долгосрочными контрактами: от нескольких тиков до нескольких дней.</p>
+                        <p>Trade short-term or long-term contracts, from 10 seconds to 365 days.</p>
                     </div>
                 </div>
             </div>
@@ -528,7 +574,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div class="gr-row">
                     <div class="gr-4 gr-12-m">
                         <h4>Интеллектуальная собственность</h4>
-                        <p>В основе нашей платформе лежит уникальная авторская технология, разработанная и поддерживаемая признанными профессионалами, которых мы нашли в разных уголках планеты.</p>
+                        <p>В основе нашей платформы лежит уникальная авторская технология, разработанная и поддерживаемая признанными профессионалами, которых мы нашли в разных уголках планеты.</p>
                     </div>
                     <div class="gr-4 gr-12-m">
                         <h4>Большой портфель продуктов</h4>
@@ -562,11 +608,65 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <div class="container">
                     <div class="gr-row">
                         <div class="gr-12">
-                            <h3>Media Coverage</h3>
+                            <h3>Освещение в СМИ</h3>
                         </div>
                     </div>
                     <div class="slider-container invisible">
                         <div class="my-slider">
+                            
+                                <div>
+                                    <a href="http://www.ico1.com/a/jiangkaishi/1277.html" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo ico1"></span>
+                                            <p class="media__headlines">BINARY.COM 宣布开展ICO</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            
+                                <div>
+                                    <a href="https://binguru.net/binary-vyxodit-na-ico-pamyatka-investoru-5371" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo binguru"></span>
+                                            <p class="media__headlines">Binary выходит на ICO: памятка инвестору</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            
+                                <div>
+                                    <a href="https://www.coinist.io/binary-com-explosive-growth-ico/" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo coinist"></span>
+                                            <p class="media__headlines">Binary.com’s Explosive Growth & Their Upcoming ICO</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            
+                                <div>
+                                    <a href="https://www.chipin.com/binary-ico-redefining-future-ipos/" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo chipin"></span>
+                                            <p class="media__headlines">Introducing the Binary ICO – Redefining the Future of IPOs</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            
+                                <div>
+                                    <a href="https://cryptogo.de/binary-analyse/" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo cryptogo"></span>
+                                            <p class="media__headlines">ICO Analyse - Binary.com</p>
+                                        </div>
+                                    </a>
+                                </div>
+                            
+                                <div>
+                                    <a href="https://hype.codes/future-ipos-blockchain" target="_blank">
+                                        <div class="media">
+                                            <span class="media__logo hype-codes"></span>
+                                            <p class="media__headlines">The future of IPOs is blockchain</p>
+                                        </div>
+                                    </a>
+                                </div>
                             
                                 <div>
                                     <a href="https://www.cryptomartez.com/2017/10/pr-binary-com-announces-ico.html" target="_blank">
@@ -704,8 +804,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <a href="https://www.reddit.com/r/binarydotcom/" target="_blank" class="gr-gutter-right">
                             <img class="responsive" src="/binary-static/br_ico_info/images/ico/icons/reddit.svg" />
                         </a>
-                        <a href="https://www.facebook.com/mybinarycoin" target="_blank">
+                        <a href="https://www.facebook.com/mybinarycoin" target="_blank" class="gr-gutter-right">
                             <img class="responsive" src="/binary-static/br_ico_info/images/ico/icons/facebook.svg" />
+                        </a>
+                        <a href="https://bitcointalk.org/index.php?topic=2368998.0" target="_blank">
+                            <img class="responsive" src="/binary-static/br_ico_info/images/ico/icons/bitcoin_talk.svg" />
                         </a>
                     </div>
                 </div>
@@ -741,12 +844,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             <h4>Зачем Binary.com проводит ICO?</h4>
                             <p>Проект Binary.com основан в 1999 году. Сегодня это крупная и довольно успешная компания. Как и в случае большинства компаний, стремительный рост нашего бизнеса заставил руководство задуматься о проведении первичного публичного предложения акций компании (IPO).</p>
                             <p>Тем не менее, мы верим что уже на протяжение ближайших десяти лет традиционные фондовые биржи будут постепенно вытесняться блокчейновыми биржами, а первичное публичное предложение (IPO) уступит место первичному предложению средств (ICO). Причина кроется в том, что технологии блокчейн намного эффективнее стандартных технологий, применяемых традиционными фондовыми биржами, что в итоге позволяет снижать комиссию за транзакции, быстрее проводить контракты и сохранять точные записи о контрактах в журнале операций. Именно по этой причине мы решили провести ICO, а не IPO.</p>
+                            <p>For further background information please read our blog post, <a href='https://blog.binary.com/ipo-or-ico/' target='_blank'>Why we are doing an ICO (and not an IPO)</a>.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Как работает ICO?</h4>
-                            <p>Binary.com намерен предложить инвесторам ряд блокчейн ключей (токенов). Данные токены могут быть выпущены в различных формах разных блокчейнов, например, токены "ERC20" в блокчейне Ethereum.</p>
+                            <p>Binary.com will offer a number of blockchain tokens to investors. These tokens will be ‘ERC20’ tokens on the Ethereum blockchain, however the Company may issue tokens on other blockchains if there is sufficient investor demand for different token types.</p>
                             <p>Независимо от вида выпущенных токенов, каждый из них даст Вам два следующие права:</p>
                             <ol>
                                 <li>Право получать выплату, эквивалентную дивидендам от Binary Group Ltd. за обыкновенные акции</li>
@@ -765,32 +869,51 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Когда будут предложены токены?</h4>
-                            <p>The tokens will be offered from 15 November 2017 to 25 December 2017.</p>
+                            <p>Токены будут предложены в период с 15 ноября по 25 декабря 2017 г.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
-                            <h4>How are the tokens offered?</h4>
-                            <p>The tokens are offered via an auction process. View our <a href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">guide</a> to the token auction.</p>
+                            <h4>На каких условиях будут предлагаться токены?</h4>
+                            <p>Токены будут предложены в рамках аукциона. Ознакомтесь с нашим <a href="https://ico_documents.binary.com/howto_ico.pdf" target="_blank">экскурсом</a> по аукциону токенов.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>How many tokens are available?</h4>
+                            <p>Up to 10 million tokens are available via the auction.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>What is the minimum bid price?</h4>
+                            <p>The minimum bid is USD 1.35/token or equivalent in other currency/cryptocurrency.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>How high should I bid?</h4>
+                            <p>The higher you bid, the more your chances of being successful in the auction. However irrespective of how high you bid, at the end of the auction all winning bids will receive the same final price, which is the lowest winning bid.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Кто сможет купить токены?</h4>
-                            <p>Токены будут предложены лишь клиентам Binary.com, обладающим реальным счётом и прошедшим <a href="https://ico_documents.binary.com/2017_Authentication_Process.pdf" target="_blank">процесс его аутентификации</a>.</p>
+                            <p>Tokens will only be offered to Binary.com clients who have a Real Money account. Please visit <a href="/binary-static/br_ico_info/ru/home.html" target="_blank">www.binary.com</a> to open an account.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Доступно ли ICO во всех юрисдикциях?</h4>
                             <p>Первичное предложение средств (ICO) будет частично запрещено в ряде стран и доступ к нему будет открыт лишь для профессиональных инвесторов, согласно правилам и нормам, действующим в соответствующих странах. В частности, ICO будет недоступно для граждан и жителей США.</p>
-                            <p>Чтобы узнать, разрешено ли ICO в Вашей юрисдикции и можете ли Вы подписаться на покупку токенов, пожалуйста, укажите Вашу страну в ниспадающем списке на странице <a href="/binary-static/br_ico_info/ru/ico-disclaimer.html">Информационного меморандума</a>.</p>
+                            <p>Чтобы узнать, разрешено ли ICO в Вашей юрисдикции и можете ли Вы подписаться на покупку токенов, пожалуйста, укажите Вашу страну в ниспадающем списке на странице <a href="/binary-static/br_ico_info/ru/ico-disclaimer.html" target="_blank">Информационного меморандума</a>.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Как купить токены?</h4>
-                            <p>Вы можете приобрести токены за средства, находящиеся на Вашем Binary.com счёте. Вы можете пользоваться любыми валютами, разрешенными нашей <a href="/binary-static/br_ico_info/ru/cashier/payment_methods.html" target="_blank">кассовой системой</a>. Если Вы хотите сделать ставку в валюте, отличной от USD, сумма ставки должна быть конвертирована в USD по курсу, действующему на момент окончания аукциона.</p>
+                            <p>You will be able to purchase tokens using the funds in your Binary.com account. You may use any of the available currencies (including
+cryptocurrencies) in our <a href="/binary-static/br_ico_info/ru/cashier/payment_methods.html" target="_blank">cashier system</a>. If you choose to bid in a currency other than USD, the bid amount shall be converted to USD at the prevailing exchange rate at the time the auction ends.</p>
                         </div>
                     </div>
                     <div class="gr-12">
@@ -801,29 +924,41 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div class="gr-12">
                         <div class="faq">
+                            <h4>What will be the token symbol?</h4>
+                            <p>We intend to apply for the token symbol BINARY.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
                             <h4>Каковы преимущества покупки токенов?</h4>
-                            <p>Можно выделить два основных преимущества покупки токенов.</p>
+                            <p>There will be three main benefits of purchasing tokens.</p>
                             <p>В первую очередь, владельцы токенов получат выплаты на основе дивидендов, эквивалентные дивидендам, выплачиваемым компанией владельцам обыкновенных акций. Таким образом, владельцы токенов получат свою часть от будущих прибылей компании, как и её акционеры.</p>
-                            <p>Во-вторых, владельцы токенов могут с лёгкостью продать имеющиеся токены. В отличае от них, обыкновенными акциями нельзя торговать на любой бирже. В этой связи, токены являются более выгодной инвестицией, чем обыкновенные акции.</p>
+                            <p>Second, tokens may be converted into Ordinary Shares of the Company (subject to certain conditions, as described in the Information Memorandum), thereby providing the legal link between tokens and Ordinary Shares.</p>
+                            <p>Third, token holders will be able to freely trade their tokens. In contrast, Ordinary Shares are not listed and therefore cannot be traded on any exchange. In that sense, the tokens will be a superior investment to Ordinary Shares.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Where can I view the source code of the tokens?</h4>
+                            <p>Binary.com intends to deploy the <a href='https://github.com/Giveth/minime' target='_blank'>Mini Me</a> token. Please view our <a href='https://tech.binary.com/an-erc20-securities-token/' target='_blank'>blog post</a> detailing our reasons for choosing this token.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Каковы риски покупки токенов?</h4>
-                            <p>Несмотря на значительные успехи Binary.com с самого момента основания компании в 1999 году, токены считаются инвестицией с высоким уровнем риска. Бизнес Binary.com подвержен ряду рисков, которые могут отрицательно сказаться на компании и таким образом повлиять на будущую стоимость токенов. Данные риски подробно описаны в <a href="/binary-static/br_ico_info/ru/ico-disclaimer.html">Информационном меморандуме</a> и должны быть тщательно оценены перед любыми инвестициями в токены.</p>
+                            <p>Несмотря на значительные успехи Binary.com с самого момента основания компании в 1999 году, токены считаются инвестицией с высоким уровнем риска. Бизнес Binary.com подвержен ряду рисков, которые могут отрицательно сказаться на компании и таким образом повлиять на будущую стоимость токенов. Данные риски подробно описаны в <a href="/binary-static/br_ico_info/ru/ico-disclaimer.html" target="_blank">Информационном меморандуме</a> и должны быть тщательно оценены перед любыми инвестициями в токены.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Как получить больше информации о Binary.com?</h4>
                             <p>Чтобы больше узнать о Binary.com, ознакомьтесь с <a href="/binary-static/br_ico_info/ru/group-history.html" target="_blank">историей нашей компании</a>, <a href="/binary-static/br_ico_info/ru/regulation.html" target="_blank">организационно-правовым статусом</a> и <a href="/binary-static/br_ico_info/ru/careers.html" target="_blank">культурой компании</a>. Также Вы можете прочесть <a href="https://blog.binary.com/" target="_blank">блог компании</a>.</p>
-                            <p>Вы можете получить больше информации об ICO в <a href="https://www.financemagnates.com/binary-options/brokers/exclusive-binary-com-ico-shows-company-profits-surpass-20-mln-2017/" target="_blank">FinanceMagnates</a> и <a href="https://www.leaprate.com/binary-options/broker/binary-com-ico-finances-binary-options-broker/" target="_blank">Leaprate</a>.</p>
                         </div>
                     </div>
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Как получить больше информации об ICO и криптовалютах?</h4>
-                            <p>Чтобы получить больше информации о Bitcoin, рекомендуем открыть <a href="https://bitcoin-wallet.binary.com/" target="_blank">Binary.com</a>Bitcoin кошелёк</a> и купить Bitcoin на бирже в Вашей стране.</p>
+                            <p>Откройте наш канал <a href=https://www.youtube.com/user/BinaryTradingVideos target='_blank'>YouTube</a>, чтобы больше узнать об ICO, популярных криптовалютах и технологии блокчейн. Мы покажем Вам, как они действуют и меняют наши методы ведения бизнеса.</p>
                         </div>
                     </div>
                     <div class="gr-12">
@@ -841,7 +976,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div class="gr-row">
                 <div class="gr-12">
                     <h2>Подпишитесь на нашу рассылку</h2>
-                    <p>for exclusive updates on the ICO.</p>
+                    <p>для получения эксклюзивных новостей о нашем ICO.</p>
                     <div class="form-container">
                         <!-- AWeber Web Form Generator 3.0.1 -->
                         <form method="post" class="af-form-wrapper" accept-charset="UTF-8" action="https://www.aweber.com/scripts/addlead.pl">
@@ -860,10 +995,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 <div id="af-body-713141817" class="gr-12 gr-12-m af-body af-standards">
                                     <div class="af-element gr-row">
                                         <div class="gr-8 gr-12-m">
-                                            <input class="text" placeholder="Enter your email" id="awf_field-90867273" type="text" name="email" value="" tabindex="500" onfocus=" if (this.value == '') { this.value = ''; }" onblur="if (this.value == '') { this.value='';} " />
+                                            <input class="text" placeholder="Введите свой email" id="awf_field-90867273" type="text" name="email" value="" tabindex="500" onfocus=" if (this.value == '') { this.value = ''; }" onblur="if (this.value == '') { this.value='';} " />
                                         </div>
                                         <div class="gr-4 gr-12-m">
-                                            <input name="submit" id="af-submit-image-713141817" type="submit" class="image" alt="Submit" tabindex="501" value="Submit"/>
+                                            <input name="submit" id="af-submit-image-713141817" type="submit" class="image" alt="Submit" tabindex="501" value="Подтвердить"/>
                                         </div>
                                     </div>
                                 </div>
@@ -887,10 +1022,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <p>Инвестиции в предложенные токены предполагают высокий уровень риска. Нет никакой гарантии, что владельцы токенов смогут получить прибыль от инвестированных средств или какую-либо прибыль от их инвестиций. Потенциальные инвесторы в токены должны тщательно обдумать все факторы риска, которые будут изложены в информационном меморандуме.</p>
             </div>
         </div>
+        <div class="primary-bg-color-dark content-inverse-color center-text gr-padding-20">
+            <span>Binary Group Ltd., Kingston Chambers, Road Town, Tortola, British Virgin Islands</span>
+        </div>
         <!--[if (lt IE 9)]><script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/min/tiny-slider.helper.ie8.js"></script><![endif]-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/min/tiny-slider.js"></script>
-        <script src="/binary-static/br_ico_info/js/landing_pages/common.js?dfzkk7rn"></script>
-        <script src="/binary-static/br_ico_info/js/landing_pages/ico.js?dfzkk7rn"></script>
+        <script src="/binary-static/br_ico_info/js/landing_pages/common.js?5srbkvqz"></script>
+        <script src="/binary-static/br_ico_info/js/landing_pages/ico.js?5srbkvqz"></script>
     </body>
 
 </html>
