@@ -28334,12 +28334,11 @@ var ICOSubscribe = function () {
             $(this).attr('src', Url.urlForStatic('images/pages/ico/auction.svg'));
         }).attr('src', image);
 
-        BinarySocket.wait('website_status', 'landing_company', 'get_settings').then(function () {
+        BinarySocket.wait('website_status', 'landing_company', 'get_settings', 'get_account_status').then(function () {
             if (State.getResponse('website_status.ico_status') === 'closed') {
                 $(form_id).replaceWith($('<p/>', { class: 'notice-msg center-text', text: localize('The ICO is currently unavailable.') }));
                 ICOcountDown();
                 ICOPortfolio.onLoad();
-                $('#ico_subscribe').setVisibility(1);
                 showContent();
             } else {
                 init();
