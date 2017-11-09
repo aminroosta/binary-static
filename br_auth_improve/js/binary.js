@@ -8488,13 +8488,21 @@ var AccountOpening = function () {
         return false;
     };
 
+    var residenceSupportsProfessional = function residenceSupportsProfessional(residence) {
+        /* Austria, Italy, Belgium, Latvia, Bulgaria,	Lithuania, Croatia, Luxembourg, Cyprus, Malta, Czech Republic,	Netherlands, Denmark, Poland, Estonia, Portugal, Finland, Romania, France, Slovakia, Germany, Slovenia, Greece, Spain, Hungary, Sweden, Ireland, United Kingdom, Australia, New Zealand, Singapore, Canada, Switzerland */
+        var countries = ['at', 'it', 'be', 'lv', 'bg', 'lt', 'hr', 'lu', 'cy', 'mt', 'cf', 'nl', 'dk', 'pl', 'ee', 'pt', 'fi', 'ro', 'fr', 'sk', 'de', 'si', 'gr', 'es', 'hu', 'se', 'ie', 'gb', 'au', 'nz', 'sg', 'ca', 'ch'];
+        return countries.indexOf(residence.toLowerCase()) !== -1;
+    };
+
     var populateForm = function populateForm(form_id, getValidations, is_financial, is_ico_only) {
         getResidence();
         BinarySocket.send({ states_list: Client.get('residence') }).then(function (data) {
             return handleState(data.states_list, form_id, getValidations);
         });
         generateBirthDate();
-        professionalClient.init(is_financial, false, is_ico_only);
+        if (residenceSupportsProfessional(Client.get('residence'))) {
+            professionalClient.init(is_financial, false, is_ico_only);
+        }
     };
 
     var getResidence = function getResidence() {
