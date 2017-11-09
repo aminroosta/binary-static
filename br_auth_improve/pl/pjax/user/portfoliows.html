@@ -1,0 +1,113 @@
+<div id="content" class="portfoliows-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin" onclick="window.open('/binary-static/br_auth_improve/pl/ico.html', '_blank');">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-9 gr-12-p gr-12-m"><p>Binary.com ICO rozpoczyna się 15 listopada 2017 r.</p></div>
+                            <div class="gr-3 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Dowiedz się więcej</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
+            <div id="page_info" style="display:none;">
+                <title>Portfolio | Binary.com</title>
+                <div id="content_class">portfoliows-content</div>
+            </div>
+            
+                <div class="container">
+            
+
+
+
+  <div id="portfolio">
+    <h1 class="portfolio-header-margin">Portfolio</h1>
+
+    <p class="notice-msg center-text invisible" id="error-msg"></p>
+
+    <div id="portfolio-loading"></div>
+
+    <div id="portfolio-content" class="invisible">
+        <div class="gr-parent gr-padding-10">
+            Saldo konta: 
+            <span class="loading" id="portfolio-balance"></span>
+
+            <!-- If the account balance is zero we show the following button, otherwise we remove it -->
+            <span id="if-balance-zero" class="invisible">
+                <a href="/binary-static/br_auth_improve/pl/cashier/forwardws.html#deposit" class="button nowrap ja-hide">
+                    <span>Wpłać środki</span>
+                </a>
+                <a href="/binary-static/br_auth_improve/pl/cashier/deposit-jp.html" class="button nowrap invisible ja-show">
+                    <span>Wpłać środki</span>
+                </a>
+            </span>
+        </div>
+
+        <div id="portfolio-no-contract">
+            <p>Brak otwartych pozycji.</p>
+        </div>
+
+        <div class="table-container">
+    <table id="portfolio-table">
+        
+        <thead>
+            
+                <tr>
+                    
+                        <th class="ref">Ref.</th>
+                    
+                        <th class="payout nowrap">Możliwa wypłata</th>
+                    
+                        <th class="details">Szczegóły kontraktu</th>
+                    
+                        <th class="purchase">Kup</th>
+                    
+                        <th class="indicative nowrap">Orientacyjny</th>
+                    
+                        <th class="button"></th>
+                    
+                </tr>
+            
+        </thead>
+        
+        <tbody id="portfolio-body">
+        
+    </tbody>
+        
+            <tfoot>
+                
+                <tr>
+                    
+                        <th >
+                            Całkowity
+                        </th>
+                    
+                        <th class="ref" colspan="2">
+                            
+                        </th>
+                    
+                        <th class="cost" id="cost-of-open-positions" >
+                            
+                        </th>
+                    
+                        <th class="value" id="value-of-open-positions" colspan="2">
+                            
+                        </th>
+                    
+                </tr>
+                
+            </tfoot>
+        
+    </table>
+    </div>
+    </div>
+</div>
