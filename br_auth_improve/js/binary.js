@@ -1073,6 +1073,13 @@ var Client = function () {
         );
     };
 
+    var canRequestProfessional = function canRequestProfessional() {
+        var residence = get('residence');
+        /* Austria, Italy, Belgium, Latvia, Bulgaria,	Lithuania, Croatia, Luxembourg, Cyprus, Malta, Czech Republic,	Netherlands, Denmark, Poland, Estonia, Portugal, Finland, Romania, France, Slovakia, Germany, Slovenia, Greece, Spain, Hungary, Sweden, Ireland, United Kingdom, Australia, New Zealand, Singapore, Canada, Switzerland */
+        var countries = ['at', 'it', 'be', 'lv', 'bg', 'lt', 'hr', 'lu', 'cy', 'mt', 'cf', 'nl', 'dk', 'pl', 'ee', 'pt', 'fi', 'ro', 'fr', 'sk', 'de', 'si', 'gr', 'es', 'hu', 'se', 'ie', 'gb', 'au', 'nz', 'sg', 'ca', 'ch'];
+        return countries.indexOf(residence.toLowerCase()) !== -1;
+    };
+
     return {
         init: init,
         validateLoginid: validateLoginid,
@@ -1102,7 +1109,8 @@ var Client = function () {
         getLandingCompanyValue: getLandingCompanyValue,
         canTransferFunds: canTransferFunds,
         hasCostaricaAccount: hasCostaricaAccount,
-        canOpenICO: canOpenICO
+        canOpenICO: canOpenICO,
+        canRequestProfessional: canRequestProfessional
     };
 }();
 
@@ -8488,19 +8496,13 @@ var AccountOpening = function () {
         return false;
     };
 
-    var residenceSupportsProfessional = function residenceSupportsProfessional(residence) {
-        /* Austria, Italy, Belgium, Latvia, Bulgaria,	Lithuania, Croatia, Luxembourg, Cyprus, Malta, Czech Republic,	Netherlands, Denmark, Poland, Estonia, Portugal, Finland, Romania, France, Slovakia, Germany, Slovenia, Greece, Spain, Hungary, Sweden, Ireland, United Kingdom, Australia, New Zealand, Singapore, Canada, Switzerland */
-        var countries = ['at', 'it', 'be', 'lv', 'bg', 'lt', 'hr', 'lu', 'cy', 'mt', 'cf', 'nl', 'dk', 'pl', 'ee', 'pt', 'fi', 'ro', 'fr', 'sk', 'de', 'si', 'gr', 'es', 'hu', 'se', 'ie', 'gb', 'au', 'nz', 'sg', 'ca', 'ch'];
-        return countries.indexOf(residence.toLowerCase()) !== -1;
-    };
-
     var populateForm = function populateForm(form_id, getValidations, is_financial, is_ico_only) {
         getResidence();
         BinarySocket.send({ states_list: Client.get('residence') }).then(function (data) {
             return handleState(data.states_list, form_id, getValidations);
         });
         generateBirthDate();
-        if (residenceSupportsProfessional(Client.get('residence'))) {
+        if (Client.canRequestProfessional()) {
             professionalClient.init(is_financial, false, is_ico_only);
         }
     };
@@ -26123,7 +26125,10 @@ var Settings = function () {
             var is_ico_only = Client.get('is_ico_only');
             // Professional Client menu should only be shown to MF and CR accounts.
             if (!is_jp && !/professional_requested|professional/.test(status) && (Client.isAccountOfType('financial') || /costarica/.test(financial_company) && Client.isAccountOfType('real') || is_ico_only)) {
-                $('#professional_client').setVisibility(1);
+
+                if (Client.canRequestProfessional()) {
+                    $('#professional_client').setVisibility(1);
+                }
             }
 
             if (!get_account_status.prompt_client_to_authenticate) {
