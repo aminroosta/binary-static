@@ -26851,7 +26851,7 @@ var LimitsInit = function () {
             var txt_withdraw_lim = 'Your withdrawal limit is [_1] [_2] (or equivalent in other currency).';
             var txt_withdraw_amt = 'You have already withdrawn the equivalent of [_1] [_2].';
             var txt_current_max_withdrawal = 'Therefore your current immediate maximum withdrawal (subject to your account having sufficient funds) is [_1] [_2] (or equivalent in other currency).';
-            var currency = 'EUR';
+            var currency = Client.get('currency') || Client.currentLandingCompany().legal_default_currency;
             var days_limit = formatMoney(currency, limits.num_of_days_limit, 1);
             // no need for formatMoney since it is already string like "1,000"
             var withdrawn = limits.withdrawal_since_inception_monetary;
@@ -26869,7 +26869,6 @@ var LimitsInit = function () {
                     txt_withdraw_lim = 'Your withdrawal limit is [_1] [_2].';
                     txt_withdraw_amt = 'You have already withdrawn [_1] [_2].';
                     txt_current_max_withdrawal = 'Therefore your current immediate maximum withdrawal (subject to your account having sufficient funds) is [_1] [_2].';
-                    currency = Client.get('currency') || Client.currentLandingCompany().legal_default_currency;
                 }
                 elementInnerHtml(el_withdraw_limit, localize(txt_withdraw_lim, [currency, days_limit]));
                 elementTextContent(el_withdrawn, localize(txt_withdraw_amt, [currency, withdrawn]));
@@ -28143,13 +28142,14 @@ var ICOPortfolio = function () {
 
     var createPortfolioRow = function createPortfolioRow(data, is_first) {
         var long_code = data.longcode;
-
+        var ico_status = (State.getResponse('website_status.ico_status') || '').toLowerCase();
+        // Default to cancel bid. Ended on a button doesn't make sense.
         var status_text = 'Ended';
         if (/unsuccessful/i.test(long_code)) {
             status_text = 'Refund Bid';
         } else if (/successful/i.test(long_code)) {
             status_text = 'Claim Tokens';
-        } else if (/bid/i.test(long_code)) {
+        } else if (ico_status === 'open') {
             status_text = 'Cancel Bid';
         }
 
