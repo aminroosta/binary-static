@@ -4758,6 +4758,7 @@ body #not_authenticated_financial ul.checked > li {
   margin-top: 50px;
 }
 #ico_info .barChart {
+  min-height: 400px;
   padding-left: 14px;
   padding-bottom: 14px;
   box-sizing: border-box;
