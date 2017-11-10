@@ -1073,6 +1073,13 @@ var Client = function () {
         );
     };
 
+    var canRequestProfessional = function canRequestProfessional() {
+        var residence = get('residence');
+        /* Austria, Italy, Belgium, Latvia, Bulgaria,	Lithuania, Croatia, Luxembourg, Cyprus, Malta, Czech Republic,	Netherlands, Denmark, Poland, Estonia, Portugal, Finland, Romania, France, Slovakia, Germany, Slovenia, Greece, Spain, Hungary, Sweden, Ireland, United Kingdom, Australia, New Zealand, Singapore, Canada, Switzerland */
+        var countries = ['at', 'it', 'be', 'lv', 'bg', 'lt', 'hr', 'lu', 'cy', 'mt', 'cf', 'nl', 'dk', 'pl', 'ee', 'pt', 'fi', 'ro', 'fr', 'sk', 'de', 'si', 'gr', 'es', 'hu', 'se', 'ie', 'gb', 'au', 'nz', 'sg', 'ca', 'ch'];
+        return countries.indexOf(residence.toLowerCase()) !== -1;
+    };
+
     return {
         init: init,
         validateLoginid: validateLoginid,
@@ -1102,7 +1109,8 @@ var Client = function () {
         getLandingCompanyValue: getLandingCompanyValue,
         canTransferFunds: canTransferFunds,
         hasCostaricaAccount: hasCostaricaAccount,
-        canOpenICO: canOpenICO
+        canOpenICO: canOpenICO,
+        canRequestProfessional: canRequestProfessional
     };
 }();
 
@@ -8494,7 +8502,9 @@ var AccountOpening = function () {
             return handleState(data.states_list, form_id, getValidations);
         });
         generateBirthDate();
-        professionalClient.init(is_financial, false, is_ico_only);
+        if (Client.canRequestProfessional()) {
+            professionalClient.init(is_financial, false, is_ico_only);
+        }
     };
 
     var getResidence = function getResidence() {
@@ -26115,7 +26125,10 @@ var Settings = function () {
             var is_ico_only = Client.get('is_ico_only');
             // Professional Client menu should only be shown to MF and CR accounts.
             if (!is_jp && !/professional_requested|professional/.test(status) && (Client.isAccountOfType('financial') || /costarica/.test(financial_company) && Client.isAccountOfType('real') || is_ico_only)) {
-                $('#professional_client').setVisibility(1);
+
+                if (Client.canRequestProfessional()) {
+                    $('#professional_client').setVisibility(1);
+                }
             }
 
             if (!get_account_status.prompt_client_to_authenticate) {
@@ -27766,12 +27779,14 @@ var Accounts = function () {
                 var company_name = getCompanyName(loginid);
                 account_type_prop['data-balloon'] = localize('Counterparty') + ': ' + company_name;
             }
-
             $('#existing_accounts').find('tbody').append($('<tr/>', { id: loginid }).append($('<td/>', { text: loginid })).append($('<td/>').html($('<span/>', account_type_prop))).append($('<td/>', { text: getAvailableMarkets(loginid) })).append($('<td/>').html(!account_currency && loginid === Client.get('loginid') ? $('<a/>', { class: 'button', href: urlFor('user/set-currency') }).html($('<span/>', { text: localize('Set Currency') })) : account_currency || '-')));
         });
     };
 
     var getAvailableMarkets = function getAvailableMarkets(loginid) {
+        if (Client.get('is_ico_only', loginid)) {
+            return [localize('None')];
+        }
         var legal_allowed_markets = Client.getLandingCompanyValue(loginid, landing_company, 'legal_allowed_markets') || '';
         if (Array.isArray(legal_allowed_markets) && legal_allowed_markets.length) {
             legal_allowed_markets = legal_allowed_markets.map(function (market) {
@@ -27882,7 +27897,7 @@ var showLoadingImage = __webpack_require__(1).showLoadingImage;
 var getHighstock = __webpack_require__(5).requireHighstock;
 var localize = __webpack_require__(2).localize;
 
-var COLOR_ORANGE = '#E98024';
+var BLUE_ORANGE = '#2A3052';
 var COLOR_GRAY = '#C2C2C2';
 var MAX_BID_PRICE = 10;
 
@@ -27942,7 +27957,7 @@ var chartConfig = function chartConfig(_ref) {
             events: {
                 load: function load() {
                     var $svg = $('#ico_info .highcharts-container > svg');
-                    createGradient($svg[0], 'gradient-0', [{ offset: '0%', 'stop-color': COLOR_ORANGE }, { offset: '100%', 'stop-color': 'white' }]);
+                    createGradient($svg[0], 'gradient-0', [{ offset: '0%', 'stop-color': BLUE_ORANGE }, { offset: '100%', 'stop-color': 'white' }]);
                     createGradient($svg[0], 'gradient-1', [{ offset: '0%', 'stop-color': COLOR_GRAY }, { offset: '100%', 'stop-color': 'white' }]);
                     callback();
                 }
@@ -27978,11 +27993,10 @@ var chartConfig = function chartConfig(_ref) {
         },
         plotOptions: {
             column: {
-                color: COLOR_ORANGE,
+                color: BLUE_ORANGE,
                 pointPadding: 0,
                 borderWidth: 0,
-                groupPadding: 0.05,
-                pointRange: 0.2
+                groupPadding: 0.05
             }
         },
         legend: false,
@@ -28001,17 +28015,14 @@ var ICOInfo = function () {
         $root = void 0,
         chart = void 0;
 
-    var init = function init(website_status) {
+    var init = function init(ico_status) {
         if (is_initialized) return;
+        ico_status.ico_status = ico_status.ico_status || 'open'; // backend will add this field.
+        var final_price = ico_status.ico_status !== 'open' ? +ico_status.final_price_usd : 0;
+        var bucket_size = +ico_status.histogram_bucket_size;
+        var minimum_bid = ico_status.minimum_bid_usd;
 
-        var ico_info = website_status.ico_info;
-        var ico_status = website_status.ico_status;
-
-        var final_price = ico_status !== 'open' ? +ico_info.final_price : 0;
-
-        var bucket_size = +ico_info.histogram_bucket_size;
-
-        var keys = Object.keys(ico_info.histogram).map(function (key) {
+        var keys = Object.keys(ico_status.histogram).map(function (key) {
             return +key;
         }).sort(function (a, b) {
             return a - b;
@@ -28019,23 +28030,28 @@ var ICOInfo = function () {
         var allValues = [];
         if (keys.length > 0) {
             var max = Math.min(keys[keys.length - 1] + 1, MAX_BID_PRICE);
-            var min = final_price ? Math.max(Math.min(keys[0], final_price) - 1, 1) : Math.max(keys[0] - 1, 1);
+            var min = final_price ? Math.max(Math.min(keys[0], final_price) - bucket_size, 1) : Math.max(keys[0] - 1, 1);
+
             for (var key = max - bucket_size; key >= min; key -= bucket_size) {
                 key = +key.toFixed(2);
-                var value = keys.indexOf(key) !== -1 ? ico_info.histogram['' + key] : 0;
-                var color = key >= final_price ? COLOR_ORANGE : COLOR_GRAY;
+                var value = keys.indexOf(key) !== -1 ? ico_status.histogram['' + key] : 0;
+                var color = key >= final_price ? BLUE_ORANGE : COLOR_GRAY;
+
                 allValues.unshift({
                     y: value,
-                    x: key,
-                    band: [key, key + bucket_size - 0.01],
+                    x: Math.max(key, minimum_bid),
+                    band: [Math.max(key, minimum_bid), key + bucket_size - 0.01],
                     color: color
                 });
+                if (key < minimum_bid) {
+                    break;
+                }
             }
 
             var aboveMaxPrice = keys.filter(function (key) {
                 return key >= MAX_BID_PRICE;
             }).map(function (key) {
-                return ico_info.histogram['' + key];
+                return ico_status.histogram['' + key];
             }).reduce(function (a, b) {
                 return a + b;
             }, 0);
@@ -28051,7 +28067,7 @@ var ICOInfo = function () {
             }
 
             var config = chartConfig({
-                min: Math.min(min - bucket_size, MAX_BID_PRICE - 1),
+                min: Math.max(Math.min(min - bucket_size, MAX_BID_PRICE - 1), minimum_bid),
                 finalPrice: final_price,
                 values: allValues,
                 finalPriceLabel: localize('Final Price') + ' ($' + final_price + ')',
@@ -28080,8 +28096,8 @@ var ICOInfo = function () {
 
         getHighstock(function (Highstock) {
             Highcharts = Highstock;
-            BinarySocket.send({ website_status: 1 }, { forced: true }).then(function (response) {
-                init(response.website_status);
+            BinarySocket.send({ ico_status: 1 }, { forced: true }).then(function (response) {
+                init(response.ico_status);
             });
         });
     };
@@ -28319,6 +28335,9 @@ var Url = __webpack_require__(8);
 var ICOSubscribe = function () {
     var form_id = '#frm_ico_bid';
     var currency = void 0,
+        min_bid = void 0,
+        unit_price = void 0,
+        min_bid_usd = void 0,
         $form_error = void 0,
         $duration = void 0,
         $price = void 0,
@@ -28338,8 +28357,8 @@ var ICOSubscribe = function () {
             $(this).attr('src', Url.urlForStatic('images/pages/ico/auction.svg'));
         }).attr('src', image);
 
-        BinarySocket.wait('website_status', 'landing_company', 'get_settings', 'get_account_status').then(function () {
-            if (State.getResponse('website_status.ico_status') === 'closed') {
+        BinarySocket.wait('ico_status', 'landing_company', 'get_settings', 'get_account_status').then(function () {
+            if (State.getResponse('ico_status.ico_status') === 'closed') {
                 $(form_id).replaceWith($('<p/>', { class: 'notice-msg center-text', text: localize('The ICO is currently unavailable.') }));
                 ICOcountDown();
                 ICOPortfolio.onLoad();
@@ -28348,6 +28367,13 @@ var ICOSubscribe = function () {
                 init();
             }
         });
+        var ico_req = {
+            ico_status: 1,
+            currency: Client.get('currency') || 'USD',
+            subscribe: 1
+        };
+        // get update on client currency.
+        BinarySocket.send(ico_req, { callback: updateMinimumBid });
     };
 
     var init = function init() {
@@ -28403,10 +28429,16 @@ var ICOSubscribe = function () {
         var duration_val = $duration.val();
         var price_val = $price.val();
         var total = 0;
+        var usd_total = 0;
         if (duration_val && price_val) {
             total = +duration_val * +price_val;
         }
-        $total.html(formatMoney(currency, total));
+        var content = '' + formatMoney(currency, total);
+        if (unit_price && unit_price < Infinity) {
+            usd_total = +unit_price * total;
+            content = content + ' / ' + formatMoney('USD', usd_total);
+        }
+        $total.html(content);
         if (!$form_error) $form_error = $('#form_error');
         $form_error.setVisibility(0);
     };
@@ -28572,6 +28604,21 @@ var ICOSubscribe = function () {
     var askForAccountOpeningReason = function askForAccountOpeningReason() {
         var el_to_show = document.getElementById('row_account_opening_reason');
         el_to_show.setVisibility(1);
+    };
+
+    var updateMinimumBid = function updateMinimumBid(ico_status) {
+        var status = ico_status.ico_status || {};
+        var el_min_bid = document.getElementById('minimum_bid');
+        var res_currency = (status.currency || '').toUpperCase();
+        min_bid = status.minimum_bid || 0;
+        min_bid_usd = status.minimum_bid_usd || 1.35;
+        unit_price = min_bid_usd / min_bid;
+        var text = localize('Minimum bid') + ' = ' + formatMoney('USD', min_bid_usd); // Fallback value.
+        // Show bid in client currency.
+        if (min_bid_usd && min_bid && res_currency && res_currency !== 'USD') {
+            text = localize('Minimum bid') + ' = ' + formatMoney(res_currency, min_bid) + ' / ' + formatMoney('USD', min_bid_usd);
+        }
+        el_min_bid.innerHTML = text;
     };
 
     var onUnload = function onUnload() {
