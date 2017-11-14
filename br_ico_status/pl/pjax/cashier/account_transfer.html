@@ -1,0 +1,138 @@
+<div id="content" class="account_transfer-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin" onclick="window.open('/binary-static/br_ico_status/pl/ico.html', '_blank');">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-9 gr-12-p gr-12-m"><p>Binary.com ICO rozpoczyna się 15 listopada 2017</p></div>
+                            <div class="gr-3 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Dowiedz się więcej</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
+            <div id="page_info" style="display:none;">
+                <title>Przelewaj środki między kontami | Binary.com</title>
+                <div id="content_class">account_transfer-content</div>
+            </div>
+            
+                <div class="container">
+            
+
+
+
+  <h1>Przelewaj środki między kontami</h1>
+
+<div class="invisible" id="client_message">
+    <p class="center-text notice-msg">
+        <span class="invisible" id="no_account">Przelewy między kontami są niedostępne.</span> <span class="invisible" id="not_enough_balance">Minimalna kwota wymagana do skorzystania z funkcji przelewów między kontami to <span id="min_required_amount"></span>.</span> <span class="invisible" id="no_balance">Dokonaj <a href="/binary-static/br_ico_status/pl/cashier/forwardws.html#deposit">wpłaty</a> na swoje konto.</span>
+        <span class="invisible" id="limit_reached">Został osiągnięty limit wypłat.</span>
+    </p>
+</div>
+
+<div class="invisible" id="error_message">
+    <p class="center-text notice-msg"></p>
+</div>
+
+<div class="invisible" id="success_form">
+    <p>Przelew środków został zrealizowany. Twoje nowe saldo wynosi:</p>
+    <div class="gr-padding-10 gr-row table-body">
+        <div class="gr-1"></div>
+        <div>
+            <span id="from_loginid"></span>
+        </div>
+        <div class="gr-5">
+            <span id="from_balance"></span>
+        </div>
+    </div>
+    <div class="gr-padding-10 gr-row table-body">
+        <div class="gr-1"></div>
+        <div>
+            <span id="to_loginid"></span>
+        </div>
+        <div class="gr-5">
+            <span id="to_balance"></span>
+        </div>
+    </div>
+</div>
+
+<form class="invisible" id="frm_account_transfer">
+    <p>Przelewaj środki między Twoimi kontami z prawdziwymi pieniędzmi.</p>
+
+    <fieldset>
+        <legend>Szczegóły</legend>
+        
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label>
+                Przelew z
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <span class="text-display">
+                                                    <span id="lbl_transfer_from" ></span>
+                    </span>
+            
+        </div>
+    </div>
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="transfer_to">
+                Przelew do
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="transfer_to" class="form_input " >                     </select>
+            
+        </div>
+    </div>
+        <div class="gr-row form-row center-text-m ">
+        <div class="gr-4 gr-12-m">
+            <label for="transfer_amount">
+                Kwota
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                
+            <label id="currency"></label>
+            <input id="amount" name="amount" type="text" maxlength="20" autocomplete="off" />
+            <div class="hint" id="range_hint"></div>
+        
+            
+        </div>
+    </div>
+    
+    </fieldset>
+
+    <div class="gr-row ">
+                <div class="gr-8 gr-push-4 gr-12-m gr-push-0-m center-text-m">
+            
+        
+        <div id="form_error" class="error-msg invisible"></div>
+        
+        <div class="gr-padding-10">
+        
+            <button id="btn_submit" type="submit">Przelew</button>
+        </div>
+    
+                </div>
+            </div>
+</form>
+
+<div class="hint invisible" id="transfer_fee">
+    <p>Uwaga: Możesz przesyłać środki wyłącznie między kontem prowadzonym w walucie fiducjarnej i kontem w kryptowalucie.</p>
+    <p>Przelewaj pieniądze pomiędzy kontami w walucie fiducjarnej i kryptowalucie po uiszczeniu opłaty:</p>
+    <ul class="bullet">
+        
+        <li>Z waluty fiducjarnej na kryptowalutę: opłata za przelew w wysokości 1%</li>
+        <li>Z kryptowaluty na walutę fiducjarną: opłata za przelew w wysokości 1%</li>
+    </ul>
+</div>
