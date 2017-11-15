@@ -891,6 +891,8 @@ var Client = function () {
                     applyToAllElements('.ico-only-hide', function (el) {
                         el.setVisibility(0);
                     });
+                }
+                if (is_ico_only || Client.get('landing_company_shortcode') === 'costarica') {
                     applyToAllElements('.ico-only-show', function (el) {
                         el.setVisibility(1);
                     });
