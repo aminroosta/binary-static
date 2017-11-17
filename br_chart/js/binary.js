@@ -27952,6 +27952,7 @@ var localize = __webpack_require__(2).localize;
 
 var COLOR_ORANGE = '#E98024';
 var COLOR_GRAY = '#C2C2C2';
+var BAR_HAS_VALUE = 'bar-has-value';
 var MAX_BID_PRICE = 10;
 
 function createGradient(svg, id, stops) {
@@ -28093,6 +28094,7 @@ var ICOInfo = function () {
                     y: value,
                     x: key,
                     band: [key, key + bucket_size - 0.01],
+                    className: value ? BAR_HAS_VALUE : '',
                     color: color
                 });
             }
@@ -28111,6 +28113,7 @@ var ICOInfo = function () {
                     y: aboveMaxPrice,
                     x: MAX_BID_PRICE,
                     band: [MAX_BID_PRICE, maxKey],
+                    className: BAR_HAS_VALUE,
                     color: _color
                 });
             }
@@ -28123,8 +28126,17 @@ var ICOInfo = function () {
                 callback: function callback() {
                     var $bars = $root.find('.barChart svg .highcharts-column-series > rect');
                     $bars.each(function (inx, bar) {
-                        var y = +$(bar).attr('y');
-                        $(bar).attr('y', '' + (y - 1));
+                        var $bar = $(bar);
+                        if ($bar.hasClass(BAR_HAS_VALUE)) {
+                            var dy = +$bar.attr('height') ? 1 : 2;
+
+                            if (dy === 2) {
+                                $bar.attr('height', '1');
+                            }
+
+                            var y = +$bar.attr('y');
+                            $bar.attr('y', '' + (+y - dy));
+                        }
                     });
                     $loading.hide();
                     $labels.setVisibility(1);
