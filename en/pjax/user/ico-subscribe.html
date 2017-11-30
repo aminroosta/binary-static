@@ -1,27 +1,51 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>The Binary.com ICO is now live</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Participate now</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Subscribe to ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Binary.com Initial Coin Offering (ICO)</h1>
+<h1>Binary.com Initial Coin Offering (ICO)</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com is offering up to <strong>10,000,000</strong> tokens in an open auction. You may place your bids using the form below. The minimum bid is <strong>USD 1</strong> or its equivalent in another currency.</p>
+    <p>Binary.com is offering up to <strong>10,000,000</strong> tokens in an open auction. You may place your bids using the form below. <a href='/binary-static/en/ico.html' target='_blank'>Learn more</a></p>
+    <p>To place a bid, you only need to deposit 5% of the total bid value. At the end of the auction, the final price of the token will be decided and you will have two weeks to settle the remaining balance that’s due on each active bid.</p>
+    <p>Bids can be cancelled at any time before the end of the auction without any penalty.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Bid on the ICO:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Balance:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Bid on the ICO:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Price per unit: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Total: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Initial deposit required: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span>% of total amount)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
                         <button id="btn_submit" type="submit">Place bid</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">You have insufficient funds in your account.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/en/cashier/forwardws.html#deposit">top up in cashier</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/en/cashier/forwardws.html#deposit">Top up in cashier</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Binary.com ICO Auction Bids</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Binary.com ICO Auction Bids</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/en/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Histogram of Active Bids
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -93,6 +141,8 @@
                     
                         <th class="purchase">Total Bid Price</th>
                     
+                        <th class="deposit">Deposit</th>
+                    
                         <th class="details">Status</th>
                     
                         <th class="button"></th>
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Notes:</p>
+        <p class="no-margin">Notes:</p>
         <ol>
-            <li>Each bid cancellation will be subject to a 2% cancellation fee.</li>
+            <li>Bids can be cancelled at any time before the end of the auction at no cost.</li>
             <li>Unsuccessful bidders will receive a full refund.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Please confirm that you are a <a href='/binary-static/en/user/settings/professional.html'>professional trader</a> to proceed.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Unable to create ICO account while virtual account is selected. Please select your real money account and try again.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Please select your ICO account to proceed.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Please select your real money account to proceed.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">This feature is only available to CR clients. Please sign up to proceed.</p>
+    <p id="message_gaming" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Malta Gaming Authority.</p>
+    <p id="message_financial" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Malta Financial Services Authority.</p>
+    <p id="message_iom" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Isle of Man Gambling Supervision Commission.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Account opening reason
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Please select</option>
+        <option value="Speculative">Speculative</option>
+        <option value="Income Earning">Income earning</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Sign up</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Cancel bid?</h1>
+                <p class="gr-padding-10 gr-child">Are you sure you want to cancel the bid?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Yes, cancel my bid</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>No, return to the ICO auction page</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

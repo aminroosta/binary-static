@@ -1,45 +1,69 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>Binary.com ICO 已經啟動</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>立刻參與</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>ICO 訂閱 | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Binary.com首次代幣發售 (ICO)</h1>
+<h1>Binary.com首次代幣發售 (ICO)</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com提供高達<strong>10,000,000</strong>個公開拍賣權杖。您可使用下面的表格出價。最低出價金額是<strong>1 美元</strong>或等值的其他貨幣。</p>
+    <p>Binary.com 將公開拍賣發售多達 <strong> 1千萬 </strong> 個代幣。您可使用下面的表格出價。 <a href='/binary-static/zh_tw/ico.html' target='_blank'>了解詳細資訊</a></p>
+    <p>若要出價, 您只需要預先存入總出價額的5%。拍賣結束時將決定代幣的最終價格, 您有兩週的時間支付每個贏取標價所應付的餘額。</p>
+    <p>拍賣結束前隨時可以取消出價，不續付任何罰款。</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">在 ICO 出價：</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> 餘額:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">在 ICO 出價：</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
                     <div class="gr-12 gr-padding-10">
-                        <label for="duration">權杖數目</label>
+                        <label for="duration">代幣數目</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
                             <div class="gr-row">
                                 <input class="gr-9" type="text" id="duration" maxlength="30" autocomplete="off">
-                                <div class="fill-bg-color gr-3"><div class="center-text margin-top">權杖</div></div>
+                                <div class="fill-bg-color gr-3"><div class="center-text margin-top">代幣</div></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="gr-row center-text-m ">
                     <div class="gr-12 gr-padding-10">
-                        <label for="price">價格/權杖：</label>
+                        <label for="price">價格/代幣：</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">總計: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">單價: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">總計: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    所需初期存款: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span>總金額的百分比)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
                         <button id="btn_submit" type="submit">出價競拍</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">您的帳戶資金不足。</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/zh_tw/cashier/forwardws.html#deposit">存款入收銀台</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/zh_tw/cashier/forwardws.html#deposit">透過收銀台存款</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Binary.com ICO 拍賣出價</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Binary.com ICO 拍賣出價</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/zh_tw/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        主動出價的長條圖
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -87,11 +135,13 @@
                     
                         <th class="ref">參考</th>
                     
-                        <th class="payout nowrap">權杖數目</th>
+                        <th class="payout nowrap">代幣數目</th>
                     
-                        <th class="bid">每個權杖的投標報價</th>
+                        <th class="bid">每個代幣的投標報價</th>
                     
                         <th class="purchase">總出價</th>
+                    
+                        <th class="deposit">存款</th>
                     
                         <th class="details">狀況</th>
                     
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>注：</p>
+        <p class="no-margin">注：</p>
         <ol>
-            <li>每次取消投標須付2%取消費。</li>
+            <li>拍賣結束前隨時可以免費取消出價。</li>
             <li>競標失敗者獲得全額退款。</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>請確認您是<a href='/binary-static/zh_tw/user/settings/professional.html'>專業交易者</a>以便繼續操作。</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>選擇虛擬帳戶時無法開立 ICO 帳戶。請選擇真實資金帳戶並重試。</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>請選擇您的ICO帳戶繼續操作。</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>請選擇您的真實資金帳戶繼續操作。</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">此功能僅 CR 客戶可用。請註冊以繼續。</p>
+    <p id="message_gaming" class="invisible">要参与Binary.com ICO, 您必須另外開立一個帳戶。繼續此操作的同時，您確認開立一個不受馬爾他博彩管理局監管的帳戶 。</p>
+    <p id="message_financial" class="invisible">要参与Binary.com ICO, 您必須另外開立一個帳戶。繼續此操作的同時，您確認開立一個不受馬爾他金融服務管理局監管的帳戶 。</p>
+    <p id="message_iom" class="invisible">要参与Binary.com ICO, 您必須另外開立一個帳戶。繼續此操作的同時，您確認開立一個不受曼島賭博監督委員會監管的帳戶 。</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    開立帳戶的原因
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">請選擇</option>
+        <option value="Speculative">投機</option>
+        <option value="Income Earning">賺取收入</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>註冊</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">您的管轄權內無法使用此功能。</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>取消出價?</h1>
+                <p class="gr-padding-10 gr-child">確認取消出價?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">是的, 取消我的出價</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>不, 返回到 ICO 拍賣頁面</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

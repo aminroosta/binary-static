@@ -1,45 +1,69 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>Binary.com ICO đã hoạt động</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Tham gia ngay</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Đăng kí ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Binary.com Initial Coin Offering (ICO)</h1>
+<h1>Binary.com Initial Coin Offering (ICO)</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com is offering up to <strong>10,000,000</strong> tokens in an open auction. You may place your bids using the form below. The minimum bid is <strong>USD 1</strong> or its equivalent in another currency.</p>
+    <p>Binary.com đang cung cấp đến <strong>10.000.000</strong> thẻ trong một phiên đấu giá mở cửa. Bạn có thể đặt giá thầu của bạn bằng cách sử dụng mẫu dưới đây. <a href='/binary-static/vi/ico.html' target='_blank'>Tìm hiểu thêm</a></p>
+    <p>Để đặt một giá thầu, bạn chỉ cần phải đặt cọc 5% của tổng giá trị thầu. Vào cuối phiên đấu giá, giá thẻ cuối cùng sẽ được quyết định và bạn sẽ có hai tuần để giải quyết số dư còn lại mà còn nợ trên từng thầu còn hoạt động.</p>
+    <p>Thầu có thể được hủy bỏ bất cứ lúc nào trước khi kết thúc phiên đấu giá mà không phải chịu hình phạt nào.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Bid on the ICO:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Số dư tài khoản:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Giá thầu trên các ICO:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
                     <div class="gr-12 gr-padding-10">
-                        <label for="duration">Number of tokens</label>
+                        <label for="duration">Số lượng thẻ</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
                             <div class="gr-row">
                                 <input class="gr-9" type="text" id="duration" maxlength="30" autocomplete="off">
-                                <div class="fill-bg-color gr-3"><div class="center-text margin-top">Tokens</div></div>
+                                <div class="fill-bg-color gr-3"><div class="center-text margin-top">Thẻ</div></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="gr-row center-text-m ">
                     <div class="gr-12 gr-padding-10">
-                        <label for="price">Price/token:</label>
+                        <label for="price">Giá/thẻ:</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Giá cho mỗi đơn vị: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Tổng: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Tiền gửi ban đầu cần thiết: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span> % của tổng số tiền)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
-                        <button id="btn_submit" type="submit">Place bid</button>
+                        <button id="btn_submit" type="submit">Đặt giá thầu</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
-                            <div class="gr-8 align-start error-msg">You have insufficient funds in your account.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/vi/cashier/forwardws.html#deposit">top up in cashier</a></div>
+                            <div class="gr-8 align-start error-msg">Bạn có đủ tiền trong tài khoản của bạn.</div>
+                            <div class="gr-4 align-end"><a href="/binary-static/vi/cashier/forwardws.html#deposit">Trên cùng ở quầy thu ngân</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Binary.com Giá thầu ICO</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Binary.com Giá thầu ICO</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/vi/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Biểu đồ các thầu đang hoạt động
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -75,7 +123,7 @@
 
             <div id="portfolio-content" class="invisible">
                 <div id="portfolio-no-contract">
-                    <p>You have no open bids.</p>
+                    <p>Bạn có giá thầu không mở.</p>
                 </div>
 
                 <div class="table-container">
@@ -87,11 +135,13 @@
                     
                         <th class="ref">Tham khảo.</th>
                     
-                        <th class="payout nowrap">No. of Tokens</th>
+                        <th class="payout nowrap">Số thẻ</th>
                     
-                        <th class="bid">Bid Price Per Token</th>
+                        <th class="bid">Giá thầu cho một thẻ</th>
                     
-                        <th class="purchase">Total Bid Price</th>
+                        <th class="purchase">Tổng giá thầu</th>
+                    
+                        <th class="deposit">Gửi tiền</th>
                     
                         <th class="details">Tình trạng</th>
                     
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Chú ý:</p>
+        <p class="no-margin">Chú ý:</p>
         <ol>
-            <li>Each bid cancellation will be subject to a 2% cancellation fee.</li>
-            <li>Unsuccessful bidders will receive a full refund.</li>
+            <li>Thầu có thể được hủy bỏ bất cứ lúc nào trước khi kết thúc phiên đấu giá mà không bị tính phí.</li>
+            <li>Nhà thầu không thành công sẽ nhận được một khoản hoàn lại đầy đủ.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Xin vui lòng xác nhận bạn là một <a href='/binary-static/vi/user/settings/professional.html'>nhà giao dịch chuyên nghiệp</a> để tiến hành.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Không thể tạo tài khoản ICO trong khi tài khoản ảo đã được chọn. Vui lòng chọn tài khoản tiền thật của bạn và thử lại.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Vui lòng chọn tài khoản ICO để tiến hành.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Vui lòng chọn tài khoản tiền thật để tiến hành.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">Tính năng này chỉ có sẵn cho các khách hàng CR. Xin vui lòng đăng ký để tiến hành.</p>
+    <p id="message_gaming" class="invisible">Để tham gia vào các ICO Binary.com, bạn được yêu cầu để mở một tài khoản riêng. Bởi tiếp tục, bạn công nhận rằng bạn đang tạo một tài khoản khác mà không thuộc thẩm quyền của chính quyền trò chơi Malta.</p>
+    <p id="message_financial" class="invisible">Để tham gia vào các ICO Binary.com, bạn được yêu cầu để mở một tài khoản riêng. Bởi tiếp tục, bạn công nhận rằng bạn đang tạo một tài khoản khác mà không thuộc thẩm quyền của chính quyền dịch vụ tài chính Malta.</p>
+    <p id="message_iom" class="invisible">Để tham gia vào các ICO Binary.com, bạn được yêu cầu để mở một tài khoản riêng. Bởi tiếp tục, bạn công nhận rằng bạn đang tạo một tài khoản khác mà không thuộc thẩm quyền của Ủy ban giám sát cờ bạc của đảo Man.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Lý do mở tài khoản
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Vui lòng chọn</option>
+        <option value="Speculative">Suy đoán</option>
+        <option value="Income Earning">Thu nhập</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Đăng kí</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">Tính năng này là không có sẵn trong thẩm quyền của bạn.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Hủy thầu?</h1>
+                <p class="gr-padding-10 gr-child">Bạn có chắc bạn muốn hủy bỏ thầu?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Vâng, hủy thầu của tôi</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>Không, quay trở lại trang bán đấu giá ICO</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,27 +1,51 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>L'ICO di Binary.com è online</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Partecipa ora</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Iscriviti all'ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Initial Coin Offering (ICO) di Binary.com</h1>
+<h1>Initial Coin Offering (ICO) di Binary.com</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com offre fino a <strong>10.000.000</strong> token in un'asta aperta. Puoi piazzare le tue offerte utilizzando il modulo qui sotto. L'offerta minima è pari a <strong>USD 1</strong> o equivalente in altra valuta.</p>
+    <p>Binary.com offre fino a <strong>10.000.000</strong> token in un'asta aperta. Puoi piazzare le tue offerte utilizzando il modulo sottostante. <a href='/binary-static/it/ico.html' target='_blank'>Per saperne di più</a></p>
+    <p>Per effettuare un'offerta, bisogna solo depositare il 5% del valore totale dell'offerta. Alla fine dell'asta, verrà deciso il prezzo finale del token e tu avrai due settimane per regolare il saldo rimanente dovuto su ogni offerta attiva.</p>
+    <p>Le offerte possono essere cancellate in qualsiasi momento prima della fine dell'asta, senza alcuna penalità.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Offerta sull'ICO:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Saldo:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Offerta sull'ICO:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
@@ -39,7 +63,7 @@
                 </div>
                 <div class="gr-row center-text-m ">
                     <div class="gr-12 gr-padding-10">
-                        <label for="price">Price/token:</label>
+                        <label for="price">Prezzo/token:</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Totale: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Prezzo per unità: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Totale: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Deposito iniziale richiesto: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span> % dell'importo totale)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
-                        <button id="btn_submit" type="submit">Place bid</button>
+                        <button id="btn_submit" type="submit">Fai un'offerta</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
-                            <div class="gr-8 align-start error-msg">You have insufficient funds in your account.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/it/cashier/forwardws.html#deposit">top up in cashier</a></div>
+                            <div class="gr-8 align-start error-msg">Non hai fondi sufficienti sull'account.</div>
+                            <div class="gr-4 align-end"><a href="/binary-static/it/cashier/forwardws.html#deposit">Integrare fondi nella cassa</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Offerte all'asta dell'ICO di Binary.com</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Offerte all'asta dell'ICO di Binary.com</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/it/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Istogramma delle offerte attive
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -89,9 +137,11 @@
                     
                         <th class="payout nowrap">Numero di token</th>
                     
-                        <th class="bid">Bid Price Per Token</th>
+                        <th class="bid">Prezzo di offerta per token</th>
                     
                         <th class="purchase">Total Bid Price</th>
+                    
+                        <th class="deposit">Deposita</th>
                     
                         <th class="details">Stato</th>
                     
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Note:</p>
+        <p class="no-margin">Note:</p>
         <ol>
-            <li>Ogni cancellazione di un'offerta è soggetta a una commissione di cancellazione del 2%.</li>
-            <li>Unsuccessful bidders will receive a full refund.</li>
+            <li>Le offerte possono essere annullate in qualsiasi momento prima della fine dell'asta, senza alcun costo.</li>
+            <li>Gli offerenti infruttuosi riceveranno un rimborso totale.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Please confirm that you are a <a href='/binary-static/it/user/settings/professional.html'>professional trader</a> to proceed.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Impossibile creare un account ICO quando si seleziona l'account virtuale. Seleziona il tuo account con soldi veri e riprova.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Per procedere, seleziona il tuo account ICO.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Per procedere, seleziona il tuo account con soldi veri.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">This feature is only available to CR clients. Please sign up to proceed.</p>
+    <p id="message_gaming" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Malta Gaming Authority.</p>
+    <p id="message_financial" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Malta Financial Services Authority.</p>
+    <p id="message_iom" class="invisible">To participate in the Binary.com ICO, you are required to open a separate account. By proceeding, you acknowledge that you are creating another account that is not under the jurisdiction of the Isle of Man Gambling Supervision Commission.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Motivo dell'apertura dell'account
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Seleziona</option>
+        <option value="Speculative">Speculativo</option>
+        <option value="Income Earning">Income earning</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Sign up</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Cancella l'offerta?</h1>
+                <p class="gr-padding-10 gr-child">Sei sicuro di voler cancellare l'offerta?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Sì, annulla la mia offerta</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>No, return to the ICO auction page</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

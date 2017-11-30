@@ -1,32 +1,56 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>La ICO de Binary.com ya está disponible</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Participe ahora</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
-                <title>Subscribe to ICO | Binary.com</title>
+                <title>Suscribirse a la ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Oferta Inicial de Monedas (ICO) de Binary.com</h1>
+<h1>Oferta Inicial de Monedas (ICO) de Binary.com</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com is offering up to <strong>10,000,000</strong> tokens in an open auction. You may place your bids using the form below. The minimum bid is <strong>USD 1</strong> or its equivalent in another currency.</p>
+    <p>Binary.com está ofreciendo hasta <strong>10.000.000</strong> tokens en una subasta abierta. Usted puede hacer su oferta mediante el siguiente formulario. <a href='/binary-static/es/ico.html' target='_blank'>Saber más</a></p>
+    <p>Para presentar una oferta, solo debe depositar 5% del valor total de su oferta. Al final de la subasta se decidirá el precio final del token y usted tendrá dos semanas para liquidar el saldo restante adeudado por cada oferta activa.</p>
+    <p>Es posible cancelar las ofertas en cualquier momento antes del final de la subasta sin sanción alguna.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Bid on the ICO:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Balance:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Presentar una oferta en la ICO:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
                     <div class="gr-12 gr-padding-10">
-                        <label for="duration">Number of tokens</label>
+                        <label for="duration">Número de tokens</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
@@ -39,7 +63,7 @@
                 </div>
                 <div class="gr-row center-text-m ">
                     <div class="gr-12 gr-padding-10">
-                        <label for="price">Price/token:</label>
+                        <label for="price">Precio/token:</label>
                     </div>
                     <div class="gr-12">
                         <div class="gr-12">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Precio por unidad: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Total: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Depósito inicial requerido: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span>% del total)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
-                        <button id="btn_submit" type="submit">Place bid</button>
+                        <button id="btn_submit" type="submit">Presentar oferta</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
-                            <div class="gr-8 align-start error-msg">You have insufficient funds in your account.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/es/cashier/forwardws.html#deposit">top up in cashier</a></div>
+                            <div class="gr-8 align-start error-msg">No tiene fondos suficientes en su cuenta.</div>
+                            <div class="gr-4 align-end"><a href="/binary-static/es/cashier/forwardws.html#deposit">Cargue saldo en su cajero</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Binary.com ICO Auction Bids</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Ofertas de subasta en la ICO de Binary.com</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/es/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Histograma de las ofertas activas
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -75,7 +123,7 @@
 
             <div id="portfolio-content" class="invisible">
                 <div id="portfolio-no-contract">
-                    <p>You have no open bids.</p>
+                    <p>Usted no tiene ofertas abiertas.</p>
                 </div>
 
                 <div class="table-container">
@@ -89,9 +137,11 @@
                     
                         <th class="payout nowrap">No. of Tokens</th>
                     
-                        <th class="bid">Bid Price Per Token</th>
+                        <th class="bid">Precio de oferta por token</th>
                     
                         <th class="purchase">Total Bid Price</th>
+                    
+                        <th class="deposit">Depósito</th>
                     
                         <th class="details">Estado</th>
                     
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Notas:</p>
+        <p class="no-margin">Notas:</p>
         <ol>
-            <li>Each bid cancellation will be subject to a 2% cancellation fee.</li>
-            <li>Unsuccessful bidders will receive a full refund.</li>
+            <li>Es posible cancelar las ofertas en cualquier momento antes del final de la subasta sin costo alguno.</li>
+            <li>Los licitantes que no resulten ganadores recibirán un reembolso total de su dinero.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Please confirm that you are a <a href='/binary-static/es/user/settings/professional.html'>professional trader</a> to proceed.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>No se puede crear cuenta ICO mientras esté seleccionada la cuenta virtual. Por favor, seleccione su cuenta de dinero real e inténtelo nuevamente.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Por favor, seleccione su cuenta ICO para continuar.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Please select your real money account to proceed.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">This feature is only available to CR clients. Please sign up to proceed.</p>
+    <p id="message_gaming" class="invisible">Para participar en la ICO (oferta inicial de moneda) de Binary.com es necesario abrir una cuenta diferente. Al continuar, usted reconoce que está creando otra cuenta, la cual no se encuentra en la jurisdicción de la Autoridad de Juegos de Azar Financieros de Malta.</p>
+    <p id="message_financial" class="invisible">Para participar en la ICO (oferta inicial de moneda) de Binary.com es necesario abrir una cuenta diferente. Al continuar, usted reconoce que está creando otra cuenta, la cual no se encuentra en la jurisdicción de la Autoridad de Servicios Financieros de Malta.</p>
+    <p id="message_iom" class="invisible">Para participar en la ICO (oferta inicial de moneda) de Binary.com es necesario abrir una cuenta diferente. Al continuar, usted reconoce que está creando otra cuenta, la cual no se encuentra en la jurisdicción de la Comisión de Supervisión de Juegos de Azar de la Isla de Man.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Motivo para abrir la cuenta
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Seleccione</option>
+        <option value="Speculative">Speculative</option>
+        <option value="Income Earning">Income earning</option>
+        <option value="Hedging">Cobertura</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Sign up</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>¿Cancelar oferta?</h1>
+                <p class="gr-padding-10 gr-child">¿Está seguro de que desea cancelar la oferta?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Si, cancelar mi oferta</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>No, volver a la página de subasta de la ICO</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

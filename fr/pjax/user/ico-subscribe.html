@@ -1,27 +1,51 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>L'ICO Binary.com est maintenant en ligne</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Participez maintenant</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Souscrire à ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Offre de pièces initiale (ICO) Binary.com</h1>
+<h1>Offre de pièces initiale (ICO) Binary.com</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com offre jusqu'à <strong>10 000 000</strong> jetons dans une vente aux enchères ouverte. Vous pouvez placer vos offres en utilisant le formulaire ci-dessous. L’enchère minimum est <strong>de 1 dollar US</strong> ou l’équivalent dans une autre devise.</p>
+    <p>Binary.com offre jusqu'à <strong>10 000 000</strong>jetons dans une vente aux enchères ouverte. Vous pouvez placer vos offres en utilisant le formulaire ci-dessous.<a href='/binary-static/fr/ico.html' target='_blank'>En savoir plus</a></p>
+    <p>Pour placer une enchère, il vous suffit de déposer 5 % du total offre de valeur. À la fin de l’enchère, le prix final du jeton sera décidé et vous aurez deux semaines pour régler le solde qui est dû sur chaque enchère active.</p>
+    <p>Les soumissions peuvent être annulées à tout moment avant la fin de la vente aux enchères sans pénalités.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Enchérissez sur l’ICO :</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Solde :
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Enchérissez sur l’ICO :</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total : <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Prix unitaire : <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Total : <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Dépôt initial requis : 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span> % du montant total)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
                         <button id="btn_submit" type="submit">Enchérir</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">Vous n'avez pas assez de fonds dans votre compte.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/fr/cashier/forwardws.html#deposit">rajouter des fonds à la caisse</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/fr/cashier/forwardws.html#deposit">Rajouter des fonds à la caisse</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Mise dans le cadre des enchères de l'ICO Binary.com</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Mise dans le cadre des enchères de l'ICO Binary.com</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/fr/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Histogramme des Offres Actives
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -93,6 +141,8 @@
                     
                         <th class="purchase">Prix total des offres</th>
                     
+                        <th class="deposit">Dépôt</th>
+                    
                         <th class="details">Statut</th>
                     
                         <th class="button"></th>
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Remarques :</p>
+        <p class="no-margin">Remarques :</p>
         <ol>
-            <li>Chaque annulation d’enchérissement sera soumise à des frais d’annulation de 2 %.</li>
+            <li>Les soumissions peuvent être annulées à tout moment avant la fin de la vente aux enchères sans frais.</li>
             <li>Les soumissionnaires non retenus recevront un remboursement complet.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Veuillez confirmer que vous êtes un <a href='/binary-static/fr/user/settings/professional.html'>trader professionnel</a> pour continuer.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Impossible de créer le compte ICO lorsque le compte virtuel est sélectionné. Veuillez sélectionner votre compte en argent réel et essayer à nouveau.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Veuillez sélectionner votre compte ICO pour continuer.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Veuillez sélectionner votre compte réel pour continuer.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">Cette fonctionnalité est uniquement disponible pour les clients CR. S’il vous plaît Inscrivez-vous pour procéder.</p>
+    <p id="message_gaming" class="invisible">Pour participer à l'ICO Binary.com, vous devez ouvrir un compte séparé. En continuant, vous reconnaissez que vous créez un autre compte qui n'est pas sous la juridiction de la Commission de Supervision des Jeux de l’île de Malte.</p>
+    <p id="message_financial" class="invisible">Pour participer à l'ICO Binary.com, vous devez ouvrir un compte séparé. En continuant, vous reconnaissez que vous créez un autre compte qui n'est pas sous la juridiction de l'Autorité des Services Financiers de Malte.</p>
+    <p id="message_iom" class="invisible">Pour participer à l'ICO Binary.com, vous devez ouvrir un compte séparé. En continuant, vous reconnaissez que vous créez un autre compte qui n'est pas sous la juridiction de la commission de supervision des Jeux de l’île de Malte.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Motif d’ouverture de compte
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Sélection</option>
+        <option value="Speculative">Spéculation</option>
+        <option value="Income Earning">Gagner des revenus</option>
+        <option value="Hedging">Opérations de couverture</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Inscription</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">Cette fonctionnalité n’est pas disponible dans votre juridiction.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Annuler la soumission?</h1>
+                <p class="gr-padding-10 gr-child">Êtes-vous certain de vouloir annuler la soumission ?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Oui, annulez mon enchère</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>Non, retourner à la page de vente aux enchères ICO</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

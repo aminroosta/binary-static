@@ -1,3 +1,6 @@
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,700&subset=latin,vietnamese,cyrillic-ext,latin-ext,cyrillic");
+/* stylelint-disable color-no-hex */
+/* stylelint-enable color-no-hex */
 /* stylelint-disable color-no-hex */
 /* stylelint-enable color-no-hex */
 /* common styles */
@@ -44,6 +47,20 @@ ol, ul {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+#end_note {
+  line-height: 25px;
+  background: #c03;
+  font-size: 0.7561436673rem;
+  position: fixed;
+  bottom: 0;
+  z-index: 10;
+  width: 100%;
+  text-align: center;
+}
+#end_note, #end_note a {
+  color: #fff;
 }
 
 .container {
@@ -186,7 +203,7 @@ hr {
 }
 
 .logo {
-  background: url("https://style.binary.com/images/logo/binary_logo_light.svg") no-repeat;
+  background: url("../images/logo/binary_logo_light.svg") no-repeat;
   width: 200px !important;
   height: 36px;
   margin: auto;

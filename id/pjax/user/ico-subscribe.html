@@ -1,27 +1,51 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>ICO Binary.com sudah dimulai</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Ikuti sekarang</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Berlangganan ICO | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Penawaran Koin Perdana (ICO) Binary.com</h1>
+<h1>Penawaran Koin Perdana (ICO) Binary.com</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>Binary.com menawarkan hingga <strong>10.000.000</strong> token pada lelang terbuka. Anda dapat menempatkan tawaran Anda menggunakan formulir di bawah ini. Tawaran minimum adalah <strong>USD 1</strong> atau setara dalam mata uang lainnya.</p>
+    <p>Binary.com menawarkan hingga <strong>10.000.000</strong> token pada lelang terbuka. Anda dapat mengajukan bid Anda menggunakan formulir di bawah ini. <a href='/binary-static/id/ico.html' target='_blank'>Pelajari lebih lanjut</a></p>
+    <p>Untuk melakukan bid, Anda hanya perlu mendeposit sebesar 5% dari total nilai bid. Pada akhir lelang, harga akhir token akan ditentukan dan Anda memiliki waktu selama dua minggu untuk melunasi sisa jumlah yang perlu Anda bayarkan bagi setiap bid yang aktif.</p>
+    <p>Bid dapat dibatalkan kapan saja sebelum lelang berakhir tanpa biaya.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Bid pada ICO:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Saldo:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Bid pada ICO:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Harga per unit: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Total: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Deposit awal yang diperlukan: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span>% dari jumlah total)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
                         <button id="btn_submit" type="submit">Tempatkan bid</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">Dana tidak mencukupi pada akun Anda.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/id/cashier/forwardws.html#deposit">isi ulang pada kasir</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/id/cashier/forwardws.html#deposit">Isi ulang pada kasir</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Tawaran Lelang ICO Binary.com</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Tawaran Lelang ICO Binary.com</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/id/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Histogram Tawaran Aktif
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -93,6 +141,8 @@
                     
                         <th class="purchase">Total Harga Bid</th>
                     
+                        <th class="deposit">Deposit</th>
+                    
                         <th class="details">Status</th>
                     
                         <th class="button"></th>
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Catatan:</p>
+        <p class="no-margin">Catatan:</p>
         <ol>
-            <li>Setiap pembatalan bid dikenakan biaya pembatalan sebesar 2%.</li>
+            <li>Bid dapat dibatalkan kapan saja sebelum lelang berakhir tanpa biaya.</li>
             <li>Penawar yang gagal akan menerima pengembalian penuh.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Mohon konfirmasikan bahwa Anda adalah seorang <a href='/binary-static/id/user/settings/professional.html'>trader profesional</a> untuk melanjutkan.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Tidak dapat mendaftar akun ICO saat memilih akun virtual. Silahkan pilih akun uang riil Anda dan coba kembali.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Silahkan pilih akun ICO Anda untuk melanjutkan.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Silahkan pilih akun uang riil Anda untuk melanjutkan.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">Fitur ini hanya tersedia untuk klien CR. Silakan masuk untuk melanjutkan.</p>
+    <p id="message_gaming" class="invisible">Untuk berpartisipasi dalam ICO Binary.com, Anda perlu mendaftar akun baru. Dengan melanjutkan, Anda mengetahui bahwa Anda akan mendaftar akun lain diluar jurisdiksi Malta Gaming Authority.</p>
+    <p id="message_financial" class="invisible">Untuk berpartisipasi dalam ICO Binary.com, Anda perlu mendaftar akun baru. Dengan melanjutkan, Anda mengetahui bahwa Anda akan mendaftar akun lain diluar jurisdiksi Malta Financial Services Authority.</p>
+    <p id="message_iom" class="invisible">Untuk berpartisipasi dalam ICO Binary.com, Anda perlu mendaftar akun baru. Dengan melanjutkan, Anda mengetahui bahwa Anda akan mendaftar akun lain diluar jurisdiksi Isle of Man Gambling Supervision Commission.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Alasan pedaftaran akun
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Tolong pilih</option>
+        <option value="Speculative">Spekulatif</option>
+        <option value="Income Earning">Hasil pendapatan</option>
+        <option value="Hedging">Hedging</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Daftar</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">Fitur ini tidak tersedia pada yurisdiksi Anda.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Membatalkan bid?</h1>
+                <p class="gr-padding-10 gr-child">Apakah Anda yakin untuk membatalkan bid?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Ya, batalkan bid saya</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>Tidak, kembali ke halaman pelelangan ICO</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

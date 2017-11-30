@@ -1,27 +1,51 @@
 <div id="content" class="ico-subscribe-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>A OIM da Binary.com já está disponível</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Participe já</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Subscreva à OIM | Binary.com</title>
                 <div id="content_class">ico-subscribe-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <h1>Oferta Inicial de Moedas (OIM) Binary.com</h1>
+<h1>Oferta Inicial de Moedas (OIM) Binary.com</h1>
 
 <div id="ico_subscribe" class="invisible">
-    <p>A Binary.com está disponibilizando até <strong>10.000.000</strong> tokens num leilão aberto. Você pode efetuar a sua licitação usando o formulário abaixo. A licitação mínima é <strong>1 USD</strong> ou o seu equivalente em outra moeda.</p>
+    <p>Binary.com está oferecendo até <strong>10.000.000</strong> tokens em um leilão aberto. Você pode fazer as suas licitações usando o formulário abaixo. <a href='/binary-static/pt/ico.html' target='_blank'>Saiba mais</a></p>
+    <p>Para apresentar uma licitação, basta depositar apenas 5% do valor total da licitação. No fim do leilão, o preço final do token será decidido e você terá duas semanas para liquidar o valor remanescente que estiver em dívida em cada licitação ativa.</p>
+    <p>As licitações podem ser canceladas a qualquer momento antes do fim do leilão, sem qualquer penalidade.</p>
     <div class="gr-row">
         <div class="gr-7 gr-12-p gr-12-m">
-            <img class="responsive" src="/binary-static/images/pages/ico/auction.svg" />
+            <a href="#auction" class="no-ajax">
+                <img class="responsive ico-auction" />
+            </a>
         </div>
         <div class="gr-5 gr-12-p gr-12-m border-gray border-radius">
             <form id="frm_ico_bid">
-                <div class="gr-row fill-bg-color gr-padding-10 border-radius">
-                    <h3 class="gr-5 no-margin">Faça uma licitação na OIM:</h3>
-                    <div class="gr-7 hint align-end">
-                        <span class="currency"></span> Saldo:
-                        <strong class="topMenuBalance"></strong>
+                <div class="gr-row fill-bg-color border-radius">
+                    <div class="gr-12 gr-padding-10">
+                        <h3 class="no-margin">Faça uma licitação na OIM:</h3>
+                        <p class="no-margin" id="minimum_bid"></p>
                     </div>
                 </div>
                 <div class="gr-row center-text-m">
@@ -50,22 +74,46 @@
                         </div>
                     </div>
                 </div>
-                <div class="gr-12 align-end hint">Total: <span id="total"></span></div>
+                <div class="gr-12 align-start hint no-padding">Preço unitário: <span id="price_unit"></span></div>
+                <div class="gr-12 align-start hint no-padding">Total: <span id="total"></span></div>
+                <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
+                <div class="gr-12 align-start hint no-padding">
+                    Depósito inicial necessário: 
+                    <strong id="payable_amount"></strong>
+                    <span class="deposit">
+                         (<span class="initial_deposit_percent"></span>% do valor total)
+                    </span>
+                </div>
                 <div class="center-text">
                     <div id="form_error" class="error-msg invisible"></div>
                     <div class="gr-padding-10">
                         <button id="btn_submit" type="submit">Apresentar lance</button>
                         <div class="gr-row invisible hint" id="topup_wrapper">
                             <div class="gr-8 align-start error-msg">Você não tem fundos suficientes na sua conta.</div>
-                            <div class="gr-4 align-end"><a href="/binary-static/pt/cashier/forwardws.html#deposit">carrega saldo no caixa</a></div>
+                            <div class="gr-4 align-end"><a href="/binary-static/pt/cashier/forwardws.html#deposit">Carregue saldo no caixa</a></div>
                         </div>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <div class=" gr-padding-20">
+    <div class="separator-line "></div>
+</div>
     <div id="ico_bids">
-        <h1>Licitações de leilão da OIM Binary.com</h1>
+        <div class="gr-row">
+            <h1 class="gr-7 gr-12-m gr-order-2-m">Licitações de leilão da OIM Binary.com</h1>
+            <div class="gr-5 gr-12-m gr-order-1-m invisible" id="view_ico_info">
+                <a class="button gr-float-right gr-float-left-m" href="/binary-static/pt/user/ico-info.html">
+                    <span>
+                        <img src="/binary-static/images/ico/icons/bar_chart.svg">
+                        Histograma de licitações ativas
+                    </span>
+                </a>
+            </div>
+        </div>
         
 
         <div id="portfolio">
@@ -93,6 +141,8 @@
                     
                         <th class="purchase">Preço de lance total</th>
                     
+                        <th class="deposit">Depositar</th>
+                    
                         <th class="details">Estado</th>
                     
                         <th class="button"></th>
@@ -110,11 +160,82 @@
             </div>
         </div>
     </div>
+    <div class=" gr-padding-10">
+    <div class="separator-line "></div>
+</div>
     <div class="faded">
-        <p>Notas:</p>
+        <p class="no-margin">Notas:</p>
         <ol>
-            <li>Cada cancelamento de uma licitação será sujeito a uma taxa de cancelamento de 2%.</li>
+            <li>As licitações podem ser canceladas a qualquer momento antes do fim do leilão, sem qualquer custo.</li>
             <li>Licitadores malsucedidos irão receber um reembolso total do seu dinheiro.</li>
         </ol>
+    </div>
+    <a href="#_" class="no-ajax img-lightbox popup" id="auction">
+        <div>
+            <img class="responsive ico-auction" />
+        </div>
+    </a>
+</div>
+
+<div class="invisible" id="ico_professional_message">
+    <p>Confirme que você é um <a href='/binary-static/pt/user/settings/professional.html'>negociador profissional</a> para proceder.</p>
+</div>
+<div class="invisible" id="ico_virtual_message">
+    <p>Não é possível criar uma conta OIM enquanto uma conta virtual está selecionada. Por favor, selecione a sua conta real e tente novamente.</p>
+</div>
+
+<div class="invisible" id="ico_account_message">
+    <p>Selecione a sua conta da OIM para proceder.</p>
+</div>
+
+<div class="invisible" id="ico_account_message_real">
+    <p>Selecione a sua conta de dinheiro real para proceder.</p>
+</div>
+
+<div class="invisible" id="ico_new_account_message">
+    <p id="message_common" class="invisible">This feature is only available to CR clients. Please sign up to proceed.</p>
+    <p id="message_gaming" class="invisible">Para participar da OIM da Binary.com, é necessário que você abra uma conta separada. Ao proceder, você reconhece que está criando uma outra conta que não está sob a jurisdição da Autoridade dos Jogos de Malta.</p>
+    <p id="message_financial" class="invisible">Para participar da OIM da Binary.com, é necessário que você abra uma conta separada. Ao proceder, você reconhece que está criando uma outra conta que não está sob a jurisdição da Autoridade dos Serviços Financeiros de Malta.</p>
+    <p id="message_iom" class="invisible">Para participar da OIM da Binary.com, é necessário que você abra uma conta separada. Ao proceder, você reconhece que está criando uma outra conta que não está sob a jurisdição da Comissão de Supervisão de Jogos da Ilha de Man.</p>
+    <div class="gr-row form-row center-text-m gr-padding-20 invisible" id="row_account_opening_reason">
+        <div class="gr-4 gr-12-m">
+            <label for="account_opening_reason">
+                                    Motivo de abertura de conta
+            </label>
+        </div>
+        <div class="gr-8 gr-12-m">
+                                <select id="account_opening_reason" class="form_input " > 
+        <option value="">Selecione</option>
+        <option value="Speculative">Especulativo</option>
+        <option value="Income Earning">Ganhar rendimentos</option>
+        <option value="Hedging">Cobertura</option>
+                        </select>
+            
+        </div>
+    </div>
+    <div class="center-text">
+        <a href="javascript:;" class="button" id="ico_new_account"><span>Inscreva-se</span></a>
+        <p class="error-msg invisible" id="new_account_error"></p>
+    </div>
+</div>
+
+<div class="invisible" id="feature_not_allowed">
+    <p class="center-text notice-msg">This feature is not available in your jurisdiction.</p>
+</div>
+
+<div id="cancel_bid_confirmation" class="lightbox invisible">
+    <div class="gr-padding-30 gr-gutter">
+        <div class="gr-gutter">
+            <div class="gr-gutter">
+                <h1>Cancelar licitação?</h1>
+                <p class="gr-padding-10 gr-child">Tem certeza que deseja cancelar a licitação?</p>
+                <form id="frm_confirm">
+                    <div class="center-text gr-centered">
+                        <button class="button" type="submit">Sim, cancelar a minha licitação</button>
+                        <a class="button-secondary" id="cancel" href="javascript:;"><span>Não, voltar para a página do leilão da OIM</span></a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>

@@ -1,20 +1,46 @@
 <div id="content" class="trading-content">
+            
+                <div id="ico_banner_container"  class="ico-banner-container">
+    <div id="ico_banner" class="ico-banner invisible ja-hide top-margin bottom-margin">
+        <div class="gr-row gr-centered">
+            <div class="gr-12">
+                <div class="gr-row gr-no-gutter ico-box">
+                    <div class="gr-3 gr-padding-10 ico-column left-bg"></div>
+                    <div class="gr-9 gr-padding-10 ico-column">
+                        <div class="gr-row gr-no-gutter">
+                            <div class="gr-8 gr-12-p gr-12-m"><p>L'ICO di Binary.com è online</p></div>
+                            <div class="gr-4 gr-12-p gr-12-m learn-btn"><a id="ico_link_button" class="button"><span>Partecipa ora</span></a></div>
+                        </div>
+                    </div>
+                    <div id="close_ico_banner" class="close-btn"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            
             <div id="page_info" style="display:none;">
                 <title>Riconosciuto dai trader dal 2000 | Binary.com</title>
                 <div id="content_class">trading-content</div>
             </div>
-            <div class="container">
+            
+                <div class="container">
+            
 
 
-
-  <div id="trading_socket_container" class="tab-menu-wrap">
+<div id="trading_socket_container" class="tab-menu-wrap">
     <div id="notifications_wrapper"></div>
     <div id="loading_container" class="overlay_container"></div>
-    <div id="deposit_btn_wrapper" class="client_real invisible secondary-bg-color center-text gr-hide-m">
-        <a id="deposit_btn_trade" href="/binary-static/it/cashier/forwardws.html#deposit">
+    <a id="deposit_btn_trade" class="client_real invisible gr-hide-m button" href="/binary-static/it/cashier/forwardws.html#deposit">
+        <span>
             <img src="/binary-static/images/common/plus.svg">
             Deposita
-        </a>
+        </span>
+    </a>
+    <div class="client_virtual invisible">
+        <div id="upgrade_btn_trade" class="invisible upgrademessage gr-hide-m">
+            <a class="button"></a>
+        </div>
     </div>
     <div class="client_virtual client_logged_out invisible" id="guideBtn"></div>
     <div class="row" id="contract_symbol_container">
@@ -59,7 +85,7 @@
                                         <select id="duration_units" class="medium_width_input"></select>
                                     </div>
                                     <div id="duration_wrapper" class="hint">
-                                        <span id="duration_tooltip">The minimum duration is</span> <span id="duration_minimum"></span> <span id="duration_unit"></span>
+                                        <span id="duration_tooltip">La durata minima è</span> <span id="duration_minimum"></span> <span id="duration_unit"></span>
                                         <span id="duration_maximum" class="invisible"></span>
                                     </div>
                                     <div id="expiry_type_endtime">
