@@ -39,8 +39,8 @@
         <link rel="icon" sizes="16x16" type="image/png" href="/binary-static/images/favicons/favicon-16x16.png" />  
         <link rel="icon" sizes="32x32" type="image/png" href="/binary-static/images/favicons/favicon-32x32.png" />
 
-        <link href="/binary-static/css/ico.css?1yhvpqxo" rel="stylesheet" />
-        <link href="https://style.binary.com/binary.css?1yhvpqxo" rel="stylesheet" />
+        <link href="/binary-static/css/ico.css?6rq23q34" rel="stylesheet" />
+        <link href="https://style.binary.com/binary.css?6rq23q34" rel="stylesheet" />
         <link href="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/tiny-slider.css" rel="stylesheet">
     </head>
 
@@ -140,7 +140,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 </div>
                                 <div class="status-toggle status-ended">
                                     <h3 class="content-inverse-color">A venda de tokens da Binary.com já terminou</h3>
-                                    <p class="intro-subtext">Veja as suas licitações vencedoras e peça os seus tokens</p>
                                 </div>
                                 <div class="status-toggle status-started" id="countdown">
                                     
@@ -196,11 +195,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                     
                                 </div>
                                 <div id="sign-up-section" class="invisible">
-                                    <div class="signup-desc">
+                                    <div class="signup-desc invisible">
                                         <p>Investidores precisam abrir uma conta real na Binary.com para participar na OIM.</p>
                                         <p>Inscreva-se agora gratuitamente.</p>
                                     </div>
-                                    <div class="signup-container gr-9 gr-12-p gr-12-m gr-centered">
+                                    <div class="signup-container gr-9 gr-12-p gr-12-m gr-centered invisible">
                                         <form id="frm_verify_email">
                                             <div class="gr-row gr-row-align-center">
                                                 <div class="signup-box gr-8 gr-10-p gr-12-m gr-no-gutter secondary-bg-color">
@@ -1028,7 +1027,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Como funciona a OIM?</h4>
-                            <p>A Binary.com irá disponibilizar um grande número de tokens de blockchain a investidores. Estes tokens serão tokens "ERC20" da blockchain Ethereum, no entanto, a Empresa pode emitir tokens em outras blockchains caso haja procura suficiente dos investidores para outros tipos de tokens.</p>
+                            <p>A Binary.com irá disponibilizar um grande número de tokens de blockchain a investidores. Estes tokens serão tokens "ERC20" da blockchain Ethereum, no entanto, a Empresa pode emitir tokens em outras blockchains caso haja procura suficiente dos investidores a outros tipos de tokens.</p>
                             <p>Independentemente do tipo de token, cada token fornecerá aos investidores dois direitos:</p>
                             <ol>
                                 <li>O direito de receber pagamentos equivalentes a dividendos pagos sobre ações ordinárias do Binary Group Ltd; e</li>
@@ -1052,7 +1051,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div class="gr-12">
                         <div class="faq">
-                            <h4>Como é que os tokens são disponibilizados?</h4>
+                            <h4>Como os tokens são disponibilizados?</h4>
                             <p>Os tokens são disponibilizados através de um processo de leilão. Para fazer uma licitação, você só precisa de fazer um depósito adiantando 5% do valor da licitação. Depois do leilão terminar e o preço final ser determinado, você terá duas semanas para depositar o valor remanescente, dependendo do preço final do token.</p>
                             <p>Isto significa que você não terá que vincular fundos importantes a fim de manter as suas licitações ativas.</p>
                         </div>
@@ -1124,7 +1123,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <div class="gr-12">
                         <div class="faq">
                             <h4>Onde posso ver o código fonte dos tokens?</h4>
-                            <p>A Binary.com pretende utilizar o token <a href='https://github.com/Giveth/minime' target='_blank' rel='noopener noreferrer'>Mini Me</a>. Por favor, leia a nossa <a href='https://tech.binary.com/an-erc20-securities-token/' target='_blank' rel='noopener noreferrer'>publicação no blog</a> com descrição dos nossos motivos por escolhermos este token.</p>
+                            <p>A Binary.com pretende utilizar o token <a href='https://github.com/Giveth/minime' target='_blank' rel='noopener noreferrer'>Mini Me</a>. Por favor, leia a nossa <a href='https://tech.binary.com/an-erc20-securities-token/' target='_blank' rel='noopener noreferrer'>publicação no blog</a> detalhando os nossos motivos por termos escolhido este token.</p>
                         </div>
                     </div>
                     <div class="gr-12">
@@ -1147,9 +1146,113 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div class="gr-12">
                         <div class="faq">
-                            <h4>Como posso me manter informado sobre a OIM da Binary.com?</h4>
-                            <p>Inscreva-se na nossa lista de endereçamento usando o formulário abaixo para receber anúncios ocasionais relacionados com a OIM.</p>
-                            <p>Também é possível <a href="/binary-static/pt/home.html" target="_blank" rel="noopener noreferrer">abrir uma Binary.comconta gratuita</a>.</p>
+                            <h4>Como vão emitir dividendos a titulares de tokens?</h4>
+                            <p>Estamos adotando o tokens ERC 20 "MiniMe" para a nossa OIM. Este tipo de token possui características únicas que são adequadas para tokens de valores mobiliários. Uma das suas características únicas é a capacidade de se clonar, criando, assim, uma versão "mini" de si próprio.</p>
+                            <p>Para implementar o nosso recurso para o pagamento de dividendos, iremos clonar os nossos tokens e cada token clonado irá representar direitos de dividendos.</p>
+                            <p>Nesta fase, os titulares de tokens podem cobrar os seus dividendos de uma de duas maneiras:</p>
+                            <ul class="bullet">
+                                <li>Troque os seus tokens clonados numa plataforma de câmbios de criptomoedas</li>
+                                <li>Troque os tokens clonados para dividendos da Binary Group Ltd</li>
+                            </ul>
+                            <p>Neste último caso, os titulares de tokens precisarão de se conectar às suas contas Binary.com, autenticar as suas contas em conformidade com os requisitos "conhecer o cliente" e depositar os tokens clonados usando os recursos que iremos fornecer em troca de dividendos.</p>
+                            <p>Geralmente, dividendos serão distribuídos uma vez por ano.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Como posso converter os meus tokens em ações ordinárias?</h4>
+                            <p>Titulares de tokens que desejam converter os seus tokens em ações ordinárias devem nos fornecer uma notificação de conversão – de acordo com os termos dos tokens.</p>
+                            <p>Os termos abrangem tópicos com valor de mercado, jurisdições, "conhecer o cliente", procedimentos contra a lavagem de dinheiro e aprovações regulamentares. Você pode consultar o memorando de informações (páginas 20 e 21) para mais detalhes.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Qual a diferença entre tokens de valores mobiliários e tokens de utilidade?</h4>
+                            <p>Tokens de valores mobiliários são tokens que derivam o seu valor de um ativo externo ou ativos que representam ativos financeiros tradicionais.</p>
+                            <p>Tokens de utilidade são tokens que lhe fornecem acesso a redes ou aplicativos descentralizados.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>O que é um leilão holandês? Como é que a Binary.com determina o preço de licitação final por token e como sei se a minha licitação foi bem-sucedida?</h4>
+                            <p>O preço por token é determinado por meio de um leilão holandês em que os investidores apresentam licitações com preços diferentes para a quantidade de tokens que desejam adquirir. Uma vez que período de licitações terminar, todas as licitações aceitas serão ordenadas da mais alta para a mais baixa até que todos os tokens tenham sido atribuídos, conforme o processo descrito no memorando de informações. O preço mais baixo entre todos os tokens atribuídos será o preço final que todos pagam.</p>
+                            <p>Isto significa que o preço do token é determinado por procura de mercado e não a Binary.com.</p>
+                            <p>Para saber se a sua licitação foi bem-sucedida, você pode consultar a seção "Licitações no leilão da OIM" na <a href="/binary-static/pt/user/ico-subscribe.html" target="_blank" rel="noopener noreferrer">página de licitações da OIM</a>.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Como posso apresentar uma licitação?</h4>
+                            <p>Para apresentar uma licitação, basta inserir o número de tokens que deseja adquirir e o preço a qual está disposta a pagar por token no formulário de licitação na <a href="/binary-static/pt/user/ico-subscribe.html" target="_blank" rel="noopener noreferrer">página de licitação da OIM</a>.</p>
+                            <p>Para apresentar uma licitação, você só precisa realizar um depósito inicial equivalente a 5% do valor total. As suas licitações podem ser canceladas a qualquer momento antes do fim do leilão sem qualquer custo.</p>
+                            <p>Depois do período de licitação terminar e o preço final dos tokens ser decidido, você terá duas semanas para pagar o valor em dívida dependendo do preço final do token.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Qual a definição de um investidor profissional?</h4>
+                            <p>A definição de "investidor profissional" varia com base na jurisdição. Essencialmente, um investidor profissional refere-se a um investidor com mais experiência e que sabe avaliar uma oportunidade de investimento com compreensão plena dos riscos envolvidos.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Posso apresentar licitações para tokens usando criptomoedas como o Bitcoin?</h4>
+                            <p>Sim, suportamos várias criptomoedas (Bitcoin, Bitcoin Cash, Ethereum e Litecoin) e moedas fiduciárias (AUD, EUR, GBP e USD).</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Há quaisquer requisitos mínimos por licitação?</h4>
+                            <p>Sim. As licitações começam a partir de 1,35 USD por token com um mínimo de 25 tokens por licitação. O preço final dos tokens será determinado depois do período de licitação terminar.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>A minha licitação foi mal-sucedida?</h4>
+                            <p>A sua licitação foi mal-sucedida por ser mais baixa que o preço de token final. Uma licitação mais alta irá lhe proporcionar uma melhor hipótese para uma licitação bem-sucedida.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>O que acontece uma vez que eu tiver pedido os tokens?</h4>
+                            <p>Uma vez que você tiver pedido os seus tokens, você terá os seguintes direitos:</p>
+                            <ul class="bullet">
+                                <li>O direito de receber pagamentos de dividendos equivalentes a dividendos pagos sobre as ações ordinárias da Binary Group Ltd</li>
+                                <li>O direito de converter os seus tokens em ações ordinárias</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>O que um tokens ERC 20?</h4>
+                            <p>Um token ERC20 é um tipo de token baseado no padrão de tokens ERC20 usado para contratos inteligentes de Ethereum. É considerado um dos mais significativos padrões de token alguma vez criados para a blockchain de Ethereum.</p>
+                            <p>Decidimos adotar o tokens ERC 20 já que possui características únicas que são apropriadas para um token de valores mobiliários.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Posso vender os meus tokens ERC20 uma vez que eles estiverem listados na plataforma de câmbios <a href="https://www.lykke.com/" target="_blank" rel="noopener noreferrer">Lykke.com</a>?</h4>
+                            <p>Sim, você pode negociar os seus tokens livremente depois deles estarem listados na plataforma de câmbios <a href="https://www.lykke.com/" target="_blank" rel="noopener noreferrer">Lykke.com</a> ou em qualquer outra plataforma de câmbios que decidir listar os nossos tokens no futuro.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>É possível minar os tokens Binary.com?</h4>
+                            <p>Não. Os tokens Binary.com são tokens garantidos por valores mobiliários que vêm com direitos exclusivos de titularidade. Eles não podem ser minados.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Qual seria o número total de ações emitidas depois da OIM?</h4>
+                            <p>Isso depende do número de tokens que serão emitidos depois da OIM.</p>
+                            <p>Se o número máximo de tokens (10 milhões) disponibilizados na venda de tokens forem emitidos, então o número de ações depois da OIM irão totalizar 220.257.430.</p>
+                            <p>Se o número minimo de tokens (3 milhões) disponibilizados na venda de tokens forem emitidos, então o número de ações depois da OIM irão totalizar 213.257.430 ações.</p>
+                        </div>
+                    </div>
+                    <div class="gr-12">
+                        <div class="faq">
+                            <h4>Há uma OIM preliminar?</h4>
+                            <p>Não.</p>
                         </div>
                     </div>
                 </div>
@@ -1221,8 +1324,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
         <!--[if (lt IE 9)]><script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/min/tiny-slider.helper.ie8.js"></script><![endif]-->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/tiny-slider/2.2.4/min/tiny-slider.js"></script>
-        <script src="/binary-static/js/landing_pages/common.js?1yhvpqxo"></script>
-        <script src="/binary-static/js/landing_pages/ico.js?1yhvpqxo"></script>
+        <script src="/binary-static/js/landing_pages/common.js?6rq23q34"></script>
+        <script src="/binary-static/js/landing_pages/ico.js?6rq23q34"></script>
     </body>
 
 </html>
